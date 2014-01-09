@@ -66,7 +66,7 @@ public abstract class MediaLibraryService extends HttpServlet {
 				stringer.object();
 				
 				stringer.key("key").value(item.getKey());
-				stringer.key("lastModified").value(item.getLastModified());
+				stringer.key("lastModified").value(item.getLastModified() != null ? item.getLastModified().getTime() : "");
 				stringer.key("sizeString").value(item.getSizeString());
 				stringer.key("size").value(item.getSize());
 				stringer.key("eTag").value(item.geteTag());
