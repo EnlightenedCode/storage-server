@@ -93,24 +93,25 @@ public class MediaItemInfo implements Serializable, SearchSortable {
 		this.size = size;
 	}
 	
-	public String getSizeString() {
-		String sizeString = "";
-		
-		if (size < 1000) {
-			sizeString = size + " bytes";
-		}
-		else if (size > 1024 && size < Math.pow(1024, 2)) {
-			sizeString = Math.floor(size / (1024 / 10)) / 10.0 + " KB";
-		}
-		else if (size >= Math.pow(1024, 2) && size < Math.pow(1024, 3)) {
-			sizeString = Math.floor(size / (Math.pow(1024, 2) / 10)) / 10.0 + " MB";
-		}
-		else if (size >= Math.pow(1024, 3)) {
-			sizeString = Math.floor(size / (Math.pow(1024, 3) / 10)) / 10.0 + " GB";
-		}
-		
-		return sizeString;
-	}
+	// Deprecated and added on the Client Side
+//	public String getSizeString() {
+//		String sizeString = "";
+//		
+//		if (size < 1000) {
+//			sizeString = size + " bytes";
+//		}
+//		else if (size > 1024 && size < Math.pow(1024, 2)) {
+//			sizeString = Math.floor(size / (1024 / 10)) / 10.0 + " KB";
+//		}
+//		else if (size >= Math.pow(1024, 2) && size < Math.pow(1024, 3)) {
+//			sizeString = Math.floor(size / (Math.pow(1024, 2) / 10)) / 10.0 + " MB";
+//		}
+//		else if (size >= Math.pow(1024, 3)) {
+//			sizeString = Math.floor(size / (Math.pow(1024, 3) / 10)) / 10.0 + " GB";
+//		}
+//		
+//		return sizeString;
+//	}
 
 	public String getStorageClass() {
 		return storageClass;
