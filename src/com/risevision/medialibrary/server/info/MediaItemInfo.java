@@ -12,13 +12,11 @@ package com.risevision.medialibrary.server.info;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.risevision.common.client.utils.RiseUtils;
-
 /**
  * A structure representing a single object stored in S3.  Returned as a part of ListBucketResponse.
  */
 @SuppressWarnings("serial")
-public class MediaItemInfo implements Serializable, SearchSortable {
+public class MediaItemInfo implements Serializable {
 	public static final String KEY_ATTRIBUTE = "Key";
 	public static final String LAST_MODIFIED_ATTRIBUTE = "LastModified";
 	public static final String SIZE_ATTRIBUTE = "Size";
@@ -129,30 +127,30 @@ public class MediaItemInfo implements Serializable, SearchSortable {
 		this.owner = owner;
 	}
 
-	public boolean search(String query) {
-		if (!RiseUtils.strIsNullOrEmpty(this.key)) {
-			return this.key.toLowerCase().contains(query.toLowerCase());
-		}
-		
-		return false;
-	}
+//	public boolean search(String query) {
+//		if (!RiseUtils.strIsNullOrEmpty(this.key)) {
+//			return this.key.toLowerCase().contains(query.toLowerCase());
+//		}
+//		
+//		return false;
+//	}
 	
-	public int compare(SearchSortable item, String column) {
-		if (item instanceof MediaItemInfo) {
-			MediaItemInfo mediaItem = (MediaItemInfo) item;
-			if (LAST_MODIFIED_ATTRIBUTE.equals(column) && this.lastModified != null) {
-				return this.lastModified.compareTo(mediaItem.getLastModified());
-			}
-			else if (KEY_ATTRIBUTE.equals(column)) {
-				return this.key.toLowerCase().compareTo(mediaItem.key.toLowerCase());
-			}
-			else if (SIZE_ATTRIBUTE.equals(column)) {
-				return this.size == mediaItem.size ? 0 : this.size > mediaItem.size ? 1 : -1;
-			}
-		}
-		
-		return -1;
-	}
+//	public int compare(SearchSortable item, String column) {
+//		if (item instanceof MediaItemInfo) {
+//			MediaItemInfo mediaItem = (MediaItemInfo) item;
+//			if (LAST_MODIFIED_ATTRIBUTE.equals(column) && this.lastModified != null) {
+//				return this.lastModified.compareTo(mediaItem.getLastModified());
+//			}
+//			else if (KEY_ATTRIBUTE.equals(column)) {
+//				return this.key.toLowerCase().compareTo(mediaItem.key.toLowerCase());
+//			}
+//			else if (SIZE_ATTRIBUTE.equals(column)) {
+//				return this.size == mediaItem.size ? 0 : this.size > mediaItem.size ? 1 : -1;
+//			}
+//		}
+//		
+//		return -1;
+//	}
 	
 	public static class Owner implements Serializable {
 		private String id;

@@ -13,6 +13,7 @@ import java.util.Arrays;
 import javax.servlet.ServletContext;
 
 
+
 import com.google.api.client.googleapis.extensions.appengine.auth.oauth2.AppIdentityCredential;
 //import com.google.api.client.auth.security.PrivateKeys;
 import com.google.api.client.http.ByteArrayContent;
@@ -23,6 +24,7 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.util.Base64;
+import com.google.api.client.util.SecurityUtils;
 import com.google.api.client.util.StringUtils;
 import com.risevision.common.client.utils.RiseUtils;
 import com.risevision.medialibrary.server.amazonImpl.ListAllMyBucketsResponse;
@@ -31,7 +33,6 @@ import com.risevision.medialibrary.server.info.MediaItemInfo;
 import com.risevision.medialibrary.server.info.MediaItemsInfo;
 import com.risevision.medialibrary.server.info.ServiceFailedException;
 
-@SuppressWarnings("serial")
 public class MediaLibraryServiceImpl extends MediaLibraryService {
 	
 	/** Global configuration of Google Cloud Storage OAuth 2.0 scope. */
@@ -284,22 +285,24 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 		}
 	}
 	
-	public String getSignedPolicy(String policyBase64) {		
-//		PrivateKey privateKey = null;
-//		try {
-//			privateKey = setServiceAccountPrivateKeyFromP12File();
-//		} catch (GeneralSecurityException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+	public String getSignedPolicy(String policyBase64, ServletContext context) {		
+		PrivateKey privateKey = null;
+		try {
+			privateKey = setServiceAccountPrivateKeyFromP12File(context);
+		} catch (GeneralSecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	    byte[] contentBytes = StringUtils.getBytesUtf8(policyBase64);
 	    try {
-		    Signature signer = Signature.getInstance("SHA256withRSA");
-//		    signer.initSign(privateKey);
+//		    Signature signer = Signature.getInstance("SHA256withRSA");
+	    	Signature signer = SecurityUtils.getSha256WithRsaSignatureAlgorithm();
+	    	
+		    signer.initSign(privateKey);
 		    signer.update(contentBytes);
 		    byte[] signature = signer.sign();
 		    return Base64.encodeBase64String(signature);
@@ -310,6 +313,8 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 	    
 	    return null;
 	}
+	
+	
 	
 	/**
 	 * Sets the private key to use with the the service account flow or
@@ -324,15 +329,15 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 	 *            input stream to the p12 file (closed at the end of this method
 	 *            in a finally block)
 	 */
-//	public PrivateKey setServiceAccountPrivateKeyFromP12File()
-//			throws GeneralSecurityException, IOException {
-//		String p12FileName = "/WEB-INF/key/65bd1c5e62dadd4852c8b04bf5124749985e8ff8-privatekey.p12";
-//		
+	public PrivateKey setServiceAccountPrivateKeyFromP12File(ServletContext context)
+			throws GeneralSecurityException, IOException {
+		String p12FileName = "/WEB-INF/key/65bd1c5e62dadd4852c8b04bf5124749985e8ff8-privatekey.p12";
+		
 //		ServletContext context = getServletContext();
-//		InputStream is = context.getResourceAsStream(p12FileName);
-//		
-//		PrivateKey serviceAccountPrivateKey = PrivateKeys.loadFromKeyStore(KeyStore.getInstance("PKCS12"), is, "notasecret", "privatekey", "notasecret");
-//
-//		return serviceAccountPrivateKey;
-//	}
+		InputStream is = context.getResourceAsStream(p12FileName);
+		
+		PrivateKey serviceAccountPrivateKey = SecurityUtils.loadPrivateKeyFromKeyStore(KeyStore.getInstance("PKCS12"), is, "notasecret", "privatekey", "notasecret");
+
+		return serviceAccountPrivateKey;
+	}
 }

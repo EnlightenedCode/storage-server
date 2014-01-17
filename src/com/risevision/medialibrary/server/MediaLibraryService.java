@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletContext;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -16,8 +16,7 @@ import com.risevision.medialibrary.server.info.MediaItemInfo;
 import com.risevision.medialibrary.server.info.MediaItemsInfo;
 import com.risevision.medialibrary.server.info.ServiceFailedException;
 
-@SuppressWarnings("serial")
-public abstract class MediaLibraryService extends HttpServlet {
+public abstract class MediaLibraryService {
 	private static MediaLibraryService instance; 
 	/** Global instance of the HTTP transport. */
 	protected static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
@@ -123,5 +122,7 @@ public abstract class MediaLibraryService extends HttpServlet {
 	public abstract void deleteMediaItems(String bucketName, ArrayList<String> itemNames) throws ServiceFailedException;
 	
 	public abstract InputStream getMediaItem(String bucketName, String itemName) throws ServiceFailedException;
+	
+	public abstract String getSignedPolicy(String policyBase64, ServletContext context);
 
 }
