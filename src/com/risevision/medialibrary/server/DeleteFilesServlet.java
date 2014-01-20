@@ -53,7 +53,7 @@ public class DeleteFilesServlet extends HttpServlet {
 		}
 
 		try {
-//			service.deleteMediaItems(bucketName, itemNames);
+			service.deleteMediaItems(bucketName, itemNames);
 		
 			jsonString = service.getBucketItemsString(bucketName);
 
