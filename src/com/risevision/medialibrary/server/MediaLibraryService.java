@@ -60,6 +60,9 @@ public abstract class MediaLibraryService {
 //			getBucketProperty(bucketName, "lifecycle");
 
 			MediaItemsInfo items = getBucketItems(bucketName, prefix);
+			stringer.object();
+			stringer.key("status").value("200");
+			stringer.key("mediaFiles");
 			stringer.array();
 			for (MediaItemInfo item: items.getMediaItems()) {
 				stringer.object();
@@ -73,6 +76,7 @@ public abstract class MediaLibraryService {
 				stringer.endObject();
 			}
 			stringer.endArray();
+			stringer.endObject();
 
 //			ListAllMyBucketsResponse allbuckets = getAllMyBuckets();
 //			stringer.array();
