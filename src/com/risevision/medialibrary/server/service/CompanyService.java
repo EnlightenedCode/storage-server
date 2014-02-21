@@ -1,5 +1,6 @@
 package com.risevision.medialibrary.server.service;
 
+import org.restlet.data.Form;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -58,4 +59,21 @@ public class CompanyService extends RiseService {
 
 		return null;
 	}
+	
+	public CompanyInfo saveCompany(CompanyInfo company) throws ServiceFailedException {
+		// new user- generate userId
+		if ((company.getId() == null) || (company.getId().isEmpty()))
+			return null;
+		String url = createCompanyResource(company.getId());
+
+		Form form = new Form();
+
+		form.add(CompanyAttribute.ID, company.getId());
+		form.add(CompanyAttribute.ENABLED_FEATURES, company.getEnabledFeaturesJson());
+		
+		put(url, form);		
+		
+		return company;
+	}
+	
 }
