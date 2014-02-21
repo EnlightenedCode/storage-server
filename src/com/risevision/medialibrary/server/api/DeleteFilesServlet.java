@@ -1,4 +1,4 @@
-package com.risevision.medialibrary.server;
+package com.risevision.medialibrary.server.api;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.appengine.labs.repackaged.org.json.JSONArray;
 import com.google.appengine.labs.repackaged.org.json.JSONException;
+import com.risevision.medialibrary.server.MediaLibraryService;
+import com.risevision.medialibrary.server.MediaLibraryServiceImpl;
 import com.risevision.medialibrary.server.info.ServiceFailedException;
 
 @SuppressWarnings("serial")

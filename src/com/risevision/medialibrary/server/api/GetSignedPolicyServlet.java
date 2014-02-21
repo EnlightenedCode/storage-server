@@ -1,4 +1,4 @@
-package com.risevision.medialibrary.server;
+package com.risevision.medialibrary.server.api;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -6,6 +6,9 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.risevision.medialibrary.server.MediaLibraryService;
+import com.risevision.medialibrary.server.MediaLibraryServiceImpl;
 
 @SuppressWarnings("serial")
 public class GetSignedPolicyServlet extends HttpServlet {

@@ -1,4 +1,4 @@
-package com.risevision.medialibrary.server;
+package com.risevision.medialibrary.server.api;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.appengine.labs.repackaged.org.json.JSONException;
 import com.google.appengine.labs.repackaged.org.json.JSONStringer;
 import com.google.appengine.labs.repackaged.org.json.JSONWriter;
+import com.risevision.medialibrary.server.MediaLibraryService;
+import com.risevision.medialibrary.server.MediaLibraryServiceImpl;
 import com.risevision.medialibrary.server.info.ServiceFailedException;
 import com.risevision.medialibrary.server.service.AuthenticationService;
 

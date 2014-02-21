@@ -1,4 +1,4 @@
-package com.risevision.medialibrary.server;
+package com.risevision.medialibrary.server.api;
 
 import java.io.IOException;
 import java.io.PrintWriter;
