@@ -2,6 +2,9 @@ package com.risevision.medialibrary.server.info;
 
 import java.io.Serializable;
 
+import com.google.appengine.labs.repackaged.org.json.JSONException;
+import com.google.appengine.labs.repackaged.org.json.JSONStringer;
+import com.google.appengine.labs.repackaged.org.json.JSONWriter;
 import com.risevision.common.client.utils.RiseUtils;
 import com.risevision.medialibrary.server.data.DataService;
 
@@ -49,6 +52,25 @@ public class CompanyInfo implements Serializable {
 	public boolean isMediaLibraryEnabled() {
 		return id.equals(DataService.getInstance().getConfig().getRiseId()) 
 				|| !RiseUtils.strIsNullOrEmpty(enabledFeaturesJson);
+	}
+
+	public void enableMediaLibrary() {
+		try {
+			// [{"name":"Media Library","value":"true"}] 
+			JSONWriter stringer = new JSONStringer();
+			
+			stringer.array();
+			stringer.object();
+			stringer.key("name").value("Media Library");
+			stringer.key("value").value("true");
+			stringer.endObject();
+			stringer.endArray();
+
+			enabledFeaturesJson = stringer.toString();		
+
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 	
 }

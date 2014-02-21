@@ -61,7 +61,7 @@ public abstract class MediaLibraryService {
 
 			MediaItemsInfo items = getBucketItems(bucketName, prefix);
 			stringer.object();
-			stringer.key("status").value("200");
+			stringer.key("status").value(ServiceFailedException.OK);
 			stringer.key("mediaFiles");
 			stringer.array();
 			for (MediaItemInfo item: items.getMediaItems()) {

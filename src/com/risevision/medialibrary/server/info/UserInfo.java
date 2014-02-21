@@ -15,6 +15,19 @@ public class UserInfo implements Serializable {
 		username = ServerUtils.getGoogleUsername();
 	}
 	
+	public CompanyInfo getCompany(String companyId) {
+		CompanyInfo company = null;
+		for (CompanyInfo item: companies) {
+			if (item.getId().equals(companyId)) {
+				company = item;
+				
+				break;
+			}
+		}
+		
+		return company;
+	}
+	
 	public String getUsername() {
 		return username;
 	}

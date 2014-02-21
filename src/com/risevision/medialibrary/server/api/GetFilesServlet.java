@@ -22,12 +22,10 @@ public class GetFilesServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String companyId = request.getParameter("companyId");
 		
-		AuthenticationService authService = new AuthenticationService();
-		
 		String jsonString = "";
 		
 		try {
-			authService.checkAuthorization(companyId);
+			AuthenticationService.checkAuthorization(companyId);
 
 			log.info("Retrieving Files");
 

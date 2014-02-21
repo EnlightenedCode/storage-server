@@ -12,7 +12,22 @@ import com.risevision.medialibrary.server.info.ServiceFailedException;
 import com.risevision.medialibrary.server.utils.XmlUtils;
 
 public class CompanyService extends RiseService {
-
+	public static CompanyService instance;
+	
+	public static CompanyService getInstance() {
+		try {
+			if (instance == null)
+				instance = new CompanyService();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return instance;
+	}
+	
+	private CompanyService() {
+		super();
+	}
+	
 	public CompanyInfo getCompany(String companyId) throws ServiceFailedException {
 		String url = createCompanyResource(companyId);
 

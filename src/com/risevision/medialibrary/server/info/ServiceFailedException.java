@@ -5,6 +5,10 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public final class ServiceFailedException  extends Exception implements Serializable {
 //	private int errorCode;
+	
+	// [AD] Not the best place to store status codes
+	public static final int OK = 200;
+	
 	public static final int BAD_REQUEST = 400;
 	public static final int AUTHENTICATION_FAILED = 401;
 	public static final int ENTITY_GONE = 410;

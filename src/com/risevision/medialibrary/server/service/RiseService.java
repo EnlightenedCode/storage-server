@@ -29,7 +29,7 @@ public abstract class RiseService {
 	
 	protected static final Logger log = Logger.getAnonymousLogger();
 
-	public RiseService() {
+	protected RiseService() {
 		init();
 	}
 	
@@ -46,11 +46,11 @@ public abstract class RiseService {
 		Engine.getInstance().getRegisteredAuthenticators().add(new HttpOAuthHelper());
 	}
 	
-	public Document get(String url) throws ServiceFailedException {
+	protected Document get(String url) throws ServiceFailedException {
 		return get(url, true);
 	}
 	
-	public Document get(String url, boolean useAuthentication) throws ServiceFailedException {
+	protected Document get(String url, boolean useAuthentication) throws ServiceFailedException {
 		ClientResource clientResource = createResource(url, getMethod, useAuthentication);
 		
 		try {
@@ -80,11 +80,11 @@ public abstract class RiseService {
 		return null;
 	}
 	
-	public void put(String url, Form form) throws ServiceFailedException {
+	protected void put(String url, Form form) throws ServiceFailedException {
 		put(url, URL_PATH_V1, form);
 	}
 	
-	public void put(String url, String urlPath, Form form) throws ServiceFailedException {
+	protected void put(String url, String urlPath, Form form) throws ServiceFailedException {
 		ClientResource clientResource = createResource(url, urlPath, putMethod, true);
 		
 //		if (retryAttempts != -1) {
