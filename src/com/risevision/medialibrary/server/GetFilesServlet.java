@@ -23,36 +23,33 @@ public class GetFilesServlet extends HttpServlet {
 		AuthenticationService authService = new AuthenticationService();
 		
 		String jsonString = "";
-		if (authService.isAuthorized(companyId)) {
-			log.warning("Retrieving Files");
+		
+		try {
+			authService.checkAuthorization(companyId);
+
+			log.info("Retrieving Files");
 
 			MediaLibraryService service = new MediaLibraryServiceImpl();
-			
-			try {
-				String bucketName = "risemedialibrary-" + companyId;
-				jsonString = service.getBucketItemsString(bucketName);
-	
-			} catch (ServiceFailedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		else {
-			log.warning("Unauthorized");
+		
+			String bucketName = "risemedialibrary-" + companyId;
+			jsonString = service.getBucketItemsString(bucketName);
+
+		} catch (ServiceFailedException e) {
+			log.warning("File retrieval failed - Status: " + e.getReason());
 			
 			try {
 				JSONWriter stringer = new JSONStringer();
 				
 				stringer.object();
-				stringer.key("status").value("401");
+				stringer.key("status").value(e.getReason());
 				stringer.endObject();
 
 				jsonString = stringer.toString();		
 
-			} catch (JSONException e) {
-				log.severe("Error - " + e.getMessage());
+			} catch (JSONException e1) {
+				log.severe("Error - " + e1.getMessage());
 
-				e.printStackTrace();
+				e1.printStackTrace();
 			}
 		}
 

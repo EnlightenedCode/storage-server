@@ -11,18 +11,18 @@ import com.risevision.medialibrary.server.utils.ServerUtils;
 public class AuthenticationService {
 	protected static final Logger log = Logger.getAnonymousLogger();
 
-	public boolean isAuthorized(String companyId) {
+	public void checkAuthorization(String companyId) throws ServiceFailedException {
 		if (ServerUtils.isUserLoggedIn()) {
 			UserInfo user = getUser();
 			CompanyInfo company = null;
 			if (user != null) {
-				log.warning("User found in cache");
+				log.info("User found in cache");
 
 				for (CompanyInfo item: user.getCompanies()) {
 					if (item.getId().equals(companyId)) {
 						company = item;
 						
-						log.warning("User Company found in cache");
+						log.info("User Company found in cache");
 						
 						break;
 					}
@@ -40,7 +40,8 @@ public class AuthenticationService {
 
 					company = new CompanyService().getCompany(companyId);
 				} catch (ServiceFailedException e) {
-
+					// [AD] ideally we should just throw the exception; however since we need to add the response to 
+					// memcache, we will catch and re-throw it after processing
 				}
 
 				if (company == null) {
@@ -54,14 +55,17 @@ public class AuthenticationService {
 				
 			}
 			
-			if (company != null) {
-				log.warning("User is " + (company.isAuthorized() ? "" : "NOT") + " Authorized");
-
-				return company.isAuthorized();
+			if (company != null && !company.isAuthorized()) {				
+				throw new ServiceFailedException(ServiceFailedException.FORBIDDEN);
+			}
+			else if (company != null && !company.isMediaLibraryEnabled()) {
+				throw new ServiceFailedException(ServiceFailedException.PRECONDITION_FAILED);
 			}
 		}
+		else {
+			throw new ServiceFailedException(ServiceFailedException.AUTHENTICATION_FAILED);
+		}
 		
-		return false;
 	}
 	
 	private UserInfo getUser() {
