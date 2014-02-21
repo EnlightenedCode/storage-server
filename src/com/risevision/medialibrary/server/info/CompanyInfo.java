@@ -3,6 +3,7 @@ package com.risevision.medialibrary.server.info;
 import java.io.Serializable;
 
 import com.risevision.common.client.utils.RiseUtils;
+import com.risevision.medialibrary.server.data.DataService;
 
 @SuppressWarnings("serial")
 public class CompanyInfo implements Serializable {
@@ -46,7 +47,8 @@ public class CompanyInfo implements Serializable {
 	}
 	
 	public boolean isMediaLibraryEnabled() {
-		return !RiseUtils.strIsNullOrEmpty(enabledFeaturesJson);
+		return id.equals(DataService.getInstance().getConfig().getRiseId()) 
+				|| !RiseUtils.strIsNullOrEmpty(enabledFeaturesJson);
 	}
 	
 }
