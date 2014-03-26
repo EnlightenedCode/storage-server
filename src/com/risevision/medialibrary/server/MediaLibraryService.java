@@ -13,7 +13,6 @@ import com.google.appengine.labs.repackaged.org.json.JSONStringer;
 import com.google.appengine.labs.repackaged.org.json.JSONWriter;
 import com.risevision.medialibrary.server.amazonImpl.ListAllMyBucketsResponse;
 import com.risevision.medialibrary.server.info.MediaItemInfo;
-import com.risevision.medialibrary.server.info.MediaItemsInfo;
 import com.risevision.medialibrary.server.info.ServiceFailedException;
 
 public abstract class MediaLibraryService {
@@ -39,11 +38,11 @@ public abstract class MediaLibraryService {
 	
 	public abstract String getBucketPropertyString(String bucketName, String property) throws ServiceFailedException;
 	
-	public MediaItemsInfo getBucketItems(String bucketName) throws ServiceFailedException {
+	public ArrayList<MediaItemInfo> getBucketItems(String bucketName) throws ServiceFailedException {
 		return getBucketItems(bucketName, null);
 	}
 	
-	public abstract MediaItemsInfo getBucketItems(String bucketName, String prefix) throws ServiceFailedException;
+	public abstract ArrayList<MediaItemInfo> getBucketItems(String bucketName, String prefix) throws ServiceFailedException;
 	
 	public String getBucketItemsString(String bucketName) throws ServiceFailedException {
 		return getBucketItemsString(bucketName, null);
@@ -59,12 +58,12 @@ public abstract class MediaLibraryService {
 //			getBucketProperty(bucketName, "logging");
 //			getBucketProperty(bucketName, "lifecycle");
 
-			MediaItemsInfo items = getBucketItems(bucketName, prefix);
+			ArrayList<MediaItemInfo> items = getBucketItems(bucketName, prefix);
 			stringer.object();
 			stringer.key("status").value(ServiceFailedException.OK);
 			stringer.key("mediaFiles");
 			stringer.array();
-			for (MediaItemInfo item: items.getMediaItems()) {
+			for (MediaItemInfo item: items) {
 				stringer.object();
 				
 				stringer.key("key").value(item.getKey());

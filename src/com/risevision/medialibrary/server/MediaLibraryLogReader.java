@@ -19,7 +19,6 @@ import com.risevision.medialibrary.server.entities.Usage;
 import com.risevision.medialibrary.server.info.MediaItemInfo;
 import com.risevision.medialibrary.server.info.MediaItemStorageInfo;
 import com.risevision.medialibrary.server.info.MediaItemUsageInfo;
-import com.risevision.medialibrary.server.info.MediaItemsInfo;
 import com.risevision.medialibrary.server.info.ServiceFailedException;
 
 public class MediaLibraryLogReader {
@@ -63,7 +62,7 @@ public class MediaLibraryLogReader {
 	}
 	
 	private static String parseBucketUsageLogs(String companyId) {
-		MediaItemsInfo mediaItems = retrieveBucketLogList("risemedialibrary-" + companyId + "_usage");
+		ArrayList<MediaItemInfo> mediaItems = retrieveBucketLogList("risemedialibrary-" + companyId + "_usage");
 		String response = "";
 		long dataCounter = 0;
 		
@@ -73,7 +72,7 @@ public class MediaLibraryLogReader {
 			
 			CompanyFileLogs fileLogs = getCompanyFileLogs(companyId);
 			
-			for (MediaItemInfo mediaItem : mediaItems.getMediaItems().subList(0, 10)) {
+			for (MediaItemInfo mediaItem : mediaItems.subList(0, 10)) {
 				List<MediaItemUsageInfo> usageItems = retrieveUsageLog(mediaItem.getKey());
 				
 				for (MediaItemUsageInfo usageItem: usageItems) {
@@ -150,7 +149,7 @@ public class MediaLibraryLogReader {
 	}
 	
 	private static String parseBucketStorageLogs(String companyId) {
-		MediaItemsInfo items = retrieveBucketLogList("risemedialibrary-" + companyId + "_storage");
+		ArrayList<MediaItemInfo> items = retrieveBucketLogList("risemedialibrary-" + companyId + "_storage");
 		
 		CompanyUsage companyUsage = getCompanyUsage(companyId);
 		Usage usage = companyUsage.usage;
@@ -159,7 +158,7 @@ public class MediaLibraryLogReader {
 		MediaItemStorageInfo storageItem = null;
 
 		if (items != null) {
-			for (MediaItemInfo item : items.getMediaItems()) {
+			for (MediaItemInfo item : items) {
 				storageItem = retrieveStorageLog(item.getKey());
 				
 				if (usage.averageStorage == 0) {
@@ -186,7 +185,7 @@ public class MediaLibraryLogReader {
 		return response;
 	}
 	
-	private static MediaItemsInfo retrieveBucketLogList(String bucketName) {
+	private static ArrayList<MediaItemInfo> retrieveBucketLogList(String bucketName) {
 		try {
 			MediaLibraryService service = MediaLibraryService.getInstance();
 		

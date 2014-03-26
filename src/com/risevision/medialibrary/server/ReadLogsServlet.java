@@ -23,7 +23,7 @@ public class ReadLogsServlet extends HttpServlet {
 			String jsonString = "";
 			
 			long dataCounter = 0;
-			for (MediaItemInfo item: service.getBucketItems("risemedialibrary-" + companyId).getMediaItems()) {
+			for (MediaItemInfo item: service.getBucketItems("risemedialibrary-" + companyId)) {
 				dataCounter += item.getSize();
 			}
 			

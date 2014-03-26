@@ -30,7 +30,6 @@ import com.risevision.common.client.utils.RiseUtils;
 import com.risevision.medialibrary.server.amazonImpl.ListAllMyBucketsResponse;
 import com.risevision.medialibrary.server.amazonImpl.ListBucketResponse;
 import com.risevision.medialibrary.server.info.MediaItemInfo;
-import com.risevision.medialibrary.server.info.MediaItemsInfo;
 import com.risevision.medialibrary.server.info.ServiceFailedException;
 
 public class MediaLibraryServiceImpl extends MediaLibraryService {
@@ -123,7 +122,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 		return null;
 	}
 	
-	public MediaItemsInfo getBucketItems(String bucketName, String prefix) throws ServiceFailedException {
+	public ArrayList<MediaItemInfo> getBucketItems(String bucketName, String prefix) throws ServiceFailedException {
 		try {
 			AppIdentityCredential credential = new AppIdentityCredential(Arrays.asList(STORAGE_SCOPE));
 
@@ -147,10 +146,9 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 
 			ListBucketResponse listBucketResponse = new ListBucketResponse(response.getContent());
 			
-			MediaItemsInfo mediaItemsInfo = new MediaItemsInfo();
-			mediaItemsInfo.setMediaItems((ArrayList<MediaItemInfo>) listBucketResponse.entries);
+			ArrayList<MediaItemInfo> mediaItems = (ArrayList<MediaItemInfo>) listBucketResponse.entries;
 			
-			return mediaItemsInfo;
+			return mediaItems;
 		} catch (HttpResponseException e) {
 			log.warning(e.getStatusCode() + " - " + e.getMessage());
 			
@@ -331,10 +329,12 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 	 */
 	public PrivateKey setServiceAccountPrivateKeyFromP12File(ServletContext context)
 			throws GeneralSecurityException, IOException {
-		String p12FileName = "/WEB-INF/key/65bd1c5e62dadd4852c8b04bf5124749985e8ff8-privatekey.p12";
+		String p12FileName = "/key/65bd1c5e62dadd4852c8b04bf5124749985e8ff8-privatekey.p12";
 		
 //		ServletContext context = getServletContext();
-		InputStream is = context.getResourceAsStream(p12FileName);
+//		InputStream is = context.getResourceAsStream(p12FileName);
+		
+		InputStream is = this.getClass().getClassLoader().getResourceAsStream(p12FileName);
 		
 		PrivateKey serviceAccountPrivateKey = SecurityUtils.loadPrivateKeyFromKeyStore(KeyStore.getInstance("PKCS12"), is, "notasecret", "privatekey", "notasecret");
 
