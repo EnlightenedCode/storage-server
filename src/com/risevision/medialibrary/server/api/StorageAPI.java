@@ -145,7 +145,6 @@ public class StorageAPI extends AbstractAPI {
 	)
 	public SimpleResponse createBucket(
 			@Nullable @Named("companyId") String companyId,
-			@Nullable @Named("bucketName") String bucketName,
 			User user) {
 
 		SimpleResponse result = new SimpleResponse();
@@ -163,7 +162,7 @@ public class StorageAPI extends AbstractAPI {
 				
 				MediaLibraryService service = new MediaLibraryServiceImpl();
 				
-				service.createBucket(bucketName);
+				service.createBucket(getBucketName(companyId));
 				
 				log.info("Bucket Created");
 
@@ -217,7 +216,7 @@ public class StorageAPI extends AbstractAPI {
 			
 			String signedPolicy = service.getSignedPolicy(policyBase64, null);
 			
-			log.info("Files Deleted");
+			log.info("Policy Signed");
 
 			result.result = true;
 			result.code = ServiceFailedException.OK;
