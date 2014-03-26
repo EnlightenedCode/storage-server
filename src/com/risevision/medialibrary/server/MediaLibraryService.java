@@ -1,7 +1,7 @@
 package com.risevision.medialibrary.server;
 
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
@@ -38,11 +38,11 @@ public abstract class MediaLibraryService {
 	
 	public abstract String getBucketPropertyString(String bucketName, String property) throws ServiceFailedException;
 	
-	public ArrayList<MediaItemInfo> getBucketItems(String bucketName) throws ServiceFailedException {
+	public List<MediaItemInfo> getBucketItems(String bucketName) throws ServiceFailedException {
 		return getBucketItems(bucketName, null);
 	}
 	
-	public abstract ArrayList<MediaItemInfo> getBucketItems(String bucketName, String prefix) throws ServiceFailedException;
+	public abstract List<MediaItemInfo> getBucketItems(String bucketName, String prefix) throws ServiceFailedException;
 	
 	public String getBucketItemsString(String bucketName) throws ServiceFailedException {
 		return getBucketItemsString(bucketName, null);
@@ -58,7 +58,7 @@ public abstract class MediaLibraryService {
 //			getBucketProperty(bucketName, "logging");
 //			getBucketProperty(bucketName, "lifecycle");
 
-			ArrayList<MediaItemInfo> items = getBucketItems(bucketName, prefix);
+			List<MediaItemInfo> items = getBucketItems(bucketName, prefix);
 			stringer.object();
 			stringer.key("status").value(ServiceFailedException.OK);
 			stringer.key("mediaFiles");
@@ -122,7 +122,7 @@ public abstract class MediaLibraryService {
 	
 	public abstract void deleteMediaItem(String bucketName, String itemName) throws ServiceFailedException;
 	
-	public abstract void deleteMediaItems(String bucketName, ArrayList<String> itemNames) throws ServiceFailedException;
+	public abstract void deleteMediaItems(String bucketName, List<String> files) throws ServiceFailedException;
 	
 	public abstract InputStream getMediaItem(String bucketName, String itemName) throws ServiceFailedException;
 	

@@ -9,8 +9,10 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.servlet.ServletContext;
+
 
 
 
@@ -122,7 +124,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 		return null;
 	}
 	
-	public ArrayList<MediaItemInfo> getBucketItems(String bucketName, String prefix) throws ServiceFailedException {
+	public List<MediaItemInfo> getBucketItems(String bucketName, String prefix) throws ServiceFailedException {
 		try {
 			AppIdentityCredential credential = new AppIdentityCredential(Arrays.asList(STORAGE_SCOPE));
 
@@ -146,7 +148,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 
 			ListBucketResponse listBucketResponse = new ListBucketResponse(response.getContent());
 			
-			ArrayList<MediaItemInfo> mediaItems = (ArrayList<MediaItemInfo>) listBucketResponse.entries;
+			List<MediaItemInfo> mediaItems = (ArrayList<MediaItemInfo>) listBucketResponse.entries;
 			
 			return mediaItems;
 		} catch (HttpResponseException e) {
@@ -277,7 +279,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 		return null;
 	}
 	
-	public void deleteMediaItems(String bucketName, ArrayList<String> itemNames) throws ServiceFailedException {
+	public void deleteMediaItems(String bucketName, List<String> itemNames) throws ServiceFailedException {
 		for (String itemName : itemNames) {
 			deleteMediaItem(bucketName, itemName);
 		}
@@ -329,7 +331,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 	 */
 	public PrivateKey setServiceAccountPrivateKeyFromP12File(ServletContext context)
 			throws GeneralSecurityException, IOException {
-		String p12FileName = "/key/65bd1c5e62dadd4852c8b04bf5124749985e8ff8-privatekey.p12";
+		String p12FileName = "key/65bd1c5e62dadd4852c8b04bf5124749985e8ff8-privatekey.p12";
 		
 //		ServletContext context = getServletContext();
 //		InputStream is = context.getResourceAsStream(p12FileName);

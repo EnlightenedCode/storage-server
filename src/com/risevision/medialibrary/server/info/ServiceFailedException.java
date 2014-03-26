@@ -18,10 +18,12 @@ public final class ServiceFailedException  extends Exception implements Serializ
 	public static final int METHOD_NOT_ALLOWED = 405;
 	
 	public static final int PRECONDITION_FAILED = 412;
+	
+	public static final int SERVER_ERROR = 500;
 
 	public static final int SERVICE_FAILED = 0;
 //	public static final int NOT_LOGGED_IN = 1;
-	
+
 	private int reason;
 
 	public ServiceFailedException() {

@@ -62,7 +62,7 @@ public class MediaLibraryLogReader {
 	}
 	
 	private static String parseBucketUsageLogs(String companyId) {
-		ArrayList<MediaItemInfo> mediaItems = retrieveBucketLogList("risemedialibrary-" + companyId + "_usage");
+		List<MediaItemInfo> mediaItems = retrieveBucketLogList("risemedialibrary-" + companyId + "_usage");
 		String response = "";
 		long dataCounter = 0;
 		
@@ -149,7 +149,7 @@ public class MediaLibraryLogReader {
 	}
 	
 	private static String parseBucketStorageLogs(String companyId) {
-		ArrayList<MediaItemInfo> items = retrieveBucketLogList("risemedialibrary-" + companyId + "_storage");
+		List<MediaItemInfo> items = retrieveBucketLogList("risemedialibrary-" + companyId + "_storage");
 		
 		CompanyUsage companyUsage = getCompanyUsage(companyId);
 		Usage usage = companyUsage.usage;
@@ -185,7 +185,7 @@ public class MediaLibraryLogReader {
 		return response;
 	}
 	
-	private static ArrayList<MediaItemInfo> retrieveBucketLogList(String bucketName) {
+	private static List<MediaItemInfo> retrieveBucketLogList(String bucketName) {
 		try {
 			MediaLibraryService service = MediaLibraryService.getInstance();
 		
