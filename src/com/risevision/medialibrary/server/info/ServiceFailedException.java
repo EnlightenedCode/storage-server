@@ -17,7 +17,7 @@ public final class ServiceFailedException  extends Exception implements Serializ
 	public static final int CONFLICT = 409;
 	public static final int METHOD_NOT_ALLOWED = 405;
 	
-	public static final int PRECONDITION_FAILED = 412;
+//	public static final int PRECONDITION_FAILED = 412;
 	
 	public static final int SERVER_ERROR = 500;
 

@@ -3,7 +3,6 @@ package com.risevision.medialibrary.server.service;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.engine.Engine;
@@ -21,12 +20,12 @@ public abstract class RiseService {
 //	private static boolean isDevelopmentMode = false;
 	
 	private static String getMethod = "GET";
-	private static String putMethod = "PUT";
+//	private static String putMethod = "PUT";
 //	private static String postMethod = "POST";
 //	private static String deleteMethod = "DELETE";
 	
 	public static final String URL_PATH_V1 = "v1";
-	public static final String URL_PATH_V2 = "v2";
+//	public static final String URL_PATH_V2 = "v2";
 	
 	protected static final Logger log = Logger.getAnonymousLogger();
 
@@ -77,33 +76,33 @@ public abstract class RiseService {
 		return null;
 	}
 	
-	protected void put(String url, Form form, String username) throws ServiceFailedException {
-		put(url, URL_PATH_V1, form, username);
-	}
+//	protected void put(String url, Form form, String username) throws ServiceFailedException {
+//		put(url, URL_PATH_V1, form, username);
+//	}
 	
-	protected void put(String url, String urlPath, Form form, String username) throws ServiceFailedException {
-		ClientResource clientResource = createResource(url, urlPath, putMethod, username);
-		
-//		if (retryAttempts != -1) {
-//			clientResource.setRetryAttempts(retryAttempts);
+//	protected void put(String url, String urlPath, Form form, String username) throws ServiceFailedException {
+//		ClientResource clientResource = createResource(url, urlPath, putMethod, username);
+//		
+////		if (retryAttempts != -1) {
+////			clientResource.setRetryAttempts(retryAttempts);
+////		}
+//		
+//		try {
+//			clientResource.put(form.getWebRepresentation());
+//		} catch (ResourceException e) {
+//			handleResourceException(e, clientResource);
+//		} catch (Exception e) {
+//			e.printStackTrace();
 //		}
-		
-		try {
-			clientResource.put(form.getWebRepresentation());
-		} catch (ResourceException e) {
-			handleResourceException(e, clientResource);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-//		int status = clientResource.getStatus().getCode();
-		
-//		if (isDevelopmentMode) {
-//			ServerUtils.writeDebugInfo(clientResource);
-//		}
-
-//		return status;
-	}
+//		
+////		int status = clientResource.getStatus().getCode();
+//		
+////		if (isDevelopmentMode) {
+////			ServerUtils.writeDebugInfo(clientResource);
+////		}
+//
+////		return status;
+//	}
 	
 	private ClientResource createResource(String url, String method, String username) throws ServiceFailedException {
 		return createResource(url, URL_PATH_V1, method, username);

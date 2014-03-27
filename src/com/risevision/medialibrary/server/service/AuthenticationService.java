@@ -19,9 +19,9 @@ public class AuthenticationService {
 				if (company != null && !company.isAuthorized()) {				
 					throw new ServiceFailedException(ServiceFailedException.FORBIDDEN);
 				}
-				else if (company != null && !company.isMediaLibraryEnabled()) {
-					throw new ServiceFailedException(ServiceFailedException.PRECONDITION_FAILED);
-				}
+//				else if (company != null && !company.isMediaLibraryEnabled()) {
+//					throw new ServiceFailedException(ServiceFailedException.PRECONDITION_FAILED);
+//				}
 			}
 			else {
 				throw new ServiceFailedException(ServiceFailedException.AUTHENTICATION_FAILED);
