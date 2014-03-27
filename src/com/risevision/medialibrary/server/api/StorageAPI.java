@@ -16,8 +16,11 @@ import com.risevision.medialibrary.server.Utils;
 import com.risevision.medialibrary.server.api.responses.FilesResponse;
 import com.risevision.medialibrary.server.api.responses.SignedPolicyResponse;
 import com.risevision.medialibrary.server.api.responses.SimpleResponse;
+import com.risevision.medialibrary.server.info.CompanyInfo;
 import com.risevision.medialibrary.server.info.MediaItemInfo;
 import com.risevision.medialibrary.server.info.ServiceFailedException;
+import com.risevision.medialibrary.server.service.CompanyService;
+import com.risevision.medialibrary.server.utils.CacheUtils;
 
 @Api(
 	    name = "storage",
@@ -240,6 +243,65 @@ public class StorageAPI extends AbstractAPI {
 		}
 		
 		return "risemedialibrary-" + companyId;
+	}
+	
+	@ApiMethod(
+			name = "enable",
+			path = "company",
+			httpMethod = HttpMethod.POST
+	)
+	public SimpleResponse enableMediaLibrary(
+			@Nullable @Named("companyId") String companyId,
+			User user) {
+
+		SimpleResponse result = new SimpleResponse();
+
+		try {
+
+			if (user == null) {
+				result.message = "No user";
+				return result;
+			}
+
+			log.info("User: " + user.getEmail());
+
+			try {
+				// Authorization check is performed when calling the API
+//				AuthenticationService.checkAuthorization(companyId, user.getEmail());
+
+				CompanyInfo company = CacheUtils.getUserCompany(companyId, user.getEmail());
+				
+				company.enableMediaLibrary();
+				
+				CompanyService.getInstance().saveCompany(company, user.getEmail());
+				
+				CacheUtils.updateCompany(company, user.getEmail());
+				
+				log.info("Enabled the Media Library for the Company");
+				
+				result.result = true;
+				result.code = ServiceFailedException.OK;
+				
+			} catch (ServiceFailedException e) {
+
+				result.result = false;
+				result.code = e.getReason();
+				result.message = "Bucket Creation Failed";
+				
+				log.warning("Enabling the Media Library Failed - Status: " + e.getReason());
+				
+			}
+
+		} catch (Exception e) {
+			Utils.logException(e);
+			
+			result.result = false;
+			result.code = ServiceFailedException.SERVER_ERROR;
+			result.message = "Internal Error.";
+		}
+
+		return result;
+
 	}
 	
 }
