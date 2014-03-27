@@ -19,6 +19,7 @@ import com.risevision.medialibrary.server.api.responses.SimpleResponse;
 import com.risevision.medialibrary.server.info.CompanyInfo;
 import com.risevision.medialibrary.server.info.MediaItemInfo;
 import com.risevision.medialibrary.server.info.ServiceFailedException;
+import com.risevision.medialibrary.server.service.AuthenticationService;
 import com.risevision.medialibrary.server.service.CompanyService;
 import com.risevision.medialibrary.server.utils.CacheUtils;
 
@@ -51,6 +52,7 @@ public class StorageAPI extends AbstractAPI {
 			log.info("User: " + user.getEmail());
 
 			try {
+				AuthenticationService.checkAuthorization(companyId, user.getEmail());
 				
 				MediaLibraryService service = new MediaLibraryServiceImpl();
 				
@@ -104,6 +106,7 @@ public class StorageAPI extends AbstractAPI {
 			log.info("User: " + user.getEmail());
 
 				try {
+					AuthenticationService.checkAuthorization(companyId, user.getEmail());
 					
 					MediaLibraryService service = new MediaLibraryServiceImpl();
 					
@@ -162,7 +165,8 @@ public class StorageAPI extends AbstractAPI {
 			log.info("User: " + user.getEmail());
 
 			try {
-				
+				AuthenticationService.checkAuthorization(companyId, user.getEmail());
+
 				MediaLibraryService service = new MediaLibraryServiceImpl();
 				
 				service.createBucket(getBucketName(companyId));
@@ -215,6 +219,20 @@ public class StorageAPI extends AbstractAPI {
 
 			log.info("User: " + user.getEmail());
 
+			try {
+
+				AuthenticationService.checkAuthorization(companyId, user.getEmail());
+
+			} catch (ServiceFailedException e) {
+
+				result.result = false;
+				result.code = e.getReason();
+				result.message = "Authentication Failed";
+				
+				log.warning("Authentication Failed - Status: " + e.getReason());
+				
+			}
+			
 			MediaLibraryService service = new MediaLibraryServiceImpl();
 			
 			String signedPolicy = service.getSignedPolicy(policyBase64, null);
