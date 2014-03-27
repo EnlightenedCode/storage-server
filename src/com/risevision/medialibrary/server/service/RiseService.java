@@ -12,6 +12,7 @@ import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 import org.w3c.dom.Document;
 
+import com.risevision.common.client.utils.RiseUtils;
 import com.risevision.medialibrary.server.info.ServiceFailedException;
 import com.risevision.medialibrary.server.oauth.HttpOAuthHelper;
 import com.risevision.medialibrary.server.utils.ServerUtils;
@@ -46,12 +47,8 @@ public abstract class RiseService {
 		Engine.getInstance().getRegisteredAuthenticators().add(new HttpOAuthHelper());
 	}
 	
-	protected Document get(String url) throws ServiceFailedException {
-		return get(url, true);
-	}
-	
-	protected Document get(String url, boolean useAuthentication) throws ServiceFailedException {
-		ClientResource clientResource = createResource(url, getMethod, useAuthentication);
+	protected Document get(String url, String username) throws ServiceFailedException {
+		ClientResource clientResource = createResource(url, getMethod, username);
 		
 		try {
 //			if (isDevelopmentMode) {
@@ -80,12 +77,12 @@ public abstract class RiseService {
 		return null;
 	}
 	
-	protected void put(String url, Form form) throws ServiceFailedException {
-		put(url, URL_PATH_V1, form);
+	protected void put(String url, Form form, String username) throws ServiceFailedException {
+		put(url, URL_PATH_V1, form, username);
 	}
 	
-	protected void put(String url, String urlPath, Form form) throws ServiceFailedException {
-		ClientResource clientResource = createResource(url, urlPath, putMethod, true);
+	protected void put(String url, String urlPath, Form form, String username) throws ServiceFailedException {
+		ClientResource clientResource = createResource(url, urlPath, putMethod, username);
 		
 //		if (retryAttempts != -1) {
 //			clientResource.setRetryAttempts(retryAttempts);
@@ -108,16 +105,16 @@ public abstract class RiseService {
 //		return status;
 	}
 	
-	private ClientResource createResource(String url, String method, boolean useAuthentication) throws ServiceFailedException {
-		return createResource(url, URL_PATH_V1, method, useAuthentication);
+	private ClientResource createResource(String url, String method, String username) throws ServiceFailedException {
+		return createResource(url, URL_PATH_V1, method, username);
 	}
 	
-	private ClientResource createResource(String url, String urlPath, String method, boolean useAuthentication) throws ServiceFailedException {
+	private ClientResource createResource(String url, String urlPath, String method, String username) throws ServiceFailedException {
 		String fullUrl = ServerUtils.formatUrl(url, urlPath);
 		ClientResource clientResource = new ClientResource(fullUrl);
 
-		if (useAuthentication) {
-			ServerUtils.signResource(clientResource, fullUrl, method);
+		if (!RiseUtils.strIsNullOrEmpty(username)) {
+			ServerUtils.signResource(clientResource, fullUrl, method, username);
 		}
 			
 		return clientResource;

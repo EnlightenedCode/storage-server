@@ -17,9 +17,6 @@ import org.restlet.data.ChallengeResponse;
 import org.restlet.data.ChallengeScheme;
 import org.restlet.resource.ClientResource;
 
-import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.risevision.medialibrary.server.data.DataService;
 import com.risevision.medialibrary.server.data.PersistentConfigurationInfo;
 import com.risevision.medialibrary.server.data.PersistentOAuthInfo;
@@ -50,28 +47,10 @@ public class ServerUtils {
 	
 	public static Date strToDate(String value) {
 		return strToDate(value, null);
-	}
+	}	
 	
-	public static boolean isUserLoggedIn() {
-		UserService userService = UserServiceFactory.getUserService();
-		return userService.isUserLoggedIn();
-	}
-	
-	public static String getGoogleUsername() {
-		String username = null;
-		UserService userService = UserServiceFactory.getUserService();
-		if (userService.isUserLoggedIn()) {
-			User currentUser = userService.getCurrentUser();
-			username = currentUser.getEmail();
-	    }
-		else {
-			return null;
-		}
-		return username;
-	}		
-	
-	public static PersistentUserInfo getPersistentUser() throws ServiceFailedException {
-		PersistentUserInfo user = DataService.getInstance().getUser();
+	public static PersistentUserInfo getPersistentUser(String username) throws ServiceFailedException {
+		PersistentUserInfo user = DataService.getInstance().getUser(username);
 		
 		if (user == null) {
 			throw new ServiceFailedException(ServiceFailedException.AUTHENTICATION_FAILED);
@@ -104,8 +83,8 @@ public class ServerUtils {
 		return consumer;
 	}
 	
-	public static void signResource(ClientResource clientResource, String url, String method) throws ServiceFailedException {
-		PersistentUserInfo user = getPersistentUser();
+	public static void signResource(ClientResource clientResource, String url, String method, String username) throws ServiceFailedException {
+		PersistentUserInfo user = getPersistentUser(username);
 		OAuthConsumer consumer = createConsumer(user);
 		
 		try {

@@ -28,10 +28,10 @@ public class CompanyService extends RiseService {
 		super();
 	}
 	
-	public CompanyInfo getCompany(String companyId) throws ServiceFailedException {
+	public CompanyInfo getCompany(String companyId, String username) throws ServiceFailedException {
 		String url = createCompanyResource(companyId);
 
-		Document d = get(url);
+		Document d = get(url, username);
 		
 		if (d != null){
 			CompanyInfo company = docToCompany(d);
@@ -75,7 +75,7 @@ public class CompanyService extends RiseService {
 		return null;
 	}
 	
-	public CompanyInfo saveCompany(CompanyInfo company) throws ServiceFailedException {
+	public CompanyInfo saveCompany(CompanyInfo company, String username) throws ServiceFailedException {
 		// new user- generate userId
 		if ((company.getId() == null) || (company.getId().isEmpty()))
 			return null;
@@ -86,7 +86,7 @@ public class CompanyService extends RiseService {
 		form.add(CompanyAttribute.ID, company.getId());
 		form.add(CompanyAttribute.ENABLED_FEATURES, company.getEnabledFeaturesJson());
 		
-		put(url, form);		
+		put(url, form, username);		
 		
 		return company;
 	}

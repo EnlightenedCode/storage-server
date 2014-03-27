@@ -1,7 +1,6 @@
 package com.risevision.medialibrary.server.data;
 
 import com.risevision.medialibrary.server.data.PersistentOAuthInfo.OAuthType;
-import com.risevision.medialibrary.server.utils.ServerUtils;
 
 public class DataService {
 	private PersistentHandler persistentHandler = new PersistentHandler();
@@ -50,17 +49,7 @@ public class DataService {
 //		cache.putInCache(user.getUserName(), user);
 //	}
 	
-	public PersistentUserInfo getUser() {
-		if (ServerUtils.isUserLoggedIn()) {
-			return getUser(ServerUtils.getGoogleUsername());
-		}
-		else {
-			return null;
-//			throw new ServiceFailedException(ServiceFailedException.NOT_LOGGED_IN);
-		}
-	}
-	
-	private PersistentUserInfo getUser(String username) {
+	public PersistentUserInfo getUser(String username) {
 		CacheHandler cache = CacheHandler.getInstance();
 		
 		PersistentUserInfo user = (PersistentUserInfo) cache.findInCache(username);

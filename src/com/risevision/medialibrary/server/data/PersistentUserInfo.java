@@ -6,8 +6,6 @@ import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
-import com.risevision.medialibrary.server.utils.ServerUtils;
-
 @SuppressWarnings("serial")
 @PersistenceCapable
 public class PersistentUserInfo implements Serializable {
@@ -25,10 +23,10 @@ public class PersistentUserInfo implements Serializable {
 	@Persistent
 	private String userTokenSecret;
 	
-	public PersistentUserInfo(String userToken, String userTokenSecret) {
+	public PersistentUserInfo(String userToken, String userTokenSecret, String username) {
 		this.userToken = userToken;
 		this.userTokenSecret = userTokenSecret;
-		this.userName = ServerUtils.getGoogleUsername();
+		this.userName = username;
 	}
 
 	public String getId() {

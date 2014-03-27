@@ -25,7 +25,7 @@ public class GetFilesServlet extends HttpServlet {
 		String jsonString = "";
 		
 		try {
-			AuthenticationService.checkAuthorization(companyId);
+			AuthenticationService.checkAuthorization(companyId, null);
 
 			log.info("Retrieving Files");
 

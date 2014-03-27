@@ -6,16 +6,15 @@ import com.risevision.common.client.utils.RiseUtils;
 import com.risevision.medialibrary.server.info.CompanyInfo;
 import com.risevision.medialibrary.server.info.ServiceFailedException;
 import com.risevision.medialibrary.server.utils.CacheUtils;
-import com.risevision.medialibrary.server.utils.ServerUtils;
 
 public class AuthenticationService {
 	protected static final Logger log = Logger.getAnonymousLogger();
 
-	public static void checkAuthorization(String companyId) throws ServiceFailedException {
+	public static void checkAuthorization(String companyId, String username) throws ServiceFailedException {
 		
 		if (!RiseUtils.strIsNullOrEmpty(companyId)) {
-			if (ServerUtils.isUserLoggedIn()) {
-				CompanyInfo company = CacheUtils.getUserCompany(companyId);
+			if (!RiseUtils.strIsNullOrEmpty(username)) {
+				CompanyInfo company = CacheUtils.getUserCompany(companyId, username);
 	
 				if (company != null && !company.isAuthorized()) {				
 					throw new ServiceFailedException(ServiceFailedException.FORBIDDEN);

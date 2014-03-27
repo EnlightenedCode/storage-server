@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 import javax.jdo.PersistenceManager;
 
 import com.risevision.medialibrary.server.data.PersistentOAuthInfo.OAuthType;
-import com.risevision.medialibrary.server.utils.ServerUtils;
 
 public class PersistentHandler {
 	public static final Logger log = Logger.getLogger(PersistentHandler.class.getName());
@@ -55,10 +54,6 @@ public class PersistentHandler {
 //            pm.close();
 //        }
 //	}
-	
-	public PersistentUserInfo getUser() {
-		return getUser(ServerUtils.getGoogleUsername());
-	}
 	
 	public PersistentUserInfo getUser(String username) {
         PersistenceManager pm = PMF.get().getPersistenceManager();

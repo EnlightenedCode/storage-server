@@ -26,13 +26,13 @@ public class EnableMediaLibraryServlet extends HttpServlet {
 
 		try {
 			
-			CompanyInfo company = CacheUtils.getUserCompany(companyId);
+			CompanyInfo company = CacheUtils.getUserCompany(companyId, null);
 			
 			company.enableMediaLibrary();
 			
-			CompanyService.getInstance().saveCompany(company);
+			CompanyService.getInstance().saveCompany(company, null);
 			
-			CacheUtils.updateCompany(company);
+			CacheUtils.updateCompany(company, null);
 			
 			log.info("Enabled the Media Library for the Company");
 

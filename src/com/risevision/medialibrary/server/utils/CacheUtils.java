@@ -11,8 +11,8 @@ import com.risevision.medialibrary.server.service.CompanyService;
 public class CacheUtils {
 	protected static final Logger log = Logger.getAnonymousLogger();
 
-	public static CompanyInfo getUserCompany(String companyId) throws ServiceFailedException {
-		UserInfo user = getCurrentUser();
+	public static CompanyInfo getUserCompany(String companyId, String username) throws ServiceFailedException {
+		UserInfo user = getCurrentUser(username);
 		CompanyInfo company = user.getCompany(companyId);
 
 		if (company != null) {
@@ -25,7 +25,7 @@ public class CacheUtils {
 			try {
 				log.warning("Retrieving Company record");
 
-				company = CompanyService.getInstance().getCompany(companyId);
+				company = CompanyService.getInstance().getCompany(companyId, username);
 			} catch (ServiceFailedException e) {
 				// [AD] ideally we should just throw the exception; however since we need to add the response to 
 				// memcache, we will catch and re-throw it after processing
@@ -46,8 +46,8 @@ public class CacheUtils {
 		
 	}
 	
-	public static void updateCompany(CompanyInfo company) {
-		UserInfo user = getUser();
+	public static void updateCompany(CompanyInfo company, String username) {
+		UserInfo user = getUser(username);
 		
 		if (user.getCompany(company.getId()) == null) {
 			user.getCompanies().add(company);
@@ -60,13 +60,13 @@ public class CacheUtils {
 		CacheUtils.saveUser(user);
 	}
 	
-	private static UserInfo getCurrentUser() {
-		UserInfo user = getUser();
+	private static UserInfo getCurrentUser(String username) {
+		UserInfo user = getUser(username);
 		if (user != null) {
 			log.info("User found in cache");
 		}
 		else {
-			user = new UserInfo();
+			user = new UserInfo(username);
 			
 			log.warning("User not found in cache");
 		}
@@ -74,8 +74,7 @@ public class CacheUtils {
 		return user;
 	}
 	
-	private static UserInfo getUser() {
-		String username = ServerUtils.getGoogleUsername();
+	private static UserInfo getUser(String username) {
 		String key = getCacheItemName(username);
 		CacheHandler cache = CacheHandler.getInstance();
 		
@@ -85,8 +84,7 @@ public class CacheUtils {
 	}
 	
 	private static void saveUser(UserInfo user) {
-		String username = ServerUtils.getGoogleUsername();
-		String key = getCacheItemName(username);
+		String key = getCacheItemName(user.getUsername());
 		CacheHandler cache = CacheHandler.getInstance();
 
 		if (user != null) {

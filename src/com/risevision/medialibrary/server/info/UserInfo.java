@@ -3,16 +3,14 @@ package com.risevision.medialibrary.server.info;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import com.risevision.medialibrary.server.utils.ServerUtils;
-
 @SuppressWarnings("serial")
 public class UserInfo implements Serializable {
 
 	private String username;
 	private ArrayList<CompanyInfo> companies = new ArrayList<CompanyInfo>();
 	
-	public UserInfo() {
-		username = ServerUtils.getGoogleUsername();
+	public UserInfo(String username) {
+		this.username = username;
 	}
 	
 	public CompanyInfo getCompany(String companyId) {
