@@ -18,7 +18,7 @@ import com.risevision.storage.api.responses.SignedPolicyResponse;
 import com.risevision.storage.api.responses.SimpleResponse;
 import com.risevision.storage.info.MediaItemInfo;
 import com.risevision.storage.info.ServiceFailedException;
-import com.risevision.storage.service.AuthenticationService;
+import com.risevision.storage.security.AccessResource;
 
 @Api(
 	    name = "storage",
@@ -43,13 +43,15 @@ public class StorageAPI extends AbstractAPI {
 
 			if (user == null) {
 				result.message = "No user";
+				result.code = ServiceFailedException.AUTHENTICATION_FAILED;
 				return result;
 			}
 
 			log.info("User: " + user.getEmail());
 
 			try {
-				AuthenticationService.checkAuthorization(companyId, user.getEmail());
+				AccessResource resource = new AccessResource(companyId, user.getEmail());
+				resource.verify();
 				
 				MediaLibraryService service = new MediaLibraryServiceImpl();
 				
@@ -103,7 +105,10 @@ public class StorageAPI extends AbstractAPI {
 			log.info("User: " + user.getEmail());
 
 				try {
-					AuthenticationService.checkAuthorization(companyId, user.getEmail());
+//					AuthenticationService.checkAuthorization(companyId, user.getEmail());
+					
+					AccessResource resource = new AccessResource(companyId, user.getEmail());
+					resource.verify();
 					
 					MediaLibraryService service = new MediaLibraryServiceImpl();
 					
@@ -162,8 +167,11 @@ public class StorageAPI extends AbstractAPI {
 			log.info("User: " + user.getEmail());
 
 			try {
-				AuthenticationService.checkAuthorization(companyId, user.getEmail());
+//				AuthenticationService.checkAuthorization(companyId, user.getEmail());
 
+				AccessResource resource = new AccessResource(companyId, user.getEmail());
+				resource.verify();
+				
 				MediaLibraryService service = new MediaLibraryServiceImpl();
 				
 				service.createBucket(getBucketName(companyId));
@@ -218,8 +226,11 @@ public class StorageAPI extends AbstractAPI {
 
 			try {
 
-				AuthenticationService.checkAuthorization(companyId, user.getEmail());
+//				AuthenticationService.checkAuthorization(companyId, user.getEmail());
 
+				AccessResource resource = new AccessResource(companyId, user.getEmail());
+				resource.verify();
+				
 			} catch (ServiceFailedException e) {
 
 				result.result = false;
