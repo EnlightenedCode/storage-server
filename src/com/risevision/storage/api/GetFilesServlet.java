@@ -13,7 +13,7 @@ import com.google.appengine.labs.repackaged.org.json.JSONWriter;
 import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.MediaLibraryServiceImpl;
 import com.risevision.storage.info.ServiceFailedException;
-import com.risevision.storage.service.AuthenticationService;
+import com.risevision.storage.security.AccessResource;
 
 @SuppressWarnings("serial")
 public class GetFilesServlet extends HttpServlet {
@@ -25,8 +25,9 @@ public class GetFilesServlet extends HttpServlet {
 		String jsonString = "";
 		
 		try {
-			AuthenticationService.checkAuthorization(companyId, null);
-
+			AccessResource resource = new AccessResource(companyId, null);
+			resource.verify();
+			
 			log.info("Retrieving Files");
 
 			MediaLibraryService service = new MediaLibraryServiceImpl();

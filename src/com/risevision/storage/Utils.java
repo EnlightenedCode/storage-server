@@ -5,12 +5,9 @@ import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 
@@ -19,7 +16,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
@@ -32,8 +28,6 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.risevision.core.api.Format;
 import com.risevision.core.api.attributes.CommonAttribute;
-import com.risevision.storage.cache.Root;
-import com.risevision.storage.entities.Company;
 
 public class Utils {
 	
@@ -360,88 +354,7 @@ public class Utils {
 			}
 		}
 	}
-	
-	static public Key getCompanyKey(DatastoreService datastore, String companyId) {
 
-		Query q = new Query(EntityKind.COMPANY).setKeysOnly().setFilter(new FilterPredicate(Company.ID, Query.FilterOperator.EQUAL, companyId));
-		PreparedQuery pq = datastore.prepare(q);
-		Entity companyEntity = pq.asSingleEntity();
-	
-		return companyEntity != null ? companyEntity.getKey() : null;
-	}
-	
-	static public Map<String, Key> getCompanyKeys(DatastoreService datastore) {
-		
-		Map<String, Key> keyMap = new HashMap<String, Key>();
-
-		String rootId = Root.getCompanyId();
-
-		Query cq = new Query(EntityKind.COMPANY).setKeysOnly().setAncestor(getRootKey());
-		List<Entity> companies = datastore.prepare(cq).asList(FetchOptions.Builder.withDefaults().chunkSize(500).prefetchSize(500));
-		for (Entity c : companies) {
-
-			String companyId = (c.getKey().getName().equals(Globals.ROOT) ? rootId : c.getKey().getName()); 
-			keyMap.put(companyId, c.getKey());
-		}
-		
-		return keyMap;
-	}
-	
-	static public List<String> getCompanyIds(DatastoreService datastore) {
-
-		List<String> ids = new ArrayList<String>();
-
-		String rootId = Root.getCompanyId();
-
-		Query cq = new Query(EntityKind.COMPANY).setKeysOnly().setAncestor(getRootKey());
-
-		List<Entity> companies = datastore.prepare(cq).asList(FetchOptions.Builder.withDefaults().chunkSize(500).prefetchSize(500));
-		for (Entity c : companies) {
-
-			String companyId = (c.getKey().getName().equals(Globals.ROOT) ? rootId : c.getKey().getName()); 
-			ids.add(companyId);
-		}
-
-		return ids;
-	}
-	
-	static public List<String> getSubCompanyIds(DatastoreService datastore, Key companyKey) {
-		
-		List<String> ids = new ArrayList<String>();
-		
-		if (companyKey != null) {
-
-			Query cq = new Query(EntityKind.COMPANY).setKeysOnly().setAncestor(companyKey);
-			
-			List<Entity> companies = datastore.prepare(cq).asList(FetchOptions.Builder.withDefaults().chunkSize(500).prefetchSize(500));
-			for (Entity c : companies) {
-				
-				if (!c.getKey().getName().equals(companyKey.getName())) {
-
-					ids.add(c.getKey().getName());
-				}
-			}
-		}
-		
-		return ids;
-	}
-	
-	static public List<String> getSubCompanyIds(Key companyKey) {
-		
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		return getSubCompanyIds(datastore, companyKey);
-	}
-	
-	static public Key getRootKey() {
-
-		return KeyFactory.createKey(EntityKind.COMPANY, Globals.ROOT);
-	}
-
-	static public String getCompanyId(Key companyKey) {
-		
-		return companyKey == null ? null : (companyKey.getName().equals(Globals.ROOT) ? Root.getCompanyId() : companyKey.getName());
-	}
-	
 	static public Key getEntityKey(Key companyKey, String entityKind, String entityId) {
 
 		return KeyFactory.createKey(companyKey, entityKind, entityId);

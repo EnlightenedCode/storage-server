@@ -14,7 +14,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.risevision.core.api.types.DisplayStatus;
 import com.risevision.core.api.types.UserStatus;
-import com.risevision.storage.entities.Company;
+import com.risevision.directory.documents.Company;
 
 public class UpdateController {
 	

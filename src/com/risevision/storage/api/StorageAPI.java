@@ -105,8 +105,6 @@ public class StorageAPI extends AbstractAPI {
 			log.info("User: " + user.getEmail());
 
 				try {
-//					AuthenticationService.checkAuthorization(companyId, user.getEmail());
-					
 					AccessResource resource = new AccessResource(companyId, user.getEmail());
 					resource.verify();
 					
@@ -167,8 +165,6 @@ public class StorageAPI extends AbstractAPI {
 			log.info("User: " + user.getEmail());
 
 			try {
-//				AuthenticationService.checkAuthorization(companyId, user.getEmail());
-
 				AccessResource resource = new AccessResource(companyId, user.getEmail());
 				resource.verify();
 				
@@ -225,8 +221,6 @@ public class StorageAPI extends AbstractAPI {
 			log.info("User: " + user.getEmail());
 
 			try {
-
-//				AuthenticationService.checkAuthorization(companyId, user.getEmail());
 
 				AccessResource resource = new AccessResource(companyId, user.getEmail());
 				resource.verify();

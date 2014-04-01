@@ -10,74 +10,7 @@ import com.risevision.directory.documents.User;
 
 public class AccessVerifier {
 	
-//	private static final String INTERNAL = "rdn-openid.appspot.com"; // change to actual key!
-//	private static final String ANONYMOUS = "anonymous";
-	
 	protected static final Logger log = Logger.getAnonymousLogger();
-		
-//	static public boolean ConsumerAppAllowed(AbstractEntityResource resource) {
-//		
-//		String ckey = resource.getConsumerKey();
-//		
-//		// no key = FAIL
-//		if (ckey == null || ckey.isEmpty()) {
-//			log.warning("App is not allowed: no consumer key.");
-//			return false;
-//		}
-//		
-//		// our own key = PASS
-//		if (ckey.equals(INTERNAL))
-//			return true;
-//						
-//		// anonymous key = FAIL
-//		if (ckey.equals(ANONYMOUS)) {
-//			log.warning("App is not allowed: anonymous consumer key.");
-//			return false;
-//		}
-//		
-//		Company company = resource.getResourceCompany();
-//		
-//		
-//		// SECURITY EXCEPTION: ALLOW user lookup without resource company
-////		if ((resource instanceof UserLoginResource) && resource.getMethod().equals(Method.GET) && company == null) {
-////			return true;
-////		}
-//		
-//		// no company = FAIL
-//		if (company == null) {
-//			log.warning("App is not allowed: no resource company to verify against.");
-//			return false;
-//		}
-//		
-//		// consumer key is assigned to the company = PASS
-//		if (company.oauthConsumerKeys != null && company.oauthConsumerKeys.contains(ckey))
-//			return true;
-//		
-//		String parentId = company.parentId;
-//		
-//		while (parentId != null && !parentId.isEmpty()) {
-//		
-//			company = Company.get(parentId);
-//			
-//			// no company = FAIL
-//			if (company == null) {
-//				log.warning("App is not allowed: no parent company to verify against.");
-//				return false;
-//			}
-//			
-//			// consumer key is assigned to some parent company = PASS
-//			if (company.oauthConsumerKeys != null && company.oauthConsumerKeys.contains(ckey))
-//				return true;
-//			
-//			parentId = company.parentId;
-//			
-//		} 
-//		
-//		// no parent has the needed consumer key = FAIL
-//		log.warning("App is not allowed: no parent has the needed consumer key.");
-//		return false;
-//    
-//	}
 	
 	static public boolean UserAllowed(AccessResource resource) {
 		
