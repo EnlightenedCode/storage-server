@@ -14,7 +14,7 @@ import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.MediaLibraryServiceImpl;
 import com.risevision.storage.Utils;
 import com.risevision.storage.api.responses.FilesResponse;
-import com.risevision.storage.api.responses.SignedPolicyResponse;
+import com.risevision.storage.api.responses.StringResponse;
 import com.risevision.storage.api.responses.SimpleResponse;
 import com.risevision.storage.info.MediaItemInfo;
 import com.risevision.storage.info.ServiceFailedException;
@@ -144,6 +144,65 @@ public class StorageAPI extends AbstractAPI {
 
 	}
 	
+	
+	@ApiMethod(
+			name = "file.url",
+			path = "file",
+			httpMethod = HttpMethod.POST
+	)
+	public SimpleResponse getFileUrl(
+			@Nullable @Named("companyId") String companyId,
+			@Nullable @Named("key") String key,
+			User user) {
+
+		StringResponse result = new StringResponse();
+
+		try {
+
+			if (user == null) {
+				result.message = "No user";
+				return result;
+			}
+
+			log.info("User: " + user.getEmail());
+
+			try {
+
+				AccessResource resource = new AccessResource(companyId, user.getEmail());
+				resource.verify();
+				
+			} catch (ServiceFailedException e) {
+
+				result.result = false;
+				result.code = e.getReason();
+				result.message = "Authentication Failed";
+				
+				log.warning("Authentication Failed - Status: " + e.getReason());
+				
+			}
+			
+			MediaLibraryService service = new MediaLibraryServiceImpl();
+
+			String fileUrl = service.getMediaItemUrl(getBucketName(companyId), key);
+			
+			log.warning(fileUrl);
+			
+			result.result = true;
+			result.code = ServiceFailedException.OK;
+			result.response = fileUrl;
+
+		} catch (Exception e) {
+			Utils.logException(e);
+			
+			result.result = false;
+			result.code = ServiceFailedException.SERVER_ERROR;
+			result.message = "Internal Error.";
+		}
+
+		return result;
+
+	}
+	
 	@ApiMethod(
 			name = "createBucket",
 			path = "bucket",
@@ -209,7 +268,7 @@ public class StorageAPI extends AbstractAPI {
 			@Nullable @Named("policyBase64") String policyBase64,
 			User user) {
 
-		SignedPolicyResponse result = new SignedPolicyResponse();
+		StringResponse result = new StringResponse();
 
 		try {
 
@@ -237,13 +296,13 @@ public class StorageAPI extends AbstractAPI {
 			
 			MediaLibraryService service = new MediaLibraryServiceImpl();
 			
-			String signedPolicy = service.getSignedPolicy(policyBase64, null);
+			String signedPolicy = service.getSignedPolicy(policyBase64);
 			
 			log.info("Policy Signed");
 
 			result.result = true;
 			result.code = ServiceFailedException.OK;
-			result.signedPolicy = signedPolicy;
+			result.response = signedPolicy;
 
 		} catch (Exception e) {
 			Utils.logException(e);
