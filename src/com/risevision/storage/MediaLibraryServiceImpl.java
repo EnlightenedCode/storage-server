@@ -9,19 +9,10 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
-import javax.servlet.ServletContext;
-
-
-
-
-
-
-
-
 import com.google.api.client.googleapis.extensions.appengine.auth.oauth2.AppIdentityCredential;
-//import com.google.api.client.auth.security.PrivateKeys;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
@@ -289,10 +280,45 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 		}
 	}
 	
-	public String getSignedPolicy(String policyBase64, ServletContext context) {		
+	public String getMediaItemUrl(String bucketName, String key) throws Exception {
+		long expiry = new Date().getTime() + 3600;
+		String stringPolicy = "GET\n" + "\n" + "\n" + expiry + "\n" + '/' + bucketName + '/' + key;
+
+		String signedPolicy = getSignedPolicy(stringPolicy);
+		
+		log.info("Policy Signed");
+		
+		String accessId = "452091732215@developer.gserviceaccount.com";
+		String fileUrl = "http://" + bucketName + ".storage.googleapis.com/" 
+				+ key
+				+ "?GoogleAccessId=" + accessId 
+				+ "&Expires=" + expiry 
+				+ "&Signature=" + URLEncoder.encode(signedPolicy, "UTF-8")
+				+ "&response-content-disposition=attachment";
+		
+		return fileUrl;
+	}
+	
+//    public String getSignedPolicy(final String stringToSign) {
+//        AppIdentityService identityService = AppIdentityServiceFactory.getAppIdentityService();
+//
+//        log.warning(identityService.getServiceAccountName());
+//        final SigningResult signingResult = identityService.signForApp(stringToSign.getBytes());
+//        String encodedSignature = "";
+//		try {
+//			encodedSignature = new String(org.apache.commons.codec.binary.Base64.encodeBase64(signingResult.getSignature(), false), "UTF-8");
+//		} catch (UnsupportedEncodingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//        return encodedSignature;
+//    }
+
+	
+	public String getSignedPolicy(String policyBase64) {		
 		PrivateKey privateKey = null;
 		try {
-			privateKey = setServiceAccountPrivateKeyFromP12File(context);
+			privateKey = setServiceAccountPrivateKeyFromP12File();
 		} catch (GeneralSecurityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -300,7 +326,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+				
 	    byte[] contentBytes = StringUtils.getBytesUtf8(policyBase64);
 	    try {
 //		    Signature signer = Signature.getInstance("SHA256withRSA");
@@ -333,7 +359,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 	 *            input stream to the p12 file (closed at the end of this method
 	 *            in a finally block)
 	 */
-	public PrivateKey setServiceAccountPrivateKeyFromP12File(ServletContext context)
+	public PrivateKey setServiceAccountPrivateKeyFromP12File()
 			throws GeneralSecurityException, IOException {
 		String p12FileName = "key/65bd1c5e62dadd4852c8b04bf5124749985e8ff8-privatekey.p12";
 		

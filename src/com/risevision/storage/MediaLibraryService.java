@@ -4,8 +4,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletContext;
-
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.appengine.labs.repackaged.org.json.JSONException;
@@ -126,6 +124,8 @@ public abstract class MediaLibraryService {
 	
 	public abstract InputStream getMediaItem(String bucketName, String itemName) throws ServiceFailedException;
 	
-	public abstract String getSignedPolicy(String policyBase64, ServletContext context);
+	public abstract String getMediaItemUrl(String bucketName, String itemName) throws Exception;
+	
+	public abstract String getSignedPolicy(String policyBase64);
 
 }
