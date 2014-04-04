@@ -34,8 +34,6 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 	/** Global configuration of Google Cloud Storage OAuth 2.0 scope. */
 	private static final String STORAGE_SCOPE = "https://www.googleapis.com/auth/devstorage.read_write";
 
-	private static final String PROJECT_ID = "452091732215";
-	
 	public ListAllMyBucketsResponse getAllMyBuckets() throws ServiceFailedException {
 		try {
 			AppIdentityCredential credential = new AppIdentityCredential(Arrays.asList(STORAGE_SCOPE));
@@ -48,7 +46,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			HttpRequest request = requestFactory.buildGetRequest(url);
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.set("x-goog-project-id", PROJECT_ID);
+			headers.set("x-goog-project-id", Globals.PROJECT_ID);
 			
 			request.setHeaders(headers);
 			HttpResponse response = request.execute();
@@ -99,7 +97,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			HttpRequest request = requestFactory.buildGetRequest(url);
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.set("x-goog-project-id", PROJECT_ID);
+			headers.set("x-goog-project-id", Globals.PROJECT_ID);
 			
 			request.setHeaders(headers);
 			HttpResponse response = request.execute();
@@ -134,7 +132,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			HttpRequest request = requestFactory.buildGetRequest(url);
 			
 //			HttpHeaders headers = new HttpHeaders();
-//			headers.set("x-goog-project-id", PROJECT_ID);
+//			headers.set("x-goog-project-id", Globals.PROJECT_ID);
 //			
 //			request.setHeaders(headers);
 			HttpResponse response = request.execute();
@@ -170,7 +168,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			HttpRequest request = requestFactory.buildPutRequest(url, null);
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.set("x-goog-project-id", PROJECT_ID);
+			headers.set("x-goog-project-id", Globals.PROJECT_ID);
 			
 			request.setHeaders(headers);
 
@@ -199,7 +197,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			HttpRequest request = requestFactory.buildPutRequest(url, ByteArrayContent.fromString(null, propertyXMLdoc));
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.set("x-goog-project-id", PROJECT_ID);
+			headers.set("x-goog-project-id", Globals.PROJECT_ID);
 			
 			request.setHeaders(headers);
 
@@ -227,7 +225,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			HttpRequest request = requestFactory.buildDeleteRequest(url);
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.set("x-goog-project-id", PROJECT_ID);
+			headers.set("x-goog-project-id", Globals.PROJECT_ID);
 			
 			request.setHeaders(headers);
 
@@ -255,7 +253,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			HttpRequest request = requestFactory.buildGetRequest(url);
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.set("x-goog-project-id", PROJECT_ID);
+			headers.set("x-goog-project-id", Globals.PROJECT_ID);
 			
 			request.setHeaders(headers);
 
@@ -288,10 +286,9 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 		
 		log.info("Policy Signed");
 		
-		String accessId = "452091732215@developer.gserviceaccount.com";
 		String fileUrl = "http://" + bucketName + ".storage.googleapis.com/" 
 				+ key
-				+ "?GoogleAccessId=" + accessId 
+				+ "?GoogleAccessId=" + Globals.ACCESS_ID 
 				+ "&Expires=" + expiry 
 				+ "&Signature=" + URLEncoder.encode(signedPolicy, "UTF-8")
 				+ "&response-content-disposition=attachment";

@@ -4,6 +4,9 @@ public final class Globals {
 	
 	public static String BUCKET_NAME_PREFIX = "risemedialibrary-";
 	
+	public static final String PROJECT_ID = "452091732215";
+	public static final String ACCESS_ID = "452091732215@developer.gserviceaccount.com";
+	
 	public static String APP_PRODUCTION = "s~rvaserver2";
 	public static String APP_TEST = "s~rvacore-test";
 	public static String APP_TEST2 = "s~rvacore-test2";
