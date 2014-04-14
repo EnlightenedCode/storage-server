@@ -29,6 +29,9 @@ public class BQUtils {
 	private static final JsonFactory JSON_FACTORY = new GsonFactory();
 	private static final String BIGQUERY_SCOPE = "https://www.googleapis.com/auth/bigquery";
 	
+	private static final String WRITE_DISPOSITION_TRUNCATE = "WRITE_TRUNCATE";
+	private static final String WRITE_DISPOSITION_APPEND = "WRITE_APPEND";
+	
 	public static final String DATASET_ID = "LogsTesting";
 	
 	protected static final Logger log = Logger.getAnonymousLogger();
@@ -37,7 +40,7 @@ public class BQUtils {
 	
 	public static String startQuery(String query, String tableId) throws IOException {
 		
-		log.info("Inserting Query Job: " + query);
+		log.info("Starting Move Job: " + query);
 		
 		Bigquery bigquery = getBigquery();
 		
@@ -55,11 +58,11 @@ public class BQUtils {
 		tableRef.setDatasetId(DATASET_ID);
 		tableRef.setTableId(tableId);
 		tableRef.setProjectId(Globals.PROJECT_ID);
-		queryConfig.setDestinationTable(tableRef);	    
-		
+		queryConfig.setDestinationTable(tableRef);
+		queryConfig.setWriteDisposition(WRITE_DISPOSITION_APPEND);
+
 	    Insert insert = bigquery.jobs().insert(Globals.PROJECT_ID, job);
 		JobReference jobRef =  insert.execute().getJobReference();
-		
 
 		// Waiting for job to complete.
 //		pollResponse(bigquery, jobRef);
@@ -80,9 +83,6 @@ public class BQUtils {
 
 		job.setConfiguration(config);
 		
-//		MediaLibraryLogReader.re
-		
-		
 		// Set where you are importing from (i.e. the Google Cloud Storage paths).
 		loadConfig.setSourceUris(sources);
 
@@ -92,17 +92,14 @@ public class BQUtils {
 		tableRef.setTableId(tableId);
 		tableRef.setProjectId(Globals.PROJECT_ID);
 		loadConfig.setDestinationTable(tableRef);
+		loadConfig.setWriteDisposition(WRITE_DISPOSITION_TRUNCATE);
 
 		loadConfig.setSchema(schema);
-
-		// Also set custom delimiter or header rows to skip here....
-		// [not shown].
 
 		Insert insert = bigquery.jobs().insert(Globals.PROJECT_ID, job);
 		insert.setProjectId(Globals.PROJECT_ID);
 		JobReference jobRef =  insert.execute().getJobReference();
 		
-
 		// Waiting for job to complete.
 //		pollResponse(bigquery, jobRef);
 		
@@ -110,16 +107,18 @@ public class BQUtils {
 	}
 	
 	public static Job checkResponse(String jobId) throws IOException {
-		long startTime = System.currentTimeMillis();
-		long elapsedTime = 0;
+//		long startTime = System.currentTimeMillis();
+//		long elapsedTime = 0;
 
 		Bigquery bigquery = getBigquery();
 		
 //		while (true) {
 			Job pollJob = bigquery.jobs().get(Globals.PROJECT_ID, jobId).execute();
-			elapsedTime = System.currentTimeMillis() - startTime;
+//			elapsedTime = System.currentTimeMillis() - startTime;
 			
-			log.info("Status=" + pollJob.getStatus().getState() + "\nTime:" + elapsedTime + "\nJobId=" + jobId);
+			log.info("Status=" + pollJob.getStatus().getState() + 
+//					"\nTime:" + elapsedTime + 
+					"\nJobId=" + jobId);
 			
 			if (pollJob.getStatus().getState().equals("DONE")) {
 				return pollJob;

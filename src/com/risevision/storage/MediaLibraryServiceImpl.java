@@ -232,7 +232,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			request.execute();
 			
 		} catch (HttpResponseException e) {
-			log.warning(e.getStatusCode() + " - " + e.getMessage());
+			log.warning(e.getStatusCode() + " - " + e.getMessage() + " (" + itemName + ")");
 			
 			throw new ServiceFailedException(ServiceFailedException.NOT_FOUND);
 		} catch (IOException e) {

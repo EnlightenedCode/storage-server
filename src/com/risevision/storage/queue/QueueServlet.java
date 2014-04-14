@@ -3,9 +3,6 @@ package com.risevision.storage.queue;
 import static com.google.appengine.api.taskqueue.TaskOptions.Builder.withUrl;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServlet;
@@ -117,17 +114,18 @@ public class QueueServlet extends HttpServlet {
 //					ImportFiles.runJob();
 					Job job = BQUtils.checkResponse(jobId);
 					
-					if (job.getStatus().getState().equals("DONE")) {
+					
+					if (job.getStatus().getErrorResult() != null) {
+						// throw error by logging it, eliminate job from queue
+						log.severe("Import Error - " + job.getStatus().getErrorResult().getMessage());
+					} 
+					else if (job.getStatus().getState().equals("DONE")) {
 
 						String jobFiles = req.getParameter(QueryParam.JOB_FILES);
 						int jobType = RiseUtils.strToInt(req.getParameter(QueryParam.JOB_TYPE), 0);
 						
 						ImportFiles.postProcess(jobFiles, jobType);
 
-					}
-					else if (job.getStatus().getErrorResult() != null) {
-						// throw error by logging it, eliminate job from queue
-						log.severe(job.getStatus().getErrorResult().getDebugInfo());
 					}
 					else {
 //						QueueFactory.getDefaultQueue().add(withUrl("/queue")
@@ -141,20 +139,23 @@ public class QueueServlet extends HttpServlet {
 					}
 				}
 				
-			} else if (task.equals(QueueTask.CHECK_MOVE_JOB)) {
+			} else if (task.equals(QueueTask.CHECK_STORAGE_MOVE_JOB) || task.equals(QueueTask.CHECK_USAGE_MOVE_JOB)) {
 				
 				String jobId = req.getParameter(QueryParam.JOB_ID);
 				
 				Job job = BQUtils.checkResponse(jobId);
 				
-				if (job.getStatus().getState().equals("DONE")) {
+				if (job.getStatus().getErrorResult() != null) {
+					// throw error by logging it, eliminate job from queue
+					log.severe("Move Error - " + job.getStatus().getErrorResult().getMessage());
+
+				} else if (job.getStatus().getState().equals("DONE")) {
 
 					// run next job
+					QueueFactory.getDefaultQueue().add(withUrl("/queue")
+							.param(QueryParam.TASK, QueueTask.RUN_BQ_JOB)
+							.method(Method.GET));
 
-				}
-				else if (job.getStatus().getErrorResult() != null) {
-					// throw error by logging it, eliminate job from queue
-					log.severe(job.getStatus().getErrorResult().getDebugInfo());
 				}
 				else {
 //						QueueFactory.getDefaultQueue().add(withUrl("/queue")

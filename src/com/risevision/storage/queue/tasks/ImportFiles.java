@@ -2,8 +2,11 @@ package com.risevision.storage.queue.tasks;
 
 import static com.google.appengine.api.taskqueue.TaskOptions.Builder.withUrl;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import com.google.api.services.bigquery.model.TableFieldSchema;
@@ -26,17 +29,18 @@ public class ImportFiles extends AbstractTask {
 	private static final int JOB_STORAGE = 0;
 	
 	private static final String USAGE_TABLE = "UsageLogs";
+	private static final String USAGE_TABLE_TEMP = "UsageLogsTemp";
 	private static final String STORAGE_TABLE = "StorageLogs";
 	private static final String STORAGE_TABLE_TEMP = "StorageLogsTemp";
 	
 //	private static long MAX_BYTES_PER_POST = 1 * 1000 * 1000; // not exactly a megabyte, leave some buffer 
-
 
 	public static String runJob() throws Exception {
 		
 //		try {
 			
 			List<String> sources = new ArrayList<String>();
+			List<String> files = new ArrayList<String>();
 
 			MediaLibraryService service = new MediaLibraryServiceImpl();
 			
@@ -53,17 +57,23 @@ public class ImportFiles extends AbstractTask {
 					
 					if (item.getKey().contains(logDate)) {
 						sources.add(LOGS_BUCKET_URL + item.getKey());
+						files.add(item.getKey());
 						jobType = JOB_STORAGE;			
 					}
 				}
 				else if (item.getKey().contains("usage") && jobType != JOB_STORAGE) {
 					sources.add(LOGS_BUCKET_URL + item.getKey());
+					files.add(item.getKey());
 					jobType = JOB_USAGE;
 				} 
 				
-				if (sources.size() > 10) {
+				if (sources.size() >= 100) {
 					break;
 				}
+			}
+			
+			if (sources.size() == 0) {
+				return "Done";
 			}
 			
 			String jobId;
@@ -74,14 +84,14 @@ public class ImportFiles extends AbstractTask {
 				jobId =  runUsageJob(sources);
 			}
 			
-			String filesString = RiseUtils.listToString(sources, ",");
+			String filesString = RiseUtils.listToString(files, ",");
 			
 			QueueFactory.getDefaultQueue().add(withUrl("/queue")
 					.param(QueryParam.TASK, QueueTask.CHECK_IMPORT_JOB)
 					.param(QueryParam.JOB_ID, jobId)
 					.param(QueryParam.JOB_TYPE, Integer.toString(jobType))
 					.param(QueryParam.JOB_FILES, filesString)
-					.countdownMillis(1000 * 10)
+					.countdownMillis(1000 * 30)
 					.method(Method.POST));
 			
 			return sources.size() + " of " + items.size();
@@ -101,30 +111,66 @@ public class ImportFiles extends AbstractTask {
 		
 		MediaLibraryService service = new MediaLibraryServiceImpl();
 		
-//		service.deleteMediaItems(LOGS_BUCKET_NAME, files);
+		log.info("Removing Files: " + filesString);
+		
+		service.deleteMediaItems(LOGS_BUCKET_NAME, files);
 		
 		if (jobType == ImportFiles.JOB_STORAGE) {
-			runMoveJob(files.get(0));
+			runStorageMoveJob(files.get(0));
+		}
+		else {
+			runUsageMoveJob();
 		}
 		
-		log.info("Job Done - File List:" + filesString);
 	}
 	
-	public static void runMoveJob(String filename) throws Exception {
+	public static void runStorageMoveJob(String filename) throws Exception {
 		String dateToken = getStorageLogDate(filename);
+		DateFormat inputDateFormat = new SimpleDateFormat("yyyy_MM_dd");
+
+		Date date = inputDateFormat.parse(dateToken);
 		
 		String query =
-				"SELECT bucket, storage_byte_hours, '" + dateToken + "' as date "
+				"SELECT bucket, storage_byte_hours, SEC_TO_TIMESTAMP(" + date.getTime() / 1000 + ") as date "
 						+ "FROM [" + BQUtils.DATASET_ID + "." + STORAGE_TABLE_TEMP + "];";
 				
-		
 //		try {
 			
 		    String jobId = BQUtils.startQuery(query, STORAGE_TABLE);
 //		    BQUtils.checkResponse(jobId);
 			
 			QueueFactory.getDefaultQueue().add(withUrl("/queue")
-					.param(QueryParam.TASK, QueueTask.CHECK_MOVE_JOB)
+					.param(QueryParam.TASK, QueueTask.CHECK_STORAGE_MOVE_JOB)
+					.param(QueryParam.JOB_ID, jobId)
+//					.param(QueryParam.JOB_TYPE, Integer.toString(JOB_STORAGE))
+//					.param(QueryParam.JOB_FILES, filesString)
+					.countdownMillis(1000 * 30)
+					.method(Method.POST));
+			
+//			return sources.size() + " of " + items.size();
+			
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			
+//			throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+//		}
+		
+	}
+	
+	public static void runUsageMoveJob() throws Exception {
+		
+		String query =
+				"SELECT USEC_TO_TIMESTAMP(INTEGER(time_micros)) as time_timestamp, * "
+						+ "FROM [" + BQUtils.DATASET_ID + "." + USAGE_TABLE_TEMP + "];";
+				
+//		try {
+			
+		    String jobId = BQUtils.startQuery(query, USAGE_TABLE);
+//		    BQUtils.checkResponse(jobId);
+			
+			QueueFactory.getDefaultQueue().add(withUrl("/queue")
+					.param(QueryParam.TASK, QueueTask.CHECK_USAGE_MOVE_JOB)
 					.param(QueryParam.JOB_ID, jobId)
 //					.param(QueryParam.JOB_TYPE, Integer.toString(JOB_STORAGE))
 //					.param(QueryParam.JOB_FILES, filesString)
@@ -192,7 +238,7 @@ public class ImportFiles extends AbstractTask {
 		
 //		recordJobFiles("UsageLogFiles", sources);
 
-		String jobId = BQUtils.runFilesJob(USAGE_TABLE, schema, sources);
+		String jobId = BQUtils.runFilesJob(USAGE_TABLE_TEMP, schema, sources);
 		
 //		FileTransferJob transferJob = new FileTransferJob(jobId, JOB_USAGE, sources);
 //		transferJob.put();
@@ -300,14 +346,14 @@ public class ImportFiles extends AbstractTask {
 
 		fields.add(getTableField("time_micros", "string"));
 		fields.add(getTableField("c_ip", "string"));
-		fields.add(getTableField("c_ip_type", "string"));
+		fields.add(getTableField("c_ip_type", "integer"));
 		fields.add(getTableField("c_ip_region", "string"));
 		fields.add(getTableField("cs_method", "string"));
 		fields.add(getTableField("cs_uri", "string"));
-		fields.add(getTableField("sc_status", "string"));
-		fields.add(getTableField("cs_bytes", "string"));
-		fields.add(getTableField("sc_bytes", "string"));
-		fields.add(getTableField("time_taken_micros", "string"));
+		fields.add(getTableField("sc_status", "integer"));
+		fields.add(getTableField("cs_bytes", "integer"));
+		fields.add(getTableField("sc_bytes", "integer"));
+		fields.add(getTableField("time_taken_micros", "integer"));
 		fields.add(getTableField("cs_host", "string"));
 		fields.add(getTableField("cs_referer", "string"));
 		fields.add(getTableField("cs_user_agent", "string"));
