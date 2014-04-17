@@ -9,6 +9,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.appengine.labs.repackaged.org.json.JSONException;
 import com.google.appengine.labs.repackaged.org.json.JSONStringer;
 import com.google.appengine.labs.repackaged.org.json.JSONWriter;
+import com.risevision.common.client.utils.RiseUtils;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
 import com.risevision.storage.info.MediaItemInfo;
 import com.risevision.storage.info.ServiceFailedException;
@@ -112,6 +113,14 @@ public abstract class MediaLibraryService {
 		}
 		
 		return response;
+	}
+	
+	public static String getBucketName(String companyId) throws ServiceFailedException {
+		if (RiseUtils.strIsNullOrEmpty(companyId)) {
+			throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+		}
+		
+		return "risemedialibrary-" + companyId;
 	}
 	
 	public abstract void createBucket(String bucketName) throws ServiceFailedException;

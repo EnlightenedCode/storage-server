@@ -9,9 +9,8 @@ import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiMethod.HttpMethod;
 import com.google.appengine.api.users.User;
-import com.risevision.common.client.utils.RiseUtils;
+import com.risevision.storage.Globals;
 import com.risevision.storage.MediaLibraryService;
-import com.risevision.storage.MediaLibraryServiceImpl;
 import com.risevision.storage.Utils;
 import com.risevision.storage.api.responses.FilesResponse;
 import com.risevision.storage.api.responses.StringResponse;
@@ -23,7 +22,7 @@ import com.risevision.storage.security.AccessResource;
 @Api(
 	    name = "storage",
 	    version = "v0.01",
-	    clientIds = {com.google.api.server.spi.Constant.API_EXPLORER_CLIENT_ID, com.risevision.storage.info.Globals.STORE_CLIENT_ID}
+	    clientIds = {com.google.api.server.spi.Constant.API_EXPLORER_CLIENT_ID, Globals.STORE_CLIENT_ID}
 )
 
 public class StorageAPI extends AbstractAPI {
@@ -53,9 +52,9 @@ public class StorageAPI extends AbstractAPI {
 				AccessResource resource = new AccessResource(companyId, user.getEmail());
 				resource.verify();
 				
-				MediaLibraryService service = new MediaLibraryServiceImpl();
+				MediaLibraryService service = MediaLibraryService.getInstance();
 				
-				List<MediaItemInfo> items =  service.getBucketItems(getBucketName(companyId));
+				List<MediaItemInfo> items =  service.getBucketItems(MediaLibraryService.getBucketName(companyId));
 				
 				result.result = true;
 				result.code = ServiceFailedException.OK;
@@ -108,13 +107,13 @@ public class StorageAPI extends AbstractAPI {
 					AccessResource resource = new AccessResource(companyId, user.getEmail());
 					resource.verify();
 					
-					MediaLibraryService service = new MediaLibraryServiceImpl();
+					MediaLibraryService service = MediaLibraryService.getInstance();
 					
-					service.deleteMediaItems(getBucketName(companyId), files);
+					service.deleteMediaItems(MediaLibraryService.getBucketName(companyId), files);
 					
 					log.info("Files Deleted");
 					
-					List<MediaItemInfo> items =  service.getBucketItems(getBucketName(companyId));
+					List<MediaItemInfo> items =  service.getBucketItems(MediaLibraryService.getBucketName(companyId));
 					
 					result.result = true;
 					result.code = ServiceFailedException.OK;
@@ -181,9 +180,9 @@ public class StorageAPI extends AbstractAPI {
 				
 			}
 			
-			MediaLibraryService service = new MediaLibraryServiceImpl();
+			MediaLibraryService service = MediaLibraryService.getInstance();
 
-			String fileUrl = service.getMediaItemUrl(getBucketName(companyId), key);
+			String fileUrl = service.getMediaItemUrl(MediaLibraryService.getBucketName(companyId), key);
 			
 			log.warning(fileUrl);
 			
@@ -227,9 +226,9 @@ public class StorageAPI extends AbstractAPI {
 				AccessResource resource = new AccessResource(companyId, user.getEmail());
 				resource.verify();
 				
-				MediaLibraryService service = new MediaLibraryServiceImpl();
+				MediaLibraryService service = MediaLibraryService.getInstance();
 				
-				service.createBucket(getBucketName(companyId));
+				service.createBucket(MediaLibraryService.getBucketName(companyId));
 				
 				log.info("Bucket Created");
 
@@ -294,7 +293,7 @@ public class StorageAPI extends AbstractAPI {
 				
 			}
 			
-			MediaLibraryService service = new MediaLibraryServiceImpl();
+			MediaLibraryService service = MediaLibraryService.getInstance();
 			
 			String signedPolicy = service.getSignedPolicy(policyBase64);
 			
@@ -314,14 +313,6 @@ public class StorageAPI extends AbstractAPI {
 
 		return result;
 
-	}
-	
-	private String getBucketName(String companyId) throws ServiceFailedException {
-		if (RiseUtils.strIsNullOrEmpty(companyId)) {
-			throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
-		}
-		
-		return "risemedialibrary-" + companyId;
 	}
 	
 //	@ApiMethod(

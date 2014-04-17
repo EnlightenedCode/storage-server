@@ -33,6 +33,10 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 	
 	/** Global configuration of Google Cloud Storage OAuth 2.0 scope. */
 	private static final String STORAGE_SCOPE = "https://www.googleapis.com/auth/devstorage.read_write";
+	
+	protected MediaLibraryServiceImpl() {
+		
+	}
 
 	public ListAllMyBucketsResponse getAllMyBuckets() throws ServiceFailedException {
 		try {

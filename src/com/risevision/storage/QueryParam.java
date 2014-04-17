@@ -8,4 +8,6 @@ public class QueryParam {
 	public static final String JOB_TYPE = "jobType";
 	public static final String JOB_FILES = "jobFiles";
 	
+	public static final String JOB_CURSOR = "jobCursor";
+	
 }

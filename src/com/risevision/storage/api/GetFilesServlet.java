@@ -11,7 +11,6 @@ import com.google.appengine.labs.repackaged.org.json.JSONException;
 import com.google.appengine.labs.repackaged.org.json.JSONStringer;
 import com.google.appengine.labs.repackaged.org.json.JSONWriter;
 import com.risevision.storage.MediaLibraryService;
-import com.risevision.storage.MediaLibraryServiceImpl;
 import com.risevision.storage.info.ServiceFailedException;
 import com.risevision.storage.security.AccessResource;
 
@@ -30,7 +29,7 @@ public class GetFilesServlet extends HttpServlet {
 			
 			log.info("Retrieving Files");
 
-			MediaLibraryService service = new MediaLibraryServiceImpl();
+			MediaLibraryService service = MediaLibraryService.getInstance();
 		
 			String bucketName = "risemedialibrary-" + companyId;
 			jsonString = service.getBucketItemsString(bucketName);

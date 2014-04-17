@@ -15,9 +15,9 @@ import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
 import com.risevision.common.client.utils.RiseUtils;
 import com.risevision.storage.MediaLibraryService;
-import com.risevision.storage.MediaLibraryServiceImpl;
 import com.risevision.storage.QueryParam;
 import com.risevision.storage.info.MediaItemInfo;
+import com.risevision.storage.queue.QueueName;
 import com.risevision.storage.queue.QueueTask;
 
 public class ImportFiles extends AbstractTask {
@@ -42,7 +42,7 @@ public class ImportFiles extends AbstractTask {
 			List<String> sources = new ArrayList<String>();
 			List<String> files = new ArrayList<String>();
 
-			MediaLibraryService service = new MediaLibraryServiceImpl();
+			MediaLibraryService service = MediaLibraryService.getInstance();
 			
 			List<MediaItemInfo> items = service.getBucketItems(LOGS_BUCKET_NAME);
 			int jobType = -1;
@@ -86,7 +86,7 @@ public class ImportFiles extends AbstractTask {
 			
 			String filesString = RiseUtils.listToString(files, ",");
 			
-			QueueFactory.getDefaultQueue().add(withUrl("/queue")
+			QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
 					.param(QueryParam.TASK, QueueTask.CHECK_IMPORT_JOB)
 					.param(QueryParam.JOB_ID, jobId)
 					.param(QueryParam.JOB_TYPE, Integer.toString(jobType))
@@ -109,7 +109,7 @@ public class ImportFiles extends AbstractTask {
 		// delete the files
 		List<String> files = new ArrayList<String>(Arrays.asList(filesString.split(",")));
 		
-		MediaLibraryService service = new MediaLibraryServiceImpl();
+		MediaLibraryService service = MediaLibraryService.getInstance();
 		
 		log.info("Removing Files: " + filesString);
 		
@@ -139,7 +139,7 @@ public class ImportFiles extends AbstractTask {
 		    String jobId = BQUtils.startQuery(query, STORAGE_TABLE);
 //		    BQUtils.checkResponse(jobId);
 			
-			QueueFactory.getDefaultQueue().add(withUrl("/queue")
+			QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
 					.param(QueryParam.TASK, QueueTask.CHECK_STORAGE_MOVE_JOB)
 					.param(QueryParam.JOB_ID, jobId)
 //					.param(QueryParam.JOB_TYPE, Integer.toString(JOB_STORAGE))
@@ -169,7 +169,7 @@ public class ImportFiles extends AbstractTask {
 		    String jobId = BQUtils.startQuery(query, USAGE_TABLE);
 //		    BQUtils.checkResponse(jobId);
 			
-			QueueFactory.getDefaultQueue().add(withUrl("/queue")
+			QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
 					.param(QueryParam.TASK, QueueTask.CHECK_USAGE_MOVE_JOB)
 					.param(QueryParam.JOB_ID, jobId)
 //					.param(QueryParam.JOB_TYPE, Integer.toString(JOB_STORAGE))

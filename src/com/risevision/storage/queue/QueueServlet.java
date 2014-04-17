@@ -10,15 +10,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.api.services.bigquery.model.Job;
-import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.appengine.api.taskqueue.TaskAlreadyExistsException;
-import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
 import com.risevision.common.client.utils.RiseUtils;
 import com.risevision.storage.QueryParam;
 import com.risevision.storage.Utils;
 import com.risevision.storage.queue.tasks.BQUtils;
+import com.risevision.storage.queue.tasks.EnableLogging;
 import com.risevision.storage.queue.tasks.ImportFiles;
 
 
@@ -74,6 +72,22 @@ public class QueueServlet extends HttpServlet {
 //					}
 //				}
 //				
+			} else if (task.equals(QueueTask.RUN_ENABLE_LOGGING_JOB)) {
+				
+//				String entityKind = req.getParameter(QueryParam.KIND);
+//				String offsetStr = req.getParameter(QueryParam.OFFSET);
+				
+//				if (offsetStr == null) {
+//					
+//					EnableLogging.Enqueue(entityKind, 0);
+//					
+//				} else {
+				
+//					Integer offset = Integer.parseInt(offsetStr);
+					String cursor = req.getParameter(QueryParam.JOB_CURSOR);
+					EnableLogging.runJob(cursor);
+//				}
+
 			} else {
 
 				log.warning("Task " + task + " is not recognized, exiting.");
@@ -152,7 +166,7 @@ public class QueueServlet extends HttpServlet {
 				} else if (job.getStatus().getState().equals("DONE")) {
 
 					// run next job
-					QueueFactory.getDefaultQueue().add(withUrl("/queue")
+					QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
 							.param(QueryParam.TASK, QueueTask.RUN_BQ_JOB)
 							.method(Method.GET));
 
@@ -172,7 +186,7 @@ public class QueueServlet extends HttpServlet {
 				log.warning("Task " + task + " is not recognized, exiting.");
 				return;
 			}
-
+			
 		} catch (Exception e) {
 			log.severe("Error: " + e.toString());
 			Utils.logStackTrace(e, log);

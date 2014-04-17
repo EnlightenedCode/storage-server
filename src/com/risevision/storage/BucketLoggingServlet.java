@@ -15,27 +15,32 @@ import com.risevision.storage.queue.QueueName;
 import com.risevision.storage.queue.QueueTask;
 
 @SuppressWarnings("serial")
-public class LogsJobServlet extends HttpServlet {
+public class BucketLoggingServlet extends HttpServlet {
 	protected static final Logger log = Logger.getAnonymousLogger();
-
+	
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		
-		try {
+//		try {
 			String jsonString = "Done";
-			
-			QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
-					.param(QueryParam.TASK, QueueTask.RUN_BQ_JOB)
+
+			QueueFactory.getQueue(QueueName.STORAGE_LOG_ENABLE).add(withUrl("/queue")
+					.param(QueryParam.TASK, QueueTask.RUN_ENABLE_LOGGING_JOB)
 					.method(Method.GET));
+			
+//			String companyId = request.getParameter("companyId");
+//			Companies companies = CacheUtils.get(Companies.class, companyId);
+//			
+//			for (Company item: companies.companies) {
+//				jsonString += item.getId() + "_" + item.name;
+//			}
 
 			response.setContentType("application/json; charset=UTF-8");
 			response.getWriter().println(jsonString);			
 
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 //		} catch (ServiceFailedException e) {
+//			// TODO Auto-generated catch block
 //			e.printStackTrace();
-		}
+//		}
 	}
-
+	
 }
