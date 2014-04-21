@@ -1,6 +1,7 @@
 package com.risevision.storage;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -127,9 +128,19 @@ public abstract class MediaLibraryService {
 	
 	public abstract void updateBucketProperty(String bucketName, String property, String propertyXMLdoc) throws ServiceFailedException;
 	
-	public abstract void deleteMediaItem(String bucketName, String itemName) throws ServiceFailedException;
+	public abstract boolean deleteMediaItem(String bucketName, String itemName) throws ServiceFailedException;
 	
-	public abstract void deleteMediaItems(String bucketName, List<String> files) throws ServiceFailedException;
+	public List<String> deleteMediaItems(String bucketName, List<String> itemNames) throws ServiceFailedException {
+		List<String> failedItems = new ArrayList<>();
+		
+		for (String itemName : itemNames) {
+			if (!deleteMediaItem(bucketName, itemName)) {
+				failedItems.add(itemName);
+			}
+		}
+		
+		return failedItems;
+	}
 	
 	public abstract InputStream getMediaItem(String bucketName, String itemName) throws ServiceFailedException;
 	

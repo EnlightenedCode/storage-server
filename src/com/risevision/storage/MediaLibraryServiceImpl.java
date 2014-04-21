@@ -217,7 +217,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 
 	}
 	
-	public void deleteMediaItem(String bucketName, String itemName) throws ServiceFailedException {
+	public boolean deleteMediaItem(String bucketName, String itemName) throws ServiceFailedException {
 		try {
 			AppIdentityCredential credential = new AppIdentityCredential(Arrays.asList(STORAGE_SCOPE));
 	
@@ -235,6 +235,8 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 
 			request.execute();
 			
+			return true;
+			
 		} catch (HttpResponseException e) {
 			log.warning(e.getStatusCode() + " - " + e.getMessage() + " (" + itemName + ")");
 			
@@ -242,6 +244,8 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 		} catch (IOException e) {
 			log.severe("Error - " + e.getMessage());
 		}
+		
+		return false;
 
 	}
 	
@@ -274,12 +278,6 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 		}
 
 		return null;
-	}
-	
-	public void deleteMediaItems(String bucketName, List<String> itemNames) throws ServiceFailedException {
-		for (String itemName : itemNames) {
-			deleteMediaItem(bucketName, itemName);
-		}
 	}
 	
 	public String getMediaItemUrl(String bucketName, String key) throws Exception {

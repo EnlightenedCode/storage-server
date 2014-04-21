@@ -73,6 +73,8 @@ public class ImportFiles extends AbstractTask {
 			}
 			
 			if (sources.size() == 0) {
+				log.info("Done");
+				
 				return "Done";
 			}
 			
@@ -113,7 +115,21 @@ public class ImportFiles extends AbstractTask {
 		
 		log.info("Removing Files: " + filesString);
 		
-		service.deleteMediaItems(LOGS_BUCKET_NAME, files);
+		List<String> failedFiles = service.deleteMediaItems(LOGS_BUCKET_NAME, files);
+		
+		if (failedFiles.size() > 0) {
+			filesString = RiseUtils.listToString(failedFiles, ",");
+			
+			QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
+					.param(QueryParam.TASK, QueueTask.CHECK_IMPORT_JOB)
+//					.param(QueryParam.JOB_ID, jobId)
+					.param(QueryParam.JOB_TYPE, Integer.toString(jobType))
+					.param(QueryParam.JOB_FILES, filesString)
+					.countdownMillis(1000 * 30)
+					.method(Method.POST));
+			
+			return;
+		}
 		
 		if (jobType == ImportFiles.JOB_STORAGE) {
 			runStorageMoveJob(files.get(0));
@@ -142,7 +158,7 @@ public class ImportFiles extends AbstractTask {
 			QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
 					.param(QueryParam.TASK, QueueTask.CHECK_STORAGE_MOVE_JOB)
 					.param(QueryParam.JOB_ID, jobId)
-//					.param(QueryParam.JOB_TYPE, Integer.toString(JOB_STORAGE))
+					.param(QueryParam.JOB_TYPE, Integer.toString(JOB_STORAGE))
 //					.param(QueryParam.JOB_FILES, filesString)
 					.countdownMillis(1000 * 30)
 					.method(Method.POST));
@@ -172,7 +188,7 @@ public class ImportFiles extends AbstractTask {
 			QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
 					.param(QueryParam.TASK, QueueTask.CHECK_USAGE_MOVE_JOB)
 					.param(QueryParam.JOB_ID, jobId)
-//					.param(QueryParam.JOB_TYPE, Integer.toString(JOB_STORAGE))
+					.param(QueryParam.JOB_TYPE, Integer.toString(JOB_USAGE))
 //					.param(QueryParam.JOB_FILES, filesString)
 					.countdownMillis(1000 * 10)
 					.method(Method.POST));

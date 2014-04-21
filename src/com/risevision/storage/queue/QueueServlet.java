@@ -119,10 +119,13 @@ public class QueueServlet extends HttpServlet {
 				
 				String jobId = req.getParameter(QueryParam.JOB_ID);
 				
-				if (jobId == null) {
+				if (RiseUtils.strIsNullOrEmpty(jobId)) {
 					
-//					Enqueue();
-			
+					String jobFiles = req.getParameter(QueryParam.JOB_FILES);
+					int jobType = RiseUtils.strToInt(req.getParameter(QueryParam.JOB_TYPE), 0);
+					
+					ImportFiles.postProcess(jobFiles, jobType);
+					
 				} else {
 					
 //					ImportFiles.runJob();
@@ -130,8 +133,13 @@ public class QueueServlet extends HttpServlet {
 					
 					
 					if (job.getStatus().getErrorResult() != null) {
-						// throw error by logging it, eliminate job from queue
+						// throw error by logging it, re-start initial import job
 						log.severe("Import Error - " + job.getStatus().getErrorResult().getMessage());
+						
+						QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
+								.param(QueryParam.TASK, QueueTask.RUN_BQ_JOB)
+								.method(Method.GET));
+
 					} 
 					else if (job.getStatus().getState().equals("DONE")) {
 
@@ -160,8 +168,12 @@ public class QueueServlet extends HttpServlet {
 				Job job = BQUtils.checkResponse(jobId);
 				
 				if (job.getStatus().getErrorResult() != null) {
-					// throw error by logging it, eliminate job from queue
+					// throw error by logging it, if needed, re-start post-processing Job
 					log.severe("Move Error - " + job.getStatus().getErrorResult().getMessage());
+					
+//					int jobType = RiseUtils.strToInt(req.getParameter(QueryParam.JOB_TYPE), 0);
+//					
+//					ImportFiles.postProcess("", jobType);
 
 				} else if (job.getStatus().getState().equals("DONE")) {
 
