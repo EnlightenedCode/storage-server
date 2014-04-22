@@ -10,4 +10,6 @@ public class QueryParam {
 	
 	public static final String JOB_CURSOR = "jobCursor";
 	
+	public static final String AUTH_KEY = "authKey";
+	
 }

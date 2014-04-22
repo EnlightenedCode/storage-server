@@ -9,6 +9,7 @@ import com.risevision.storage.info.ServiceFailedException;
 
 public class AccessResource {
 	
+	private String authKey;
 	private String companyId;
 	
 	private User accessingUser;
@@ -20,13 +21,48 @@ public class AccessResource {
 	
 	protected static final Logger log = Logger.getAnonymousLogger();
 	
+	public AccessResource(String authKey) {
+		this.authKey = authKey;
+	}
+	
 	public AccessResource(String companyId, String username) {
 		this.companyId = companyId;
 		this.accessingUserId = username;		
 	}
 	
 	public void verify() throws ServiceFailedException {  
+		if (!RiseUtils.strIsNullOrEmpty(authKey)) {
+			verifyByKey();
+		}
+		else {
+			verifyByUser();
+		}
+	}
+	
+	private void verifyByKey() throws ServiceFailedException {
+		resourceCompany = Company.getByAuthKey(authKey);
 		
+    	if (resourceCompany != null) {
+    		
+    		log.info("Resource Company: " + resourceCompany.name + " (id: " + resourceCompany.id + ")");
+    		
+    	}
+    	
+		if (!AccessVerifier.AuthKeyAllowed(this)) {
+			
+			throw new ServiceFailedException(ServiceFailedException.FORBIDDEN);
+			
+//			setStatus(ServiceFailedException.FORBIDDEN);
+//    		return;
+
+		} else {
+			
+			setStatus(ServiceFailedException.OK);
+			
+		}
+	}
+	
+	private void verifyByUser() throws ServiceFailedException {
 		if (RiseUtils.strIsNullOrEmpty(companyId)) {
 			throw new ServiceFailedException(ServiceFailedException.BAD_REQUEST);
 		}
@@ -126,6 +162,14 @@ public class AccessResource {
 	public Company getResourceCompany() {
 
 		return resourceCompany;
+	}
+	
+	public String getResourceCompanyId() {
+		if (resourceCompany != null) {
+			return resourceCompany.getId();
+		}
+		
+		return null;
 	}
 	
 	private User findAccessingUser(String googleEmail) {
