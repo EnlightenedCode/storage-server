@@ -16,6 +16,7 @@ import com.google.appengine.api.search.SearchServiceFactory;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
 import com.risevision.directory.documents.Company;
+import com.risevision.storage.Globals;
 import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.QueryParam;
 import com.risevision.storage.amazonImpl.LoggingResponse;
@@ -25,18 +26,16 @@ import com.risevision.storage.queue.QueueTask;
 
 public class EnableLogging extends AbstractTask {
 	
-	private static final String LOGS_BUCKET_NAME = "rva-logs-bucket";
-	
 	private static final String LOGGING_ENABLED_XML = "<Logging>\n"
-			+ "    <LogBucket>" + LOGS_BUCKET_NAME + "</LogBucket>\n"
+			+ "    <LogBucket>" + Globals.LOGS_BUCKET_NAME + "</LogBucket>\n"
 			+ "    <LogObjectPrefix>%bucketName%</LogObjectPrefix>\n"
 			+ "</Logging>";
 
 	private static final String LOGGING_DISABLED_XML = "<Logging/>";
 
-	private static int QUERY_LIMIT = 100;
+	private static int QUERY_LIMIT = 200;
 	
-	public static String runJob(String lastCompanyId) throws Exception {
+	public static String runJob(String lastCompanyId) {
 		
 //		try {
 			
@@ -47,9 +46,17 @@ public class EnableLogging extends AbstractTask {
 			}
 			
 			for (String companyId: companyIds) {
-				boolean enabled = verifyBucketLogging(companyId);
-				
-				log.info(String.format("Company %s has logging %s", companyId, enabled ? "enabled" : "disabled"));
+				boolean enabled = false;
+				try {
+					enabled = verifyBucketLogging(companyId);
+
+					log.info(String.format("Company %s has logging %s", companyId, enabled ? "enabled" : "disabled"));
+
+				} catch (ServiceFailedException e) {
+					if (e.getReason() == ServiceFailedException.NOT_FOUND) {
+//						log.info("Bucket Not Found for Company: " + companyId);
+					}
+				}
 				
 				lastCompanyId = companyId;
 			}
@@ -70,96 +77,6 @@ public class EnableLogging extends AbstractTask {
 //		}
 		
 	}
-	
-	
-//	static public void Enqueue(Integer offset) throws Exception {
-//
-//		QueueFactory.getQueue(QueueName.MAINTENANCE).add(withUrl("/queue")
-//				.param(QueryParam.TASK, QueueTask.RUN_ENABLE_LOGGING_JOB)
-////				.param(QueryParam.KIND, entityKind)
-//				.param(QueryParam.OFFSET, offset.toString())
-////				.param(QueryParam.MODE, "new")
-//				.method(Method.GET));
-//	}
-	
-//	static public void Enqueue(String cursor) throws Exception {
-//
-//		QueueFactory.getQueue(QueueName.MAINTENANCE).add(withUrl("/queue")
-//				.param(QueryParam.TASK, QueueTask.RUN_ENABLE_LOGGING_JOB)
-////				.param(QueryParam.KIND, entityKind)
-////				.param(QueryParam.OFFSET, offset.toString())
-//				.param(QueryParam.JOB_CURSOR, cursor)
-////				.param(QueryParam.MODE, "new")
-//				.method(Method.GET));
-//	}
-
-//	static public void Execute(Integer offset, String cursor) throws Exception {
-//		
-////		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-////		
-////		if (offset == 0) {
-////		
-////			Query dq = new Query(EntityKind.ENTITY_CURSOR).setKeysOnly().setFilter(new FilterPredicate(EntityCursor.ENTITY_KIND, Query.FilterOperator.EQUAL, entityKind));
-////
-////			List<Entity> ee = datastore.prepare(dq).asList(FetchOptions.Builder.withDefaults().chunkSize(50).prefetchSize(50));
-////
-////			List<Key> keys = new ArrayList<Key>();
-////			for (Entity e : ee) {
-////				keys.add(e.getKey());
-////			}
-////			datastore.delete(keys);
-////		}
-//		
-//		Results<ScoredDocument> results = null;
-//		
-//		String indexName = Company.INDEX_ALL;
-//				
-//		log.info(String.format("Index: %s", indexName));
-//		
-//		String encodedCursor = null;
-////		Integer nextOffset = offset + QUERY_LIMIT;
-//
-//		IndexSpec indexSpec = IndexSpec.newBuilder().setName(indexName).build(); 
-//		Index index = SearchServiceFactory.getSearchService().getIndex(indexSpec);
-//
-//		if (index != null) {
-//
-//			if (cursor != null) {
-//
-//				results = index.search(com.google.appengine.api.search.Query.newBuilder()
-//						.setOptions(QueryOptions.newBuilder()
-//								.setLimit(QUERY_LIMIT)
-//								.setCursor(Cursor.newBuilder().build(cursor)))
-//						.build(""));
-//
-//			} else {
-//
-//				results = index.search(com.google.appengine.api.search.Query.newBuilder()
-//						.setOptions(QueryOptions.newBuilder()
-//								.setLimit(QUERY_LIMIT)
-//								.setCursor(Cursor.newBuilder().build()))
-//						.build(""));
-//			}
-//			
-//			log.info(String.format("Retrieved: %d", results.getNumberReturned()));
-//			
-//			encodedCursor = (results.getCursor() != null) ? results.getCursor().toWebSafeString() : null;
-//			
-//		}
-//		
-//		if (encodedCursor != null) {
-//			
-////			EntityCursor ec = new EntityCursor(entityKind, nextOffset, encodedCursor, new Date());
-////			
-////			log.info("Recording cursor for " + entityKind + " with offset: " + nextOffset.toString());
-////			
-////			ec.putNew(null, Globals.SYSTEM_USER);
-//			
-//			log.info("Enqueue with cursor: " + encodedCursor);
-//			Enqueue(encodedCursor);
-//			
-//		}
-//	}
 	
 	private static List<String> getCompanyIDs(String lastId) {
 
@@ -184,23 +101,15 @@ public class EnableLogging extends AbstractTask {
 
 	} 
 	
-	public static boolean verifyBucketLogging(String companyId) {
+	public static boolean verifyBucketLogging(String companyId) throws ServiceFailedException {
 		boolean enabled = false;
 
-		try {
-			String bucketName = MediaLibraryService.getBucketName(companyId);
-		
-			enabled = checkBucketLogging(bucketName);
-		} catch (ServiceFailedException e) {
-			if (e.getReason() == ServiceFailedException.NOT_FOUND) {
-				log.info("Bucket Not Found for Company: " + companyId);
-				
-				return false;
-			}
-		}
-		
+		String bucketName = MediaLibraryService.getBucketName(companyId);
+
+		enabled = checkBucketLogging(bucketName);
+
 		if (!enabled) {
-//			updateBucketLogging(bucketName, true);
+			updateBucketLogging(bucketName, true);
 			
 			return false;
 		}
@@ -226,7 +135,7 @@ public class EnableLogging extends AbstractTask {
 		return false;
 	}
 	
-	private static void updateBucketLogging(String bucketName, boolean enabled) {
+	private static void updateBucketLogging(String bucketName, boolean enabled) throws ServiceFailedException {
 		MediaLibraryService service = MediaLibraryService.getInstance();
 
 		try {

@@ -14,6 +14,7 @@ import com.google.api.services.bigquery.model.TableSchema;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
 import com.risevision.common.client.utils.RiseUtils;
+import com.risevision.storage.Globals;
 import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.QueryParam;
 import com.risevision.storage.info.MediaItemInfo;
@@ -22,8 +23,7 @@ import com.risevision.storage.queue.QueueTask;
 
 public class ImportFiles extends AbstractTask {
 	
-	private static final String LOGS_BUCKET_NAME = "rva-logs-bucket";
-	private static final String LOGS_BUCKET_URL = "gs://" + LOGS_BUCKET_NAME + "/";
+	private static final String LOGS_BUCKET_URL = "gs://" + Globals.LOGS_BUCKET_NAME + "/";
 	
 	private static final int JOB_USAGE = 1;
 	private static final int JOB_STORAGE = 0;
@@ -44,7 +44,7 @@ public class ImportFiles extends AbstractTask {
 
 			MediaLibraryService service = MediaLibraryService.getInstance();
 			
-			List<MediaItemInfo> items = service.getBucketItems(LOGS_BUCKET_NAME);
+			List<MediaItemInfo> items = service.getBucketItems(Globals.LOGS_BUCKET_NAME);
 			int jobType = -1;
 			String logDate = "";
 			for (MediaItemInfo item: items) {
@@ -65,7 +65,7 @@ public class ImportFiles extends AbstractTask {
 					sources.add(LOGS_BUCKET_URL + item.getKey());
 					files.add(item.getKey());
 					jobType = JOB_USAGE;
-				} 
+				}
 				
 				if (sources.size() >= 100) {
 					break;
@@ -115,7 +115,7 @@ public class ImportFiles extends AbstractTask {
 		
 		log.info("Removing Files: " + filesString);
 		
-		List<String> failedFiles = service.deleteMediaItems(LOGS_BUCKET_NAME, files);
+		List<String> failedFiles = service.deleteMediaItems(Globals.LOGS_BUCKET_NAME, files);
 		
 		if (failedFiles.size() > 0) {
 			filesString = RiseUtils.listToString(failedFiles, ",");

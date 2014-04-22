@@ -111,9 +111,11 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			return response;
 			
 		} catch (HttpResponseException e) {
-			log.warning(e.getStatusCode() + " - " + e.getMessage());
+			if (e.getStatusCode() != ServiceFailedException.NOT_FOUND) {
+				log.warning(e.getStatusCode() + " - " + e.getMessage());
+			}
 			
-			throw new ServiceFailedException(ServiceFailedException.NOT_FOUND);
+			throw new ServiceFailedException(e.getStatusCode());
 		} catch (IOException e) {
 			log.severe("Error - " + e.getMessage());
 		}
