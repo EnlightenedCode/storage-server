@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.appengine.api.search.Document;
@@ -54,8 +56,8 @@ public class EnableLogging extends AbstractTask {
 					log.info(String.format("Company %s has logging %s", companyId, enabled ? "enabled" : "disabled"));
 
 				} catch (ServiceFailedException e) {
-					if (e.getReason() == ServiceFailedException.NOT_FOUND) {
-//						log.info("Bucket Not Found for Company: " + companyId);
+					if (e.getReason() == ServiceFailedException.FORBIDDEN) {
+						return "forbidden";
 					}
 				}
 				
@@ -63,11 +65,11 @@ public class EnableLogging extends AbstractTask {
 				
 			}
 			
-			QueueFactory.getQueue(QueueName.STORAGE_LOG_ENABLE).add(withUrl("/queue")
-					.param(QueryParam.TASK, QueueTask.RUN_ENABLE_LOGGING_JOB)
-					.param(QueryParam.JOB_CURSOR, lastCompanyId)
-					.countdownMillis(1000 * 5)
-					.method(Method.GET));
+//			QueueFactory.getQueue(QueueName.STORAGE_LOG_ENABLE).add(withUrl("/queue")
+//					.param(QueryParam.TASK, QueueTask.RUN_ENABLE_LOGGING_JOB)
+//					.param(QueryParam.JOB_CURSOR, lastCompanyId)
+//					.countdownMillis(1000 * 5)
+//					.method(Method.GET));
 			
 			return "queued next job";
 			
@@ -118,28 +120,48 @@ public class EnableLogging extends AbstractTask {
 		    
 		    if (bucket.getLogging() == null || !Globals.LOGS_BUCKET_NAME.equals(bucket.getLogging().getLogBucket())) {
 		    	
-			    Storage.Buckets.Update updateBucket = storage.buckets().update(bucketName, bucket);
-			    
-			    Bucket.Logging logging = new Bucket.Logging();
-			    logging.setLogBucket(Globals.LOGS_BUCKET_NAME);
-			    logging.setLogObjectPrefix(bucketName);
-			
-			    bucket.setLogging(logging);
-			    
-			    updateBucket.execute();
+//			    Storage.Buckets.Update updateBucket = storage.buckets().update(bucketName, bucket);
+//			    
+//			    Bucket.Logging logging = new Bucket.Logging();
+//			    logging.setLogBucket(Globals.LOGS_BUCKET_NAME);
+//			    logging.setLogObjectPrefix(bucketName);
+//			
+//			    bucket.setLogging(logging);
+//			    
+//			    updateBucket.execute();
 		
 				return false;
 		
 		    }
+		    
 			return true;
 		
-		} catch (IOException e) {
-			e.printStackTrace();
-			// TODO Auto-generated catch block
-			log.warning(e.getMessage());
-		}
+	    } catch (GoogleJsonResponseException e) {
+			if (e.getStatusCode() != ServiceFailedException.NOT_FOUND) {
+				log.warning(e.getStatusCode() + " - " + e.getMessage());
+			}
+	    	
+			throw new ServiceFailedException(e.getStatusCode());
+			
+//	        GoogleJsonError error = e.getDetails();
+//
+//	        log.warning("Error code: " + error.getCode());
+//			log.warning("Error message: " + error.getMessage());
+	        // More error information can be retrieved with error.getErrors().
+	      } catch (HttpResponseException e) {
+	        // No Json body was returned by the API.
+	        log.warning("HTTP Status code: " + e.getStatusCode());
+	        log.warning("HTTP Reason: " + e.getMessage());
+	        
+	        throw new ServiceFailedException(e.getStatusCode());
+	        
+	      } catch (IOException e) {
+	        // Other errors (e.g connection timeout, etc.).
+	    	log.warning("An error occurred: " + e);
+	    	
+	    	throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+	      }
     
-		return false;
 	}
 	
 //	public static boolean verifyBucketLogging(String companyId) throws ServiceFailedException {
