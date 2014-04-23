@@ -85,7 +85,8 @@ public class QueueServlet extends HttpServlet {
 				
 //					Integer offset = Integer.parseInt(offsetStr);
 					String cursor = req.getParameter(QueryParam.JOB_CURSOR);
-					EnableLogging.runJob(cursor);
+					String userId = req.getParameter(QueryParam.USER_ID);
+					EnableLogging.runJob(userId, cursor);
 //				}
 
 			} else {
