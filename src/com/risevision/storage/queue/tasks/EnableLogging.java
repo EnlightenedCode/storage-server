@@ -95,11 +95,11 @@ public class EnableLogging extends AbstractTask {
 			
 		}
 		
-//		QueueFactory.getQueue(QueueName.STORAGE_LOG_ENABLE).add(withUrl("/queue")
-//				.param(QueryParam.TASK, QueueTask.RUN_ENABLE_LOGGING_JOB)
-//				.param(QueryParam.JOB_CURSOR, lastCompanyId)
-//				.countdownMillis(1000 * 5)
-//				.method(Method.GET));
+		QueueFactory.getQueue(QueueName.STORAGE_LOG_ENABLE).add(withUrl("/queue")
+				.param(QueryParam.TASK, QueueTask.RUN_ENABLE_LOGGING_JOB)
+				.param(QueryParam.JOB_CURSOR, lastCompanyId)
+				.countdownMillis(1000 * 5)
+				.method(Method.GET));
 		
 		return "queued next job";
 			
