@@ -12,7 +12,6 @@ import com.risevision.storage.queue.QueueTask;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -21,8 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 public class LoggingServlet extends AbstractAppEngineAuthorizationCodeServlet {
 
 	private static final long serialVersionUID = 1L;
-
-	protected static final Logger log = Logger.getAnonymousLogger();
 
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)

@@ -17,7 +17,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class AuthUtils {
+class AuthUtils {
 
 	/**
 	 * Global instance of the {@link DataStoreFactory}. The best practice is to
@@ -28,7 +28,7 @@ public class AuthUtils {
 
 	private static GoogleClientSecrets clientSecrets = null;
 	private static final Set<String> SCOPES = Collections.singleton(StorageScopes.DEVSTORAGE_FULL_CONTROL);
-	static final String MAIN_SERVLET_PATH = "job/auth";
+	static final String MAIN_SERVLET_PATH = "/job/auth";
 	static final String AUTH_CALLBACK_SERVLET_PATH = "/job/oauth2callback";
 	static final UrlFetchTransport HTTP_TRANSPORT = new UrlFetchTransport();
 	static final JacksonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
@@ -47,14 +47,14 @@ public class AuthUtils {
 		return clientSecrets;
 	}
 
-	public static GoogleAuthorizationCodeFlow initializeFlow() throws IOException {
+	static GoogleAuthorizationCodeFlow initializeFlow() throws IOException {
 		return new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT,
 				JSON_FACTORY, getClientSecrets(), SCOPES)
 				.setDataStoreFactory(DATA_STORE_FACTORY)
 				.setAccessType("offline").build();
 	}
 
-	public static String getRedirectUri(HttpServletRequest req) {
+	static String getRedirectUri(HttpServletRequest req) {
 		GenericUrl requestUrl = new GenericUrl(req.getRequestURL().toString());
 		requestUrl.setRawPath(AUTH_CALLBACK_SERVLET_PATH);
 		return requestUrl.build();

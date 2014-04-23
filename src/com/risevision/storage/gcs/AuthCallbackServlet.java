@@ -4,7 +4,6 @@ import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.appengine.auth.oauth2.AbstractAppEngineAuthorizationCodeCallbackServlet;
-import com.google.appengine.api.users.UserServiceFactory;
 
 import java.io.IOException;
 
@@ -30,11 +29,9 @@ public class AuthCallbackServlet extends AbstractAppEngineAuthorizationCodeCallb
 	@Override
 	protected void onError(HttpServletRequest req, HttpServletResponse resp, AuthorizationCodeResponseUrl errorResponse)
 			throws ServletException, IOException {
-		String nickname = UserServiceFactory.getUserService().getCurrentUser()
-				.getNickname();
-		resp.getWriter().print(
-				"<h3>Hey " + nickname
-						+ ", why don't you want to play with me?</h1>");
+//		String nickname = UserServiceFactory.getUserService().getCurrentUser()
+//				.getNickname();
+		resp.getWriter().print("Not allowed");
 		resp.setStatus(200);
 		resp.addHeader("Content-Type", "text/html");
 		return;
