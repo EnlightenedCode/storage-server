@@ -32,7 +32,9 @@ public class BQUtils {
 	private static final String WRITE_DISPOSITION_TRUNCATE = "WRITE_TRUNCATE";
 	private static final String WRITE_DISPOSITION_APPEND = "WRITE_APPEND";
 	
-	public static final String DATASET_ID = "LogsTesting";
+//	public static final String DATASET_ID = "LogsTesting";
+	public static final String DATASET_ID = "RiseStorageLogsTest";
+//	public static final String DATASET_ID = "RiseStorageLogs";
 	
 	protected static final Logger log = Logger.getAnonymousLogger();
 	
