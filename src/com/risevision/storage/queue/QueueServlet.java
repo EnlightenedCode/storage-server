@@ -52,42 +52,14 @@ public class QueueServlet extends HttpServlet {
 //				
 //			} else 
 			if (task.equals(QueueTask.RUN_BQ_JOB)) {
+				
 				ImportFiles.runJob();
-//			}
-//			else if (task.equals(QueueTask.CHECK_BQ_JOB)) {
-//				
-//				String id = req.getParameter(QueryParam.ID);
-//				
-//				if (id == null) {
-//					
-////					Enqueue();
-//			
-//				} else {
-//					
-////					ImportFiles.runJob();
-//					Job job = BQUtils.checkResponse(id);
-//					
-//					if (job.getStatus().getState().equals("DONE")) {
-//						// delete the files
-//					}
-//				}
-//				
+				
 			} else if (task.equals(QueueTask.RUN_ENABLE_LOGGING_JOB)) {
 				
-//				String entityKind = req.getParameter(QueryParam.KIND);
-//				String offsetStr = req.getParameter(QueryParam.OFFSET);
-				
-//				if (offsetStr == null) {
-//					
-//					EnableLogging.Enqueue(entityKind, 0);
-//					
-//				} else {
-				
-//					Integer offset = Integer.parseInt(offsetStr);
-					String cursor = req.getParameter(QueryParam.JOB_CURSOR);
-					String userId = req.getParameter(QueryParam.USER_ID);
-					EnableLogging.runJob(userId, cursor);
-//				}
+				String cursor = req.getParameter(QueryParam.JOB_CURSOR);
+				String userId = req.getParameter(QueryParam.USER_ID);
+				EnableLogging.runJob(userId, cursor);
 
 			} else {
 
@@ -129,7 +101,6 @@ public class QueueServlet extends HttpServlet {
 					
 				} else {
 					
-//					ImportFiles.runJob();
 					Job job = BQUtils.checkResponse(jobId);
 					
 					
