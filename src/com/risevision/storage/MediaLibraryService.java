@@ -1,6 +1,7 @@
 package com.risevision.storage;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -9,6 +10,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.appengine.labs.repackaged.org.json.JSONException;
 import com.google.appengine.labs.repackaged.org.json.JSONStringer;
 import com.google.appengine.labs.repackaged.org.json.JSONWriter;
+import com.risevision.common.client.utils.RiseUtils;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
 import com.risevision.storage.info.MediaItemInfo;
 import com.risevision.storage.info.ServiceFailedException;
@@ -114,13 +116,31 @@ public abstract class MediaLibraryService {
 		return response;
 	}
 	
+	public static String getBucketName(String companyId) throws ServiceFailedException {
+		if (RiseUtils.strIsNullOrEmpty(companyId)) {
+			throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+		}
+		
+		return "risemedialibrary-" + companyId;
+	}
+	
 	public abstract void createBucket(String bucketName) throws ServiceFailedException;
 	
 	public abstract void updateBucketProperty(String bucketName, String property, String propertyXMLdoc) throws ServiceFailedException;
 	
-	public abstract void deleteMediaItem(String bucketName, String itemName) throws ServiceFailedException;
+	public abstract boolean deleteMediaItem(String bucketName, String itemName) throws ServiceFailedException;
 	
-	public abstract void deleteMediaItems(String bucketName, List<String> files) throws ServiceFailedException;
+	public List<String> deleteMediaItems(String bucketName, List<String> itemNames) throws ServiceFailedException {
+		List<String> failedItems = new ArrayList<>();
+		
+		for (String itemName : itemNames) {
+			if (!deleteMediaItem(bucketName, itemName)) {
+				failedItems.add(itemName);
+			}
+		}
+		
+		return failedItems;
+	}
 	
 	public abstract InputStream getMediaItem(String bucketName, String itemName) throws ServiceFailedException;
 	

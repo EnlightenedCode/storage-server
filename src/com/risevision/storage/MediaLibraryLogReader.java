@@ -185,7 +185,7 @@ public class MediaLibraryLogReader {
 		return response;
 	}
 	
-	private static List<MediaItemInfo> retrieveBucketLogList(String bucketName) {
+	public static List<MediaItemInfo> retrieveBucketLogList(String bucketName) {
 		try {
 			MediaLibraryService service = MediaLibraryService.getInstance();
 		

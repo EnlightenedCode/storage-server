@@ -12,6 +12,26 @@ public class AccessVerifier {
 	
 	protected static final Logger log = Logger.getAnonymousLogger();
 	
+	static public boolean AuthKeyAllowed(AccessResource resource) {
+		
+		Company resourceCompany = resource.getResourceCompany();
+
+		// no resource company = FAIL
+		if (resourceCompany == null) {
+			log.warning("Key not allowed: no resource company.");
+			return false;
+		}
+		
+    	// user's company is inactive = FAIL
+    	if (resourceCompany.companyStatus == CompanyStatus.INACTIVE) { // PRIMITIVE TYPE EQUALITY!!!
+    		log.warning("Key not allowed: company is inactive.");
+    		return false;
+    	}
+
+		return true;
+		
+	}
+	
 	static public boolean UserAllowed(AccessResource resource) {
 		
 		User user = resource.getAccessingUser();

@@ -4,6 +4,15 @@ public final class Globals {
 	
 	public static String BUCKET_NAME_PREFIX = "risemedialibrary-";
 	
+//	public static final String LOGS_BUCKET_NAME = "rva-logs-bucket";
+	public static final String LOGS_BUCKET_NAME = "rise-storage-logs-test";
+//	public static final String LOGS_BUCKET_NAME = "rise-storage-logs";
+	
+	public static final String PROJECT_ID = "452091732215";
+	public static final String ACCESS_ID = "452091732215@developer.gserviceaccount.com";
+	
+	public static final String STORE_CLIENT_ID = "614513768474.apps.googleusercontent.com";
+	
 	public static String APP_PRODUCTION = "s~rvaserver2";
 	public static String APP_TEST = "s~rvacore-test";
 	public static String APP_TEST2 = "s~rvacore-test2";
@@ -26,8 +35,8 @@ public final class Globals {
 	
 	public static final String HQ_TIMEZONE = "America/Toronto";
 	
-	static public final String PREVIEW_SUFFIX = ".preview";
-	static public final String PREVIOUS_PARENT_SUFFIX = ".prev_parent"; 
+//	static public final String PREVIEW_SUFFIX = ".preview";
+//	static public final String PREVIOUS_PARENT_SUFFIX = ".prev_parent"; 
 	
 
 }

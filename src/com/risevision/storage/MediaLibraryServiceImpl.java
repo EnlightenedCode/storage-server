@@ -33,9 +33,11 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 	
 	/** Global configuration of Google Cloud Storage OAuth 2.0 scope. */
 	private static final String STORAGE_SCOPE = "https://www.googleapis.com/auth/devstorage.read_write";
-
-	private static final String PROJECT_ID = "452091732215";
 	
+	protected MediaLibraryServiceImpl() {
+		
+	}
+
 	public ListAllMyBucketsResponse getAllMyBuckets() throws ServiceFailedException {
 		try {
 			AppIdentityCredential credential = new AppIdentityCredential(Arrays.asList(STORAGE_SCOPE));
@@ -48,7 +50,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			HttpRequest request = requestFactory.buildGetRequest(url);
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.set("x-goog-project-id", PROJECT_ID);
+			headers.set("x-goog-project-id", Globals.PROJECT_ID);
 			
 			request.setHeaders(headers);
 			HttpResponse response = request.execute();
@@ -99,7 +101,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			HttpRequest request = requestFactory.buildGetRequest(url);
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.set("x-goog-project-id", PROJECT_ID);
+			headers.set("x-goog-project-id", Globals.PROJECT_ID);
 			
 			request.setHeaders(headers);
 			HttpResponse response = request.execute();
@@ -109,9 +111,11 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			return response;
 			
 		} catch (HttpResponseException e) {
-			log.warning(e.getStatusCode() + " - " + e.getMessage());
+			if (e.getStatusCode() != ServiceFailedException.NOT_FOUND) {
+				log.warning(e.getStatusCode() + " - " + e.getMessage());
+			}
 			
-			throw new ServiceFailedException(ServiceFailedException.NOT_FOUND);
+			throw new ServiceFailedException(e.getStatusCode());
 		} catch (IOException e) {
 			log.severe("Error - " + e.getMessage());
 		}
@@ -134,7 +138,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			HttpRequest request = requestFactory.buildGetRequest(url);
 			
 //			HttpHeaders headers = new HttpHeaders();
-//			headers.set("x-goog-project-id", PROJECT_ID);
+//			headers.set("x-goog-project-id", Globals.PROJECT_ID);
 //			
 //			request.setHeaders(headers);
 			HttpResponse response = request.execute();
@@ -170,7 +174,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			HttpRequest request = requestFactory.buildPutRequest(url, null);
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.set("x-goog-project-id", PROJECT_ID);
+			headers.set("x-goog-project-id", Globals.PROJECT_ID);
 			
 			request.setHeaders(headers);
 
@@ -199,7 +203,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			HttpRequest request = requestFactory.buildPutRequest(url, ByteArrayContent.fromString(null, propertyXMLdoc));
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.set("x-goog-project-id", PROJECT_ID);
+			headers.set("x-goog-project-id", Globals.PROJECT_ID);
 			
 			request.setHeaders(headers);
 
@@ -215,7 +219,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 
 	}
 	
-	public void deleteMediaItem(String bucketName, String itemName) throws ServiceFailedException {
+	public boolean deleteMediaItem(String bucketName, String itemName) throws ServiceFailedException {
 		try {
 			AppIdentityCredential credential = new AppIdentityCredential(Arrays.asList(STORAGE_SCOPE));
 	
@@ -227,19 +231,23 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			HttpRequest request = requestFactory.buildDeleteRequest(url);
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.set("x-goog-project-id", PROJECT_ID);
+			headers.set("x-goog-project-id", Globals.PROJECT_ID);
 			
 			request.setHeaders(headers);
 
 			request.execute();
 			
+			return true;
+			
 		} catch (HttpResponseException e) {
-			log.warning(e.getStatusCode() + " - " + e.getMessage());
+			log.warning(e.getStatusCode() + " - " + e.getMessage() + " (" + itemName + ")");
 			
 			throw new ServiceFailedException(ServiceFailedException.NOT_FOUND);
 		} catch (IOException e) {
 			log.severe("Error - " + e.getMessage());
 		}
+		
+		return false;
 
 	}
 	
@@ -255,7 +263,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			HttpRequest request = requestFactory.buildGetRequest(url);
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.set("x-goog-project-id", PROJECT_ID);
+			headers.set("x-goog-project-id", Globals.PROJECT_ID);
 			
 			request.setHeaders(headers);
 
@@ -274,12 +282,6 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 		return null;
 	}
 	
-	public void deleteMediaItems(String bucketName, List<String> itemNames) throws ServiceFailedException {
-		for (String itemName : itemNames) {
-			deleteMediaItem(bucketName, itemName);
-		}
-	}
-	
 	public String getMediaItemUrl(String bucketName, String key) throws Exception {
 		long expiry = new Date().getTime() + 3600;
 		String stringPolicy = "GET\n" + "\n" + "\n" + expiry + "\n" + '/' + bucketName + '/' + key;
@@ -288,10 +290,9 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 		
 		log.info("Policy Signed");
 		
-		String accessId = "452091732215@developer.gserviceaccount.com";
 		String fileUrl = "http://" + bucketName + ".storage.googleapis.com/" 
 				+ key
-				+ "?GoogleAccessId=" + accessId 
+				+ "?GoogleAccessId=" + Globals.ACCESS_ID 
 				+ "&Expires=" + expiry 
 				+ "&Signature=" + URLEncoder.encode(signedPolicy, "UTF-8")
 				+ "&response-content-disposition=attachment";
