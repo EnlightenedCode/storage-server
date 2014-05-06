@@ -345,8 +345,6 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 	    return null;
 	}
 	
-	
-	
 	/**
 	 * Sets the private key to use with the the service account flow or
 	 * {@code null} for none.
@@ -362,12 +360,14 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 	 */
 	public PrivateKey setServiceAccountPrivateKeyFromP12File()
 			throws GeneralSecurityException, IOException {
-		String p12FileName = "key/65bd1c5e62dadd4852c8b04bf5124749985e8ff8-privatekey.p12";
+//		String p12FileName = "key/65bd1c5e62dadd4852c8b04bf5124749985e8ff8-privatekey.p12";
+		String p12FileName = "/65bd1c5e62dadd4852c8b04bf5124749985e8ff8-privatekey.p12";
 		
 //		ServletContext context = getServletContext();
 //		InputStream is = context.getResourceAsStream(p12FileName);
 		
-		InputStream is = this.getClass().getClassLoader().getResourceAsStream(p12FileName);
+//		InputStream is = this.getClass().getClassLoader().getResourceAsStream(p12FileName);
+		InputStream is = MediaLibraryServiceImpl.class.getResourceAsStream(p12FileName);
 		
 		PrivateKey serviceAccountPrivateKey = SecurityUtils.loadPrivateKeyFromKeyStore(KeyStore.getInstance("PKCS12"), is, "notasecret", "privatekey", "notasecret");
 
