@@ -14,18 +14,19 @@ import com.risevision.common.client.utils.RiseUtils;
 public class UploadCompleteServlet extends HttpServlet {
 	protected static final Logger log = Logger.getAnonymousLogger();
 	private static final String OUTPUT_PARAM = "%key%";
-	private static final String RESPONSE_HTML = "" +
-			"<html>" +
-			"<head>" +
-			"<script language=\"javascript\">" +
-			"	var d = window.opener || window.parent;" +
-			"	if (d) {" +
-			"		d.parent._uploadComplete('" + OUTPUT_PARAM + "');" +
-			"	}" +
-			"</script>" +
-			"</head>" +
-			"<body></body>" +
-			"</html>";
+//	private static final String RESPONSE_HTML = "" +
+//			"<html>" +
+//			"<head>" +
+//			"<script language=\"javascript\">" +
+//			"	var d = window.opener || window.parent;" +
+//			"	if (d) {" +
+//			"		d.parent._uploadComplete('" + OUTPUT_PARAM + "');" +
+//			"	}" +
+//			"</script>" +
+//			"</head>" +
+//			"<body></body>" +
+//			"</html>";
+	private static final String RESPONSE_HTML = OUTPUT_PARAM;
 	
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String key = request.getParameter("key");
