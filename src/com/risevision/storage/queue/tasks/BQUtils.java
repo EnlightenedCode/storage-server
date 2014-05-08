@@ -32,10 +32,6 @@ public class BQUtils {
 	private static final String WRITE_DISPOSITION_TRUNCATE = "WRITE_TRUNCATE";
 	private static final String WRITE_DISPOSITION_APPEND = "WRITE_APPEND";
 	
-//	public static final String DATASET_ID = "LogsTesting";
-	public static final String DATASET_ID = "RiseStorageLogsTest";
-//	public static final String DATASET_ID = "RiseStorageLogs";
-	
 	protected static final Logger log = Logger.getAnonymousLogger();
 	
 	private static Bigquery bigquery;
@@ -57,7 +53,7 @@ public class BQUtils {
 	    
 		// Describe the resulting table you are importing to:
 		TableReference tableRef = new TableReference();
-		tableRef.setDatasetId(DATASET_ID);
+		tableRef.setDatasetId(Globals.DATASET_ID);
 		tableRef.setTableId(tableId);
 		tableRef.setProjectId(Globals.PROJECT_ID);
 		queryConfig.setDestinationTable(tableRef);
@@ -90,7 +86,7 @@ public class BQUtils {
 
 		// Describe the resulting table you are importing to:
 		TableReference tableRef = new TableReference();
-		tableRef.setDatasetId(DATASET_ID);
+		tableRef.setDatasetId(Globals.DATASET_ID);
 		tableRef.setTableId(tableId);
 		tableRef.setProjectId(Globals.PROJECT_ID);
 		loadConfig.setDestinationTable(tableRef);
