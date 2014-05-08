@@ -42,7 +42,7 @@ class AuthUtils {
 									.startsWith("Enter ")
 									&& !clientSecrets.getDetails().getClientSecret().startsWith("Enter "),
 							"Download client_secrets.json file from https://code.google.com/apis/console/?api=plus "
-									+ "into plus-appengine-sample/src/main/resources/client_secrets.json");
+									+ "into src/client_secrets.json");
 		}
 		return clientSecrets;
 	}
