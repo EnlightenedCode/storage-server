@@ -8,6 +8,10 @@ public final class Globals {
 	public static final String LOGS_BUCKET_NAME = "rise-storage-logs-test";
 //	public static final String LOGS_BUCKET_NAME = "rise-storage-logs";
 	
+//	public static final String DATASET_ID = "LogsTesting";
+	public static final String DATASET_ID = "RiseStorageLogsTest";
+//	public static final String DATASET_ID = "RiseStorageLogs";
+	
 	public static final String PROJECT_ID = "452091732215";
 	public static final String ACCESS_ID = "452091732215@developer.gserviceaccount.com";
 	

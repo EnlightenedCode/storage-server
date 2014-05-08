@@ -148,7 +148,7 @@ public class ImportFiles extends AbstractTask {
 		
 		String query =
 				"SELECT bucket, storage_byte_hours, SEC_TO_TIMESTAMP(" + date.getTime() / 1000 + ") as date "
-						+ "FROM [" + BQUtils.DATASET_ID + "." + STORAGE_TABLE_TEMP + "];";
+						+ "FROM [" + Globals.DATASET_ID + "." + STORAGE_TABLE_TEMP + "];";
 				
 //		try {
 			
@@ -178,7 +178,7 @@ public class ImportFiles extends AbstractTask {
 		
 		String query =
 				"SELECT USEC_TO_TIMESTAMP(INTEGER(time_micros)) as time_timestamp, * "
-						+ "FROM [" + BQUtils.DATASET_ID + "." + USAGE_TABLE_TEMP + "];";
+						+ "FROM [" + Globals.DATASET_ID + "." + USAGE_TABLE_TEMP + "];";
 				
 //		try {
 			
