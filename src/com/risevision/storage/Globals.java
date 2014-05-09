@@ -4,13 +4,17 @@ public final class Globals {
 	
 	public static String BUCKET_NAME_PREFIX = "risemedialibrary-";
 	
-//	public static final String LOGS_BUCKET_NAME = "rva-logs-bucket";
-	public static final String LOGS_BUCKET_NAME = "rise-storage-logs-test";
-//	public static final String LOGS_BUCKET_NAME = "rise-storage-logs";
+	public static final boolean IS_PRODUCTION = false;
 	
-//	public static final String DATASET_ID = "LogsTesting";
-	public static final String DATASET_ID = "RiseStorageLogsTest";
-//	public static final String DATASET_ID = "RiseStorageLogs";
+	public static final String LOGS_BUCKET_NAME_TEST = "rise-storage-logs-test";
+	public static final String LOGS_BUCKET_NAME_PRODUCTION = "rise-storage-logs";
+
+	public static final String LOGS_BUCKET_NAME = IS_PRODUCTION ? LOGS_BUCKET_NAME_PRODUCTION : LOGS_BUCKET_NAME_TEST;
+	
+	public static final String DATASET_ID_TEST = "RiseStorageLogsTest";
+	public static final String DATASET_ID_PRODUCTION = "RiseStorageLogs";
+	
+	public static final String DATASET_ID = IS_PRODUCTION ? DATASET_ID_PRODUCTION : DATASET_ID_TEST;
 	
 	public static final String PROJECT_ID = "452091732215";
 	public static final String ACCESS_ID = "452091732215@developer.gserviceaccount.com";
