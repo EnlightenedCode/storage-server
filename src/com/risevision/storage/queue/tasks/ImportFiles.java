@@ -67,7 +67,7 @@ public class ImportFiles extends AbstractTask {
 					jobType = JOB_USAGE;
 				}
 				
-				if (sources.size() >= 100) {
+				if (sources.size() >= 200) {
 					break;
 				}
 			}
@@ -127,6 +127,8 @@ public class ImportFiles extends AbstractTask {
 					.param(QueryParam.JOB_FILES, filesString)
 					.countdownMillis(1000 * 30)
 					.method(Method.POST));
+			
+			log.info("Requeued delete job: " + filesString);
 			
 			return;
 		}
