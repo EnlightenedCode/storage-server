@@ -42,6 +42,11 @@ public final class Globals {
 	public static final String UNKNOWN_USER = "unknown";
 	
 	public static final String HQ_TIMEZONE = "America/Toronto";
+
+        public static final String LOGGING_ENABLED_XML = "<Logging>"
+                            + "<LogBucket>" + LOGS_BUCKET_NAME + "</LogBucket>"
+                            + "<LogObjectPrefix>%bucketName%</LogObjectPrefix>"
+                            + "</Logging>";
 	
 //	static public final String PREVIEW_SUFFIX = ".preview";
 //	static public final String PREVIOUS_PARENT_SUFFIX = ".prev_parent"; 

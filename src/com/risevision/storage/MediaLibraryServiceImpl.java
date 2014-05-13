@@ -32,7 +32,7 @@ import com.risevision.storage.info.ServiceFailedException;
 public class MediaLibraryServiceImpl extends MediaLibraryService {
 	
 	/** Global configuration of Google Cloud Storage OAuth 2.0 scope. */
-	private static final String STORAGE_SCOPE = "https://www.googleapis.com/auth/devstorage.read_write";
+	private static final String STORAGE_SCOPE = "https://www.googleapis.com/auth/devstorage.full_control";
 	
 	protected MediaLibraryServiceImpl() {
 		
@@ -182,8 +182,9 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			
 		} catch (HttpResponseException e) {
 			log.warning(e.getStatusCode() + " - " + e.getMessage());
-			
-			throw new ServiceFailedException(ServiceFailedException.NOT_FOUND);
+			if (e.getStatusCode() != 409) {
+                          throw new ServiceFailedException(ServiceFailedException.NOT_FOUND);
+                        }
 		} catch (IOException e) {
 			log.severe("Error - " + e.getMessage());
 		}
