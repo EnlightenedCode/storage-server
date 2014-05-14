@@ -210,15 +210,12 @@ public class StorageAPI extends AbstractAPI {
 	public SimpleResponse createBucket(
 			@Nullable @Named("companyId") String companyId,
 			User user) {
-
-		SimpleResponse result = new SimpleResponse();
-
-		try {
-
-			if (user == null) {
+SimpleResponse result = new SimpleResponse(); try { if (user == null) {
 				result.message = "No user";
 				return result;
 			}
+
+                        String bucketName; 
 
 			log.info("User: " + user.getEmail());
 
@@ -227,29 +224,36 @@ public class StorageAPI extends AbstractAPI {
 				resource.verify();
 				
 				MediaLibraryService service = MediaLibraryService.getInstance();
-				
-				service.createBucket(MediaLibraryService.getBucketName(companyId));
-				
-				log.info("Bucket Created");
+                              bucketName = MediaLibraryService.getBucketName(companyId);
+                              
+                              service.createBucket(bucketName);
+                              
+                              log.info("Bucket Created");
 
-				result.result = true;
-				result.code = ServiceFailedException.OK;
-				
-			} catch (ServiceFailedException e) {
 
-				result.result = false;
-				result.code = e.getReason();
-				result.message = "Bucket Creation Failed";
-				
-				log.warning("Bucket Creation Failed - Status: " + e.getReason());
-				
-			}
 
-		} catch (Exception e) {
-			Utils.logException(e);
-			
-			result.result = false;
-			result.code = ServiceFailedException.SERVER_ERROR;
+                              service.updateBucketProperty(bucketName, "logging", Globals.LOGGING_ENABLED_XML.replace("%bucketName%", bucketName));
+
+                              log.info("Bucket Logging Enabled");
+
+                              result.result = true;
+                              result.code = ServiceFailedException.OK;
+                              
+                      } catch (ServiceFailedException e) {
+
+                              result.result = false;
+                              result.code = e.getReason();
+                              result.message = "Bucket Creation Failed";
+                              
+                              log.warning("Bucket Creation Failed - Status: " + e.getReason());
+                              
+                      }
+
+              } catch (Exception e) {
+                      Utils.logException(e);
+                      
+                      result.result = false;
+                      result.code = ServiceFailedException.SERVER_ERROR;
 			result.message = "Internal Error.";
 		}
 
