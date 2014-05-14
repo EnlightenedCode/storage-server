@@ -51,9 +51,14 @@ public class QueueServlet extends HttpServlet {
 //						.method(Method.GET));
 //				
 //			} else 
-			if (task.equals(QueueTask.RUN_BQ_JOB)) {
-				
+			if (task.equals(QueueTask.START_BQ_JOB)) {
 				ImportFiles.runJob();
+			}
+			else if (task.equals(QueueTask.RUN_IMPORT_JOB)) {
+
+				int jobType = RiseUtils.strToInt(req.getParameter(QueryParam.JOB_TYPE), 0);
+				
+				ImportFiles.runJob(jobType);
 				
 			} else if (task.equals(QueueTask.RUN_ENABLE_LOGGING_JOB)) {
 				
@@ -108,9 +113,7 @@ public class QueueServlet extends HttpServlet {
 						// throw error by logging it, re-start initial import job
 						log.severe("Import Error - " + job.getStatus().getErrorResult().getMessage());
 						
-						QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
-								.param(QueryParam.TASK, QueueTask.RUN_BQ_JOB)
-								.method(Method.GET));
+						enqueueJob(req.getParameter(QueryParam.JOB_TYPE));
 
 					} 
 					else if (job.getStatus().getState().equals("DONE")) {
@@ -133,10 +136,10 @@ public class QueueServlet extends HttpServlet {
 					}
 				}
 				
-			} else if (task.equals(QueueTask.CHECK_STORAGE_MOVE_JOB) || task.equals(QueueTask.CHECK_USAGE_MOVE_JOB)) {
+			} else if (task.equals(QueueTask.CHECK_MOVE_JOB)) {
 				
 				String jobId = req.getParameter(QueryParam.JOB_ID);
-				
+
 				Job job = BQUtils.checkResponse(jobId);
 				
 				if (job.getStatus().getErrorResult() != null) {
@@ -150,9 +153,9 @@ public class QueueServlet extends HttpServlet {
 				} else if (job.getStatus().getState().equals("DONE")) {
 
 					// run next job
-					QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
-							.param(QueryParam.TASK, QueueTask.RUN_BQ_JOB)
-							.method(Method.GET));
+					enqueueJob(req.getParameter(QueryParam.JOB_TYPE));
+					
+					log.info("Job done, Scheduled next job. Job Type:" + req.getParameter(QueryParam.JOB_TYPE));
 
 				}
 				else {
@@ -180,14 +183,42 @@ public class QueueServlet extends HttpServlet {
 		
 	}
 	
-	static public void Enqueue() {
-		
+	public static void enqueueJob(String jobType) {
+		QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
+				.param(QueryParam.TASK, QueueTask.RUN_IMPORT_JOB)
+				.param(QueryParam.JOB_TYPE, jobType)
+				.countdownMillis(1000 * 30)
+				.method(Method.GET));
+	}
+	
+	public static void enqueueCheckImportJob(String jobId, String jobType, String filesString) {
+		QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
+				.param(QueryParam.TASK, QueueTask.CHECK_IMPORT_JOB)
+				.param(QueryParam.JOB_ID, jobId)
+				.param(QueryParam.JOB_TYPE, jobType)
+				.param(QueryParam.JOB_FILES, filesString)
+				.countdownMillis(1000 * 30)
+				.method(Method.POST));
+	}
+	
+	public static void enqueueCheckMoveJob(String jobId, String jobType) {
+		QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
+				.param(QueryParam.TASK, QueueTask.CHECK_MOVE_JOB)
+				.param(QueryParam.JOB_ID, jobId)
+				.param(QueryParam.JOB_TYPE, jobType)
+//				.param(QueryParam.JOB_FILES, filesString)
+				.countdownMillis(1000 * 10)
+				.method(Method.POST));
+	}
+	
+//	static public void Enqueue() {
+//		
 //		long now = System.currentTimeMillis();
 //		long logRangeEndMs = round(now, INTERVAL_MSEC);
 //		long logRangeStartMs = logRangeEndMs - INTERVAL_MSEC;
 //		
 //		Enqueue(logRangeStartMs, logRangeEndMs);
-	}
+//	}
 	
 //	static public void Enqueue(Long logRangeStartMs, Long logRangeEndMs) {
 //		

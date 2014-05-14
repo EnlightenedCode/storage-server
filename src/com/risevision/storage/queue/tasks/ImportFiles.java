@@ -1,7 +1,5 @@
 package com.risevision.storage.queue.tasks;
 
-import static com.google.appengine.api.taskqueue.TaskOptions.Builder.withUrl;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,15 +9,11 @@ import java.util.List;
 
 import com.google.api.services.bigquery.model.TableFieldSchema;
 import com.google.api.services.bigquery.model.TableSchema;
-import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.appengine.api.taskqueue.TaskOptions.Method;
 import com.risevision.common.client.utils.RiseUtils;
 import com.risevision.storage.Globals;
 import com.risevision.storage.MediaLibraryService;
-import com.risevision.storage.QueryParam;
 import com.risevision.storage.info.MediaItemInfo;
-import com.risevision.storage.queue.QueueName;
-import com.risevision.storage.queue.QueueTask;
+import com.risevision.storage.queue.QueueServlet;
 
 public class ImportFiles extends AbstractTask {
 	
@@ -35,7 +29,13 @@ public class ImportFiles extends AbstractTask {
 	
 //	private static long MAX_BYTES_PER_POST = 1 * 1000 * 1000; // not exactly a megabyte, leave some buffer 
 
-	public static String runJob() throws Exception {
+	public static void runJob() throws Exception {
+		runJob(JOB_STORAGE);
+		
+		QueueServlet.enqueueJob(Integer.toString(JOB_USAGE));
+	}
+	
+	public static String runJob(int jobType) throws Exception {
 		
 //		try {
 			
@@ -45,12 +45,11 @@ public class ImportFiles extends AbstractTask {
 			MediaLibraryService service = MediaLibraryService.getInstance();
 			
 			List<MediaItemInfo> items = service.getBucketItems(Globals.LOGS_BUCKET_NAME);
-			int jobType = -1;
 			String logDate = "";
 			for (MediaItemInfo item: items) {
 				
 				// process Storage logs first
-				if (item.getKey().contains("storage") && jobType != JOB_USAGE) {
+				if (item.getKey().contains("storage") && jobType == JOB_STORAGE) {
 					if (RiseUtils.strIsNullOrEmpty(logDate)) {
 						logDate = getStorageLogDate(item.getKey());
 					}
@@ -58,13 +57,11 @@ public class ImportFiles extends AbstractTask {
 					if (item.getKey().contains(logDate)) {
 						sources.add(LOGS_BUCKET_URL + item.getKey());
 						files.add(item.getKey());
-						jobType = JOB_STORAGE;			
 					}
 				}
-				else if (item.getKey().contains("usage") && jobType != JOB_STORAGE) {
+				else if (item.getKey().contains("usage") && jobType == JOB_USAGE) {
 					sources.add(LOGS_BUCKET_URL + item.getKey());
 					files.add(item.getKey());
-					jobType = JOB_USAGE;
 				}
 				
 				if (sources.size() >= 200) {
@@ -88,14 +85,9 @@ public class ImportFiles extends AbstractTask {
 			
 			String filesString = RiseUtils.listToString(files, ",");
 			
-			QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
-					.param(QueryParam.TASK, QueueTask.CHECK_IMPORT_JOB)
-					.param(QueryParam.JOB_ID, jobId)
-					.param(QueryParam.JOB_TYPE, Integer.toString(jobType))
-					.param(QueryParam.JOB_FILES, filesString)
-					.countdownMillis(1000 * 30)
-					.method(Method.POST));
+			QueueServlet.enqueueCheckImportJob(jobId, Integer.toString(jobType), filesString);
 			
+			log.info("Files (" + files.size() + ") first: " + files.get(0) + " last: " + files.get(files.size() - 1));
 			return sources.size() + " of " + items.size();
 			
 //		} catch (Exception e) {
@@ -113,22 +105,16 @@ public class ImportFiles extends AbstractTask {
 		
 		MediaLibraryService service = MediaLibraryService.getInstance();
 		
-		log.info("Removing Files: " + filesString);
+		log.info("Removing Files (" + files.size() + ") first: " + files.get(0) + " last: " + files.get(files.size() - 1));
 		
 		List<String> failedFiles = service.deleteMediaItems(Globals.LOGS_BUCKET_NAME, files);
 		
 		if (failedFiles.size() > 0) {
 			filesString = RiseUtils.listToString(failedFiles, ",");
 			
-			QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
-					.param(QueryParam.TASK, QueueTask.CHECK_IMPORT_JOB)
-//					.param(QueryParam.JOB_ID, jobId)
-					.param(QueryParam.JOB_TYPE, Integer.toString(jobType))
-					.param(QueryParam.JOB_FILES, filesString)
-					.countdownMillis(1000 * 30)
-					.method(Method.POST));
+			QueueServlet.enqueueCheckImportJob("", Integer.toString(jobType), filesString);
 			
-			log.info("Requeued delete job: " + filesString);
+			log.info("Requeued delete job for: " + filesString);
 			
 			return;
 		}
@@ -157,13 +143,7 @@ public class ImportFiles extends AbstractTask {
 		    String jobId = BQUtils.startQuery(query, STORAGE_TABLE);
 //		    BQUtils.checkResponse(jobId);
 			
-			QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
-					.param(QueryParam.TASK, QueueTask.CHECK_STORAGE_MOVE_JOB)
-					.param(QueryParam.JOB_ID, jobId)
-					.param(QueryParam.JOB_TYPE, Integer.toString(JOB_STORAGE))
-//					.param(QueryParam.JOB_FILES, filesString)
-					.countdownMillis(1000 * 30)
-					.method(Method.POST));
+		    QueueServlet.enqueueCheckMoveJob(jobId, Integer.toString(JOB_STORAGE));
 			
 //			return sources.size() + " of " + items.size();
 			
@@ -187,13 +167,7 @@ public class ImportFiles extends AbstractTask {
 		    String jobId = BQUtils.startQuery(query, USAGE_TABLE);
 //		    BQUtils.checkResponse(jobId);
 			
-			QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
-					.param(QueryParam.TASK, QueueTask.CHECK_USAGE_MOVE_JOB)
-					.param(QueryParam.JOB_ID, jobId)
-					.param(QueryParam.JOB_TYPE, Integer.toString(JOB_USAGE))
-//					.param(QueryParam.JOB_FILES, filesString)
-					.countdownMillis(1000 * 10)
-					.method(Method.POST));
+		    QueueServlet.enqueueCheckMoveJob(jobId, Integer.toString(JOB_USAGE));
 			
 //			return sources.size() + " of " + items.size();
 			
