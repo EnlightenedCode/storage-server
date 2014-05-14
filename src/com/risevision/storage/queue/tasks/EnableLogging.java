@@ -46,10 +46,10 @@ public class EnableLogging extends AbstractTask {
 	
 	private static Storage storage;
 
-	private static int QUERY_LIMIT = 200;
+	private static int QUERY_LIMIT = 500;
 	
 	public static String runJob(String userId, String lastCompanyId) {
-		
+		int jobCount = 0, successCount = 0, failCount = 0;
 		try {
 			
 			storage = StorageHelper.getStorage(userId);
@@ -78,19 +78,32 @@ public class EnableLogging extends AbstractTask {
 			return "Done";
 		}
 		
+		log.info("First Company:" + companyIds.get(0));
+		
 		for (String companyId: companyIds) {
 			boolean enabled = false;
+
 			try {
 				enabled = verifyBucketLogging(companyId);
 
-				log.info(String.format("Company %s has logging %s", companyId, enabled ? "enabled" : "disabled"));
-
-			} catch (ServiceFailedException e) {
-				if (e.getReason() == ServiceFailedException.FORBIDDEN) {
-					return "forbidden";
+//				log.info(String.format("Company %s has logging %s", companyId, enabled ? "enabled" : "disabled"));
+				if (!enabled) {
+					successCount++;
 				}
+				
+			} catch (ServiceFailedException e) {
+				if (e.getReason() == ServiceFailedException.FORBIDDEN || 
+						e.getReason() == ServiceFailedException.AUTHENTICATION_FAILED) {
+					log.severe(String.format("Verifying Company %s has failed. Error:%d", companyId, e.getReason()));
+
+					return "Auth failed";
+					
+				}
+				
+				failCount++;
 			}
 			
+			jobCount++;
 			lastCompanyId = companyId;
 			
 		}
@@ -100,6 +113,9 @@ public class EnableLogging extends AbstractTask {
 				.param(QueryParam.JOB_CURSOR, lastCompanyId)
 				.countdownMillis(1000 * 5)
 				.method(Method.GET));
+		
+		log.info("Last Company:" + lastCompanyId);
+		log.info("Processed:" + jobCount + " Modified:" + successCount + " Not found:" + failCount);
 		
 		return "queued next job";
 			

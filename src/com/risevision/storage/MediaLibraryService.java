@@ -130,12 +130,18 @@ public abstract class MediaLibraryService {
 	
 	public abstract boolean deleteMediaItem(String bucketName, String itemName) throws ServiceFailedException;
 	
-	public List<String> deleteMediaItems(String bucketName, List<String> itemNames) throws ServiceFailedException {
+	public List<String> deleteMediaItems(String bucketName, List<String> itemNames) {
 		List<String> failedItems = new ArrayList<>();
 		
 		for (String itemName : itemNames) {
-			if (!deleteMediaItem(bucketName, itemName)) {
-				failedItems.add(itemName);
+			try {
+				if (!deleteMediaItem(bucketName, itemName)) {
+					failedItems.add(itemName);
+				}
+			} catch (ServiceFailedException e) {
+				if (e.getReason() != ServiceFailedException.NOT_FOUND) {
+					failedItems.add(itemName);
+				}
 			}
 		}
 		

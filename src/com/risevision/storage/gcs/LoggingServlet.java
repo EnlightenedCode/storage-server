@@ -6,6 +6,7 @@ import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.extensions.appengine.auth.oauth2.AbstractAppEngineAuthorizationCodeServlet;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
+import com.risevision.common.client.utils.RiseUtils;
 import com.risevision.storage.QueryParam;
 import com.risevision.storage.queue.QueueName;
 import com.risevision.storage.queue.QueueTask;
@@ -25,12 +26,21 @@ public class LoggingServlet extends AbstractAppEngineAuthorizationCodeServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException, ServletException {
 
-		// Storage storage = StorageHelper.getStorage(getUserId(req));
-
-		QueueFactory.getQueue(QueueName.STORAGE_LOG_ENABLE).add(withUrl("/queue")
-						.param(QueryParam.TASK, QueueTask.RUN_ENABLE_LOGGING_JOB)
-						.param(QueryParam.USER_ID, getUserId(req))
-						.method(Method.GET));
+		String lastCompanyId = req.getParameter(QueryParam.JOB_CURSOR);
+		
+		if (RiseUtils.strIsNullOrEmpty(lastCompanyId)) {
+			QueueFactory.getQueue(QueueName.STORAGE_LOG_ENABLE).add(withUrl("/queue")
+					.param(QueryParam.TASK, QueueTask.RUN_ENABLE_LOGGING_JOB)
+					.param(QueryParam.USER_ID, getUserId(req))
+					.method(Method.GET));
+		}
+		else {
+			QueueFactory.getQueue(QueueName.STORAGE_LOG_ENABLE).add(withUrl("/queue")
+					.param(QueryParam.TASK, QueueTask.RUN_ENABLE_LOGGING_JOB)
+					.param(QueryParam.JOB_CURSOR, lastCompanyId)
+					.param(QueryParam.USER_ID, getUserId(req))
+					.method(Method.GET));
+		}
 
 		// Send the results as the response
 		PrintWriter respWriter = resp.getWriter();
