@@ -1,6 +1,5 @@
 package com.risevision.storage;
 
-import static com.google.appengine.api.taskqueue.TaskOptions.Builder.withUrl;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -9,10 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.appengine.api.taskqueue.TaskOptions.Method;
-import com.risevision.storage.queue.QueueName;
-import com.risevision.storage.queue.QueueTask;
+import com.risevision.storage.queue.QueueServlet;
 
 @SuppressWarnings("serial")
 public class LogsJobServlet extends HttpServlet {
@@ -23,9 +19,7 @@ public class LogsJobServlet extends HttpServlet {
 		try {
 			String jsonString = "Done";
 			
-			QueueFactory.getQueue(QueueName.STORAGE_LOG_TRANSFER).add(withUrl("/queue")
-					.param(QueryParam.TASK, QueueTask.RUN_BQ_JOB)
-					.method(Method.GET));
+			QueueServlet.enqueueJob(request.getParameter(QueryParam.JOB_TYPE));
 
 			response.setContentType("application/json; charset=UTF-8");
 			response.getWriter().println(jsonString);			
