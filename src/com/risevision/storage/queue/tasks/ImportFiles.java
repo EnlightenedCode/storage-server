@@ -12,6 +12,7 @@ import com.google.api.services.bigquery.model.TableSchema;
 import com.risevision.common.client.utils.RiseUtils;
 import com.risevision.storage.Globals;
 import com.risevision.storage.MediaLibraryService;
+import com.risevision.storage.MediaLibraryServiceImpl;
 import com.risevision.storage.info.MediaItemInfo;
 import com.risevision.storage.queue.QueueServlet;
 
@@ -44,29 +45,39 @@ public class ImportFiles extends AbstractTask {
 
 			MediaLibraryService service = MediaLibraryService.getInstance();
 			
-			List<MediaItemInfo> items = service.getBucketItems(Globals.LOGS_BUCKET_NAME);
+			String lastItem = null;
 			String logDate = "";
-			for (MediaItemInfo item: items) {
-				
-				// process Storage logs first
-				if (item.getKey().contains("storage") && jobType == JOB_STORAGE) {
-					if (RiseUtils.strIsNullOrEmpty(logDate)) {
-						logDate = getStorageLogDate(item.getKey());
-					}
+			while (sources.size() < 200) {
+				List<MediaItemInfo> items = service.getBucketItems(Globals.LOGS_BUCKET_NAME, null, lastItem);
+
+				for (MediaItemInfo item: items) {
 					
-					if (item.getKey().contains(logDate)) {
+					// process Storage logs first
+					if (item.getKey().contains("storage") && jobType == JOB_STORAGE) {
+						if (RiseUtils.strIsNullOrEmpty(logDate)) {
+							logDate = getStorageLogDate(item.getKey());
+						}
+						
+						if (item.getKey().contains(logDate)) {
+							sources.add(LOGS_BUCKET_URL + item.getKey());
+							files.add(item.getKey());
+						}
+					}
+					else if (item.getKey().contains("usage") && jobType == JOB_USAGE) {
 						sources.add(LOGS_BUCKET_URL + item.getKey());
 						files.add(item.getKey());
 					}
-				}
-				else if (item.getKey().contains("usage") && jobType == JOB_USAGE) {
-					sources.add(LOGS_BUCKET_URL + item.getKey());
-					files.add(item.getKey());
+					
+					if (sources.size() >= 200) {
+						break;
+					}
 				}
 				
-				if (sources.size() >= 200) {
+				if (items.size() < MediaLibraryServiceImpl.MAX_KEYS) {
 					break;
 				}
+				
+				lastItem = items.get(items.size() - 1).getKey();
 			}
 			
 			if (sources.size() == 0) {
@@ -88,7 +99,7 @@ public class ImportFiles extends AbstractTask {
 			QueueServlet.enqueueCheckImportJob(jobId, Integer.toString(jobType), filesString);
 			
 			log.info("Files (" + files.size() + ") first: " + files.get(0) + " last: " + files.get(files.size() - 1));
-			return sources.size() + " of " + items.size();
+			return "Queued";
 			
 //		} catch (Exception e) {
 //			// TODO Auto-generated catch block
@@ -103,20 +114,22 @@ public class ImportFiles extends AbstractTask {
 		// delete the files
 		List<String> files = new ArrayList<String>(Arrays.asList(filesString.split(",")));
 		
-		MediaLibraryService service = MediaLibraryService.getInstance();
-		
-		log.info("Removing Files (" + files.size() + ") first: " + files.get(0) + " last: " + files.get(files.size() - 1));
-		
-		List<String> failedFiles = service.deleteMediaItems(Globals.LOGS_BUCKET_NAME, files);
-		
-		if (failedFiles.size() > 0) {
-			filesString = RiseUtils.listToString(failedFiles, ",");
+		if (files.size() > 0) {
+			MediaLibraryService service = MediaLibraryService.getInstance();
 			
-			QueueServlet.enqueueCheckImportJob("", Integer.toString(jobType), filesString);
+			log.info("Removing Files (" + files.size() + ") first: " + files.get(0) + " last: " + files.get(files.size() - 1));
 			
-			log.info("Requeued delete job for: " + filesString);
+			List<String> failedFiles = service.deleteMediaItems(Globals.LOGS_BUCKET_NAME, files);
 			
-			return;
+			if (failedFiles.size() > 0) {
+				filesString = RiseUtils.listToString(failedFiles, ",");
+				
+				QueueServlet.enqueueCheckImportJob("", Integer.toString(jobType), filesString);
+				
+				log.info("Requeued delete job for: " + filesString);
+				
+				return;
+			}
 		}
 		
 		if (jobType == ImportFiles.JOB_STORAGE) {

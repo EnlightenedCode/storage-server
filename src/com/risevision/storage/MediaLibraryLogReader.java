@@ -190,7 +190,7 @@ public class MediaLibraryLogReader {
 			MediaLibraryService service = MediaLibraryService.getInstance();
 		
 
-			return service.getBucketItems(LOGS_BUCKET_NAME, bucketName);
+			return service.getBucketItems(LOGS_BUCKET_NAME, bucketName, null);
 		} catch (ServiceFailedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -31,6 +31,8 @@ import com.risevision.storage.info.ServiceFailedException;
 
 public class MediaLibraryServiceImpl extends MediaLibraryService {
 	
+	public static final int MAX_KEYS = 1000;
+	
 	/** Global configuration of Google Cloud Storage OAuth 2.0 scope. */
 	private static final String STORAGE_SCOPE = "https://www.googleapis.com/auth/devstorage.full_control";
 	
@@ -123,7 +125,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 		return null;
 	}
 	
-	public List<MediaItemInfo> getBucketItems(String bucketName, String prefix) throws ServiceFailedException {
+	public List<MediaItemInfo> getBucketItems(String bucketName, String prefix, String marker) throws ServiceFailedException {
 		try {
 			AppIdentityCredential credential = new AppIdentityCredential(Arrays.asList(STORAGE_SCOPE));
 
@@ -131,6 +133,13 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			if (!RiseUtils.strIsNullOrEmpty(prefix)) {
 				URI += "?prefix=" + prefix;
 			}
+			if (!RiseUtils.strIsNullOrEmpty(marker)) {
+				URI += URI.contains("?") ? "&" : "?";
+				URI += "marker=" + marker;
+			}
+
+			URI += URI.contains("?") ? "&" : "?";
+			URI += "max-keys=" + MAX_KEYS;
 			
 			HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory(credential);
 			
