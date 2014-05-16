@@ -143,12 +143,12 @@ public class QueueServlet extends HttpServlet {
 				Job job = BQUtils.checkResponse(jobId);
 				
 				if (job.getStatus().getErrorResult() != null) {
+					int jobType = RiseUtils.strToInt(req.getParameter(QueryParam.JOB_TYPE), 0);
+
 					// throw error by logging it, if needed, re-start post-processing Job
 					log.severe("Move Error - " + job.getStatus().getErrorResult().getMessage());
 					
-//					int jobType = RiseUtils.strToInt(req.getParameter(QueryParam.JOB_TYPE), 0);
-//					
-//					ImportFiles.postProcess("", jobType);
+					ImportFiles.postProcess("", jobType);
 
 				} else if (job.getStatus().getState().equals("DONE")) {
 

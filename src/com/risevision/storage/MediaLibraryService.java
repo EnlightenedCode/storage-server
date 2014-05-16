@@ -39,16 +39,16 @@ public abstract class MediaLibraryService {
 	public abstract String getBucketPropertyString(String bucketName, String property) throws ServiceFailedException;
 	
 	public List<MediaItemInfo> getBucketItems(String bucketName) throws ServiceFailedException {
-		return getBucketItems(bucketName, null);
+		return getBucketItems(bucketName, null, null);
 	}
 	
-	public abstract List<MediaItemInfo> getBucketItems(String bucketName, String prefix) throws ServiceFailedException;
+	public abstract List<MediaItemInfo> getBucketItems(String bucketName, String prefix, String marker) throws ServiceFailedException;
 	
 	public String getBucketItemsString(String bucketName) throws ServiceFailedException {
-		return getBucketItemsString(bucketName, null);
+		return getBucketItemsString(bucketName, null, null);
 	}
 	
-	public String getBucketItemsString(String bucketName, String prefix) throws ServiceFailedException {
+	public String getBucketItemsString(String bucketName, String prefix, String marker) throws ServiceFailedException {
 		String response = "";
 
 		try {
@@ -58,7 +58,7 @@ public abstract class MediaLibraryService {
 //			getBucketProperty(bucketName, "logging");
 //			getBucketProperty(bucketName, "lifecycle");
 
-			List<MediaItemInfo> items = getBucketItems(bucketName, prefix);
+			List<MediaItemInfo> items = getBucketItems(bucketName, prefix, marker);
 			stringer.object();
 			stringer.key("status").value(ServiceFailedException.OK);
 			stringer.key("mediaFiles");
