@@ -151,7 +151,7 @@ public class StorageAPI extends AbstractAPI {
 	)
 	public SimpleResponse getFileUrl(
 			@Nullable @Named("companyId") String companyId,
-			@Nullable @Named("key") String key,
+			@Nullable @Named("file") String file,
 			User user) {
 
 		StringResponse result = new StringResponse();
@@ -182,7 +182,7 @@ public class StorageAPI extends AbstractAPI {
 			
 			MediaLibraryService service = MediaLibraryService.getInstance();
 
-			String fileUrl = service.getMediaItemUrl(MediaLibraryService.getBucketName(companyId), key);
+			String fileUrl = service.getMediaItemUrl(MediaLibraryService.getBucketName(companyId), file);
 			
 			log.warning(fileUrl);
 			
