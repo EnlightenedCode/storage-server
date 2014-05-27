@@ -6,3 +6,6 @@
 *.ear
 *.swp
 .gitkeep
+target/
+lib/com/
+src/private-keys/

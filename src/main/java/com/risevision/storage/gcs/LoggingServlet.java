@@ -6,7 +6,7 @@ import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.extensions.appengine.auth.oauth2.AbstractAppEngineAuthorizationCodeServlet;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
-import com.risevision.common.client.utils.RiseUtils;
+import com.google.common.base.Strings;
 import com.risevision.storage.QueryParam;
 import com.risevision.storage.queue.QueueName;
 import com.risevision.storage.queue.QueueTask;
@@ -28,7 +28,7 @@ public class LoggingServlet extends AbstractAppEngineAuthorizationCodeServlet {
 
 		String lastCompanyId = req.getParameter(QueryParam.JOB_CURSOR);
 		
-		if (RiseUtils.strIsNullOrEmpty(lastCompanyId)) {
+		if (Strings.isNullOrEmpty(lastCompanyId)) {
 			QueueFactory.getQueue(QueueName.STORAGE_LOG_ENABLE).add(withUrl("/queue")
 					.param(QueryParam.TASK, QueueTask.RUN_ENABLE_LOGGING_JOB)
 					.param(QueryParam.USER_ID, getUserId(req))

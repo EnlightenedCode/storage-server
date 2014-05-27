@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.risevision.common.client.utils.RiseUtils;
+import com.google.common.base.Strings;
+import org.apache.commons.lang3.math.NumberUtils;
 import com.risevision.storage.amazonImpl.LoggingResponse;
 import com.risevision.storage.cache.CompanyFileLogs;
 import com.risevision.storage.cache.CompanyUsage;
@@ -76,7 +77,7 @@ public class MediaLibraryLogReader {
 				List<MediaItemUsageInfo> usageItems = retrieveUsageLog(mediaItem.getKey());
 				
 				for (MediaItemUsageInfo usageItem: usageItems) {
-					if (!RiseUtils.strIsNullOrEmpty(usageItem.getObject()) && usageItem.getStatus() != 404) {
+					if (!Strings.isNullOrEmpty(usageItem.getObject()) && usageItem.getStatus() != 404) {
 						Map<String, FileLog> perIpLogs = fileLogs.fileLogs.get(usageItem.getObject());
 						
 						if (perIpLogs == null) {
@@ -222,13 +223,13 @@ public class MediaLibraryLogReader {
 //				"cs_user_agent", "s_request_id", "cs_operation", "cs_bucket",
 //				"cs_object"
 				
-				item.setTime(new Date(RiseUtils.strToInt(line[0], 0)));
+				item.setTime(new Date(NumberUtils.toInt(line[0], 0)));
 				item.setIp(line[1]);
 				item.setMethod(line[4]);
 				item.setUri(line[5]);
-				item.setStatus(RiseUtils.strToInt(line[6], 0));
-				item.setInBytes(RiseUtils.strToLong(line[7], 0));
-				item.setOutBytes(RiseUtils.strToLong(line[8], 0));
+				item.setStatus(NumberUtils.toInt(line[6], 0));
+				item.setInBytes(NumberUtils.toLong(line[7], 0));
+				item.setOutBytes(NumberUtils.toLong(line[8], 0));
 				item.setUserAgent(line[12]);	
 				item.setObject(line[16]);
 				
@@ -271,10 +272,10 @@ public class MediaLibraryLogReader {
 			
 			MediaItemStorageInfo storageItem = new MediaItemStorageInfo();
 			
-//			storageItem.setTime(new Date(RiseUtils.strToInt(line[0], 0)));
+//			storageItem.setTime(new Date(NumberUtils.toInt(line[0], 0)));
 //			storageItem.setLogName(s.get(1)[0]);
 			storageItem.setLogName(logName);
-			storageItem.setBytes(RiseUtils.strToLong(s.get(1)[1], 0));
+			storageItem.setBytes(NumberUtils.toLong(s.get(1)[1], 0));
 				
 			reader.close();
 			

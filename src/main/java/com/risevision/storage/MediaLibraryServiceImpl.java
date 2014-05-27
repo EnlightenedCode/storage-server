@@ -23,7 +23,7 @@ import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.util.Base64;
 import com.google.api.client.util.SecurityUtils;
 import com.google.api.client.util.StringUtils;
-import com.risevision.common.client.utils.RiseUtils;
+import com.google.common.base.Strings;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
 import com.risevision.storage.amazonImpl.ListBucketResponse;
 import com.risevision.storage.info.MediaItemInfo;
@@ -130,10 +130,10 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			AppIdentityCredential credential = new AppIdentityCredential(Arrays.asList(STORAGE_SCOPE));
 
 			String URI = MediaItemInfo.MEDIA_LIBRARY_URL + bucketName;
-			if (!RiseUtils.strIsNullOrEmpty(prefix)) {
+			if (!Strings.isNullOrEmpty(prefix)) {
 				URI += "?prefix=" + prefix;
 			}
-			if (!RiseUtils.strIsNullOrEmpty(marker)) {
+			if (!Strings.isNullOrEmpty(marker)) {
 				URI += URI.contains("?") ? "&" : "?";
 				URI += "marker=" + marker;
 			}

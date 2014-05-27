@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpResponseException;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.BucketAccessControl;
@@ -19,7 +19,7 @@ import com.google.appengine.api.search.IndexSpec;
 import com.google.appengine.api.search.SearchServiceFactory;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
-import com.risevision.common.client.utils.RiseUtils;
+import com.google.common.base.Strings;
 import com.risevision.directory.documents.Company;
 import com.risevision.storage.Globals;
 import com.risevision.storage.MediaLibraryService;
@@ -61,7 +61,7 @@ public class EnableLogging extends AbstractTask {
 		}
 		
 		// Job is starting, verify Logging bucket ACLs
-		if (RiseUtils.strIsNullOrEmpty(lastCompanyId)) {
+		if (Strings.isNullOrEmpty(lastCompanyId)) {
 			try {
 				verifyLoggingBucketACL();
 			} catch (ServiceFailedException e) {

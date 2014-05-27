@@ -12,12 +12,13 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.api.services.bigquery.model.Job;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
-import com.risevision.common.client.utils.RiseUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import com.risevision.storage.QueryParam;
 import com.risevision.storage.Utils;
 import com.risevision.storage.queue.tasks.BQUtils;
 import com.risevision.storage.queue.tasks.EnableLogging;
 import com.risevision.storage.queue.tasks.ImportFiles;
+import com.google.common.base.Strings;
 
 
 @SuppressWarnings("serial")
@@ -56,7 +57,7 @@ public class QueueServlet extends HttpServlet {
 			}
 			else if (task.equals(QueueTask.RUN_IMPORT_JOB)) {
 
-				int jobType = RiseUtils.strToInt(req.getParameter(QueryParam.JOB_TYPE), 0);
+				int jobType = NumberUtils.toInt(req.getParameter(QueryParam.JOB_TYPE), 0);
 				
 				ImportFiles.runJob(jobType);
 				
@@ -97,10 +98,10 @@ public class QueueServlet extends HttpServlet {
 				
 				String jobId = req.getParameter(QueryParam.JOB_ID);
 				
-				if (RiseUtils.strIsNullOrEmpty(jobId)) {
+				if (Strings.isNullOrEmpty(jobId)) {
 					
 					String jobFiles = req.getParameter(QueryParam.JOB_FILES);
-					int jobType = RiseUtils.strToInt(req.getParameter(QueryParam.JOB_TYPE), 0);
+					int jobType = NumberUtils.toInt(req.getParameter(QueryParam.JOB_TYPE), 0);
 					
 					ImportFiles.postProcess(jobFiles, jobType);
 					
@@ -119,7 +120,7 @@ public class QueueServlet extends HttpServlet {
 					else if (job.getStatus().getState().equals("DONE")) {
 
 						String jobFiles = req.getParameter(QueryParam.JOB_FILES);
-						int jobType = RiseUtils.strToInt(req.getParameter(QueryParam.JOB_TYPE), 0);
+						int jobType = NumberUtils.toInt(req.getParameter(QueryParam.JOB_TYPE), 0);
 						
 						ImportFiles.postProcess(jobFiles, jobType);
 
@@ -143,7 +144,7 @@ public class QueueServlet extends HttpServlet {
 				Job job = BQUtils.checkResponse(jobId);
 				
 				if (job.getStatus().getErrorResult() != null) {
-					int jobType = RiseUtils.strToInt(req.getParameter(QueryParam.JOB_TYPE), 0);
+					int jobType = NumberUtils.toInt(req.getParameter(QueryParam.JOB_TYPE), 0);
 
 					// throw error by logging it, if needed, re-start post-processing Job
 					log.severe("Move Error - " + job.getStatus().getErrorResult().getMessage());
