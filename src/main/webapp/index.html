@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+<head><title>storage</title></head>
+<body>
+  <h3>This is the backend api for storage</h3>
+  <h4><a id="explorerLink"  href="">API Explorer</a></h4>
+  <script>
+      var subDomain
+         ,domain
+         ,appSpotIdx = location.host.indexOf(".appspot.com");
+
+      if (appSpotIdx > 0) {
+        subDomain = location.host.substr(0, appSpotIdx);
+        subDomain = subDomain.replace(/\./g, "-dot-");
+        domain = subDomain + ".appspot.com";
+      } else {
+        domain = location.host;
+      }
+
+      document.getElementById("explorerLink").href = location.protocol + "//" + 
+                                                          domain + "/_ah/api/explorer";
+  </script>
+</body>
+</html>

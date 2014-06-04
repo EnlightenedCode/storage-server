@@ -9,7 +9,8 @@ import java.util.List;
 
 import com.google.api.services.bigquery.model.TableFieldSchema;
 import com.google.api.services.bigquery.model.TableSchema;
-import com.risevision.common.client.utils.RiseUtils;
+import com.google.common.base.Strings;
+import com.google.common.base.Joiner;
 import com.risevision.storage.Globals;
 import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.MediaLibraryServiceImpl;
@@ -54,7 +55,7 @@ public class ImportFiles extends AbstractTask {
 					
 					// process Storage logs first
 					if (item.getKey().contains("storage") && jobType == JOB_STORAGE) {
-						if (RiseUtils.strIsNullOrEmpty(logDate)) {
+						if (Strings.isNullOrEmpty(logDate)) {
 							logDate = getStorageLogDate(item.getKey());
 						}
 						
@@ -94,7 +95,7 @@ public class ImportFiles extends AbstractTask {
 				jobId =  runUsageJob(sources);
 			}
 			
-			String filesString = RiseUtils.listToString(files, ",");
+			String filesString = Joiner.on(",").join(files);
 			
 			QueueServlet.enqueueCheckImportJob(jobId, Integer.toString(jobType), filesString);
 			
@@ -122,7 +123,7 @@ public class ImportFiles extends AbstractTask {
 			List<String> failedFiles = service.deleteMediaItems(Globals.LOGS_BUCKET_NAME, files);
 			
 			if (failedFiles.size() > 0) {
-				filesString = RiseUtils.listToString(failedFiles, ",");
+				filesString = Joiner.on(",").join(failedFiles);
 				
 				QueueServlet.enqueueCheckImportJob("", Integer.toString(jobType), filesString);
 				

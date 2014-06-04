@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.risevision.common.client.utils.RiseUtils;
+import com.google.common.base.Strings;
 
 @SuppressWarnings("serial")
 public class UploadCompleteServlet extends HttpServlet {
@@ -30,7 +30,7 @@ public class UploadCompleteServlet extends HttpServlet {
 	
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String key = request.getParameter("key");
-		key = RiseUtils.strIsNullOrEmpty(key) ? "" : key;
+		key = Strings.isNullOrEmpty(key) ? "" : key;
 		String bucket = request.getParameter("bucket");
 
 	    PrintWriter out = response.getWriter();

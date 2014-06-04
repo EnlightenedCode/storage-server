@@ -2,7 +2,7 @@ package com.risevision.storage.security;
 
 import java.util.logging.Logger;
 
-import com.risevision.common.client.utils.RiseUtils;
+import com.google.common.base.Strings;
 import com.risevision.directory.documents.Company;
 import com.risevision.directory.documents.User;
 import com.risevision.storage.info.ServiceFailedException;
@@ -31,7 +31,7 @@ public class AccessResource {
 	}
 	
 	public void verify() throws ServiceFailedException {  
-		if (!RiseUtils.strIsNullOrEmpty(authKey)) {
+		if (!Strings.isNullOrEmpty(authKey)) {
 			verifyByKey();
 		}
 		else {
@@ -63,11 +63,11 @@ public class AccessResource {
 	}
 	
 	private void verifyByUser() throws ServiceFailedException {
-		if (RiseUtils.strIsNullOrEmpty(companyId)) {
+		if (Strings.isNullOrEmpty(companyId)) {
 			throw new ServiceFailedException(ServiceFailedException.BAD_REQUEST);
 		}
 		
-		if (RiseUtils.strIsNullOrEmpty(accessingUserId)) {
+		if (Strings.isNullOrEmpty(accessingUserId)) {
 			throw new ServiceFailedException(ServiceFailedException.AUTHENTICATION_FAILED);
 		}
 		

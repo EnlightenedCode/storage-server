@@ -7,9 +7,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.appengine.labs.repackaged.org.json.JSONException;
-import com.google.appengine.labs.repackaged.org.json.JSONStringer;
-import com.google.appengine.labs.repackaged.org.json.JSONWriter;
+import org.json.JSONException;
+import org.json.JSONStringer;
+import org.json.JSONWriter;
 import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.QueryParam;
 import com.risevision.storage.info.ServiceFailedException;

@@ -7,10 +7,10 @@ import java.util.logging.Logger;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.appengine.labs.repackaged.org.json.JSONException;
-import com.google.appengine.labs.repackaged.org.json.JSONStringer;
-import com.google.appengine.labs.repackaged.org.json.JSONWriter;
-import com.risevision.common.client.utils.RiseUtils;
+import org.json.JSONException;
+import org.json.JSONStringer;
+import org.json.JSONWriter;
+import com.google.common.base.Strings;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
 import com.risevision.storage.info.MediaItemInfo;
 import com.risevision.storage.info.ServiceFailedException;
@@ -117,7 +117,7 @@ public abstract class MediaLibraryService {
 	}
 	
 	public static String getBucketName(String companyId) throws ServiceFailedException {
-		if (RiseUtils.strIsNullOrEmpty(companyId)) {
+		if (Strings.isNullOrEmpty(companyId)) {
 			throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
 		}
 		
