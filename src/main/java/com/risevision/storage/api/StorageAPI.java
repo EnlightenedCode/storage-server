@@ -221,6 +221,9 @@ SimpleResponse result = new SimpleResponse(); try { if (user == null) {
 
 			try {
 				AccessResource resource = new AccessResource(companyId, user.getEmail());
+                                log.info("Attempting to create bucket using the following logging xml:");
+                                log.info(Globals.LOGGING_ENABLED_XML.replace("%bucketName%", "testbucketname").replace("%logBucket%", Globals.LOGS_BUCKET_NAME));
+
 				resource.verify();
 				
 				MediaLibraryService service = MediaLibraryService.getInstance();
@@ -232,7 +235,7 @@ SimpleResponse result = new SimpleResponse(); try { if (user == null) {
 
 
 
-                              service.updateBucketProperty(bucketName, "logging", Globals.LOGGING_ENABLED_XML.replace("%bucketName%", bucketName));
+                              service.updateBucketProperty(bucketName, "logging", Globals.LOGGING_ENABLED_XML.replace("%bucketName%", bucketName).replace("%logBucket%", Globals.LOGS_BUCKET_NAME));
 
                               log.info("Bucket Logging Enabled");
 
