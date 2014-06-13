@@ -38,24 +38,6 @@
             <filtering>false</filtering>
           </resource>
         </resources>
-        <plugins>
-          <plugin>
-            <groupId>com.google.code.echo-maven-plugin</groupId>
-            <artifactId>echo-maven-plugin</artifactId>
-            <version>1.0.0</version>
-            <inherited>false</inherited>
-            <configuration>
-              <message>Using PRODUCTION build</message>
-            </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>echo</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
       </build>
     </profile>
     <profile>
@@ -72,24 +54,6 @@
             <filtering>false</filtering>
           </resource>
         </resources>
-        <plugins>
-          <plugin>
-            <groupId>com.google.code.echo-maven-plugin</groupId>
-            <artifactId>echo-maven-plugin</artifactId>
-            <version>1.0.0</version>
-            <inherited>false</inherited>
-            <configuration>
-              <message>Using TEST build</message>
-            </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>echo</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
       </build>
     </profile>
   </profiles>
@@ -104,6 +68,23 @@
     </resources>
 
     <plugins>
+      <plugin>
+        <groupId>com.google.code.echo-maven-plugin</groupId>
+        <artifactId>echo-maven-plugin</artifactId>
+        <version>1.0.0</version>
+        <inherited>false</inherited>
+        <executions>
+          <execution>
+            <id>execution-prod</id>
+            <goals>
+              <goal>echo</goal>
+            </goals>
+            <configuration>
+              <message>Use -Pprod to use production globals</message>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>com.google.appengine</groupId>
         <artifactId>appengine-maven-plugin</artifactId>

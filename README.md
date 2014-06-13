@@ -1,11 +1,11 @@
-![Build Status](http://107.170.153.135:8080/job/Storage-Server-BranchPush/badge/icon)
+![Build Status](http://devtools1.risevision.com:8080/job/Storage-Server-BranchPush/badge/icon)
 
 Storage Server API 
 =================
 
 Run locally via
 ``` bash
-mvn clean install
+mvn clean install [-Pprod]
 mvn appengine:devserver
 ```
 
