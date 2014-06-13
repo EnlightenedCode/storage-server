@@ -28,6 +28,36 @@
     </repository>
   </repositories>
 
+  <profiles>
+    <profile>
+      <id>prod</id>
+      <build>
+        <resources>
+          <resource>
+            <directory>src/globals/prod</directory>
+            <filtering>false</filtering>
+          </resource>
+        </resources>
+      </build>
+    </profile>
+    <profile>
+      <id>test</id>
+      <activation>
+          <file>
+            <missing>${project.build.outputDirectory/build.properties</missing>
+          </file>
+      </activation>
+      <build>
+        <resources>
+          <resource>
+            <directory>src/globals/test</directory>
+            <filtering>false</filtering>
+          </resource>
+        </resources>
+      </build>
+    </profile>
+  </profiles>
+
   <build>
     <sourceDirectory>${project.basedir}/src</sourceDirectory>
     <resources>
@@ -36,16 +66,34 @@
         <filtering>false</filtering>
       </resource>
     </resources>
-      <plugins>
-        <plugin>
-          <groupId>com.google.appengine</groupId>
-          <artifactId>appengine-maven-plugin</artifactId>
-          <version>${appengine.api.version}</version>
-          <configuration>
-            <port>8888</port>
-          </configuration>
-        </plugin>
-      </plugins>
+
+    <plugins>
+      <plugin>
+        <groupId>com.google.code.echo-maven-plugin</groupId>
+        <artifactId>echo-maven-plugin</artifactId>
+        <version>1.0.0</version>
+        <inherited>false</inherited>
+        <executions>
+          <execution>
+            <id>execution-prod</id>
+            <goals>
+              <goal>echo</goal>
+            </goals>
+            <configuration>
+              <message>Use -Pprod to use production globals</message>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.google.appengine</groupId>
+        <artifactId>appengine-maven-plugin</artifactId>
+        <version>${appengine.api.version}</version>
+        <configuration>
+          <port>8888</port>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
 
   <dependencies>
