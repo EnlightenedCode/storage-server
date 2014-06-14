@@ -59,7 +59,6 @@
   </profiles>
 
   <build>
-    <sourceDirectory>${project.basedir}/src</sourceDirectory>
     <resources>
       <resource>
         <directory>src/private-keys</directory>
@@ -97,6 +96,12 @@
   </build>
 
   <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>com.google.appengine</groupId>
       <artifactId>appengine-maven-plugin</artifactId>
