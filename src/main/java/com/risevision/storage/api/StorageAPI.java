@@ -221,9 +221,6 @@ SimpleResponse result = new SimpleResponse(); try { if (user == null) {
 
 			try {
 				AccessResource resource = new AccessResource(companyId, user.getEmail());
-                                log.info("Attempting to create bucket using the following logging globals:");
-                                log.info(Globals.LOGGING_ENABLED_XML);
-                                log.info(Globals.LOGS_BUCKET_NAME);
 
 				resource.verify();
 				
