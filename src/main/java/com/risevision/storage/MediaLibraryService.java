@@ -14,9 +14,11 @@ import com.google.common.base.Strings;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
 import com.risevision.storage.info.MediaItemInfo;
 import com.risevision.storage.info.ServiceFailedException;
+import com.risevision.storage.gcs.StorageServiceImpl;
 
 public abstract class MediaLibraryService {
   private static MediaLibraryService instance; 
+  private static MediaLibraryService GCSinstance; 
   protected static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 
   protected static final Logger log = Logger.getAnonymousLogger();
@@ -31,6 +33,16 @@ public abstract class MediaLibraryService {
     return instance;
   }
 
+  public static MediaLibraryService getGCSInstance() {
+    try {
+      if (GCSinstance == null)
+        GCSinstance = new StorageServiceImpl();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return GCSinstance;
+  }
+
   public abstract ListAllMyBucketsResponse getAllMyBuckets() 
   throws ServiceFailedException;
 
@@ -42,14 +54,19 @@ public abstract class MediaLibraryService {
                                                  String property)
   throws ServiceFailedException;
 
-  public List<MediaItemInfo> getBucketItems(String bucketName)
+  public List getBucketItems(String bucketName)
   throws ServiceFailedException {
     return getBucketItems(bucketName, null, null);
   }
 
-  public abstract List<MediaItemInfo> getBucketItems(String bucketName,
+  public List getBucketItems(String bucketName, String prefix)
+  throws ServiceFailedException {
+    return getBucketItems(bucketName, prefix, null);
+  }
+
+  public abstract List getBucketItems(String bucketName,
                                                      String prefix,
-                                                     String marker)
+                                                     String delimiter)
   throws ServiceFailedException;
 
   public String getBucketItemsString(String bucketName)
@@ -104,6 +121,9 @@ public abstract class MediaLibraryService {
   }
 
   public abstract void createBucket(String bucketName)
+  throws ServiceFailedException;
+
+  public abstract void createFolder(String bucket, String folder)
   throws ServiceFailedException;
 
   public abstract void updateBucketProperty(String bucketName,

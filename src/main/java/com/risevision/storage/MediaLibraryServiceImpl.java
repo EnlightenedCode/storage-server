@@ -170,6 +170,12 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 		return null;
 	}
 	
+        public void createFolder(String bucketName, String folderName)
+        throws ServiceFailedException {
+                       log.info("folder creation not implemented in " + 
+                                 "MediaLibraryServiceImpl.java");
+        }
+
 	public void createBucket(String bucketName) throws ServiceFailedException {
 		try {
 			log.info("Creating bucket");

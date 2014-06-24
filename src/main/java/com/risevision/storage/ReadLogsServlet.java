@@ -2,6 +2,7 @@ package com.risevision.storage;
 
 import java.io.IOException;
 import java.util.logging.Logger;
+import java.util.List;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -23,7 +24,9 @@ public class ReadLogsServlet extends HttpServlet {
 			String jsonString = "";
 			
 			long dataCounter = 0;
-			for (MediaItemInfo item: service.getBucketItems("risemedialibrary-" + companyId)) {
+
+                        List<MediaItemInfo> items = service.getBucketItems("risemedialibrary-" + companyId);
+			for (MediaItemInfo item: items) {
 				dataCounter += item.getSize();
 			}
 			
