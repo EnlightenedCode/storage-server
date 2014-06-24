@@ -18,7 +18,7 @@ import com.risevision.storage.gcs.StorageServiceImpl;
 
 public abstract class MediaLibraryService {
   private static MediaLibraryService instance; 
-  private static MediaLibraryService GCSinstance; 
+  private static StorageServiceImpl GCSinstance; 
   protected static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 
   protected static final Logger log = Logger.getAnonymousLogger();
@@ -33,7 +33,7 @@ public abstract class MediaLibraryService {
     return instance;
   }
 
-  public static MediaLibraryService getGCSInstance() {
+  public static StorageServiceImpl getGCSInstance() {
     try {
       if (GCSinstance == null)
         GCSinstance = new StorageServiceImpl();
@@ -123,36 +123,10 @@ public abstract class MediaLibraryService {
   public abstract void createBucket(String bucketName)
   throws ServiceFailedException;
 
-  public abstract void createFolder(String bucket, String folder)
-  throws ServiceFailedException;
-
   public abstract void updateBucketProperty(String bucketName,
                                             String property,
                                             String propertyXMLdoc)
   throws ServiceFailedException;
-
-  public abstract boolean deleteMediaItem(String bucketName,
-                                          String itemName)
-  throws ServiceFailedException;
-
-  public List<String> deleteMediaItems(String bucketName,
-                                       List<String> itemNames) {
-    List<String> failedItems = new ArrayList<>();
-
-    for (String itemName : itemNames) {
-      try {
-        if (!deleteMediaItem(bucketName, itemName)) {
-          failedItems.add(itemName);
-        }
-      } catch (ServiceFailedException e) {
-        if (e.getReason() != ServiceFailedException.NOT_FOUND) {
-          failedItems.add(itemName);
-        }
-      }
-    }
-
-    return failedItems;
-  }
 
   public abstract InputStream getMediaItem(String bucketName, String itemName)
   throws ServiceFailedException;

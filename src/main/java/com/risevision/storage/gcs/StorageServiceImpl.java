@@ -11,26 +11,24 @@ import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
 import com.risevision.storage.info.MediaItemInfo;
 import com.risevision.storage.info.ServiceFailedException;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.googleapis.extensions.appengine.auth.oauth2.AppIdentityCredential;
 import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpHeaders;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
+import com.google.api.services.storage.model.Objects;
 import com.google.api.services.storage.model.StorageObject;
 import com.google.api.services.storage.Storage.Buckets.*;
-import com.google.api.services.storage.Storage.Objects.*;
+import com.google.api.client.googleapis.batch.BatchRequest;
+import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonError.ErrorInfo;
 import com.google.api.client.http.ByteArrayContent;
 import com.risevision.storage.Globals;
 
 public class StorageServiceImpl extends MediaLibraryService {
   private static HttpRequestInitializer credential;
   private static Storage storage;
-  private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
-  private static final JsonFactory JSON_FACTORY =
-    JacksonFactory.getDefaultInstance();
 
   static {
     if (Globals.devserver) {
@@ -39,9 +37,11 @@ public class StorageServiceImpl extends MediaLibraryService {
       credential = new AppIdentityCredential(Arrays.asList(Globals.STORAGE_SCOPE));
     }
 
-    storage = new Storage.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
-               .setApplicationName(Globals.STORAGE_APP_NAME)
-               .build();
+    storage = GCSClient.getStorageClient(credential);
+  }
+
+  public void setClient(Storage client) {
+    this.storage = client;
   }
 
   @Override
@@ -105,13 +105,13 @@ public class StorageServiceImpl extends MediaLibraryService {
           items.add(folderItem);
         }
       } catch (NullPointerException e) {
-        log.warning("No folders to list");
+        log.info("No folders to list");
       }
 
       try {
         items.addAll(listResult.getItems());
       } catch (NullPointerException e) {
-        log.warning("No objects to list");
+        log.info("No files to list");
       }
       listRequest.setPageToken(listResult.getNextPageToken());
     } while (null != listResult.getNextPageToken());
@@ -135,6 +135,21 @@ public class StorageServiceImpl extends MediaLibraryService {
       log.warning(e.getMessage());
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
     }
+    log.info("Bucket created: " + bucketName);
+  }
+
+  public void deleteBucket(String bucketName)
+  throws ServiceFailedException {
+
+    log.info("Deleting bucket using gcs client library");
+
+    try {
+      storage.buckets().delete(bucketName).execute();
+    } catch (IOException e) {
+      log.warning(e.getMessage());
+      throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+    }
+    log.info("Bucket created: " + bucketName);
   }
 
   public void createFolder(String bucketName, String folderName)
@@ -166,18 +181,27 @@ public class StorageServiceImpl extends MediaLibraryService {
   throws ServiceFailedException {
   }
 
-  @Override
-  public boolean deleteMediaItem(String bucketName, String itemName)
+  public List<String> deleteMediaItems(String bucketName, List<String> items)
   throws ServiceFailedException {
-    log.info("Deleting object using gcs client library");
+    log.info("Deleting objects using gcs client library");
+    log.info(items.toString());
+    List<String> errorItems = new ArrayList<String>();
 
-    try {
-      storage.objects().delete(bucketName, itemName).execute();
-      return true;
-    } catch (IOException e) {
-      log.warning(e.getMessage());
-      throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+    if (items.size() == 0) {return errorItems;}
+    if (items.size() == 1 && items.get(0).endsWith("/") == false) {
+      try {
+        storage.objects().delete(bucketName, items.get(0)).execute();
+        return errorItems;
+      } catch (IOException e) {
+        log.warning(e.getMessage());
+        errorItems.add(items.get(0));
+        return errorItems;
+      }
     }
+
+    BatchDelete batchDelete = new BatchDelete();
+    errorItems = batchDelete.deleteFiles(bucketName, items);
+    return errorItems;
   }
 
   @Override
@@ -195,5 +219,62 @@ public class StorageServiceImpl extends MediaLibraryService {
   @Override
   public String getSignedPolicy(String policyBase64) {
     return null;
+  }
+
+  class BatchDelete {
+    List<String> errorList;
+
+    public BatchDelete() {
+      errorList = new ArrayList<String>();
+    }
+
+    class DeleteBatchCallback extends JsonBatchCallback {
+      String fileName;
+
+      public DeleteBatchCallback(String deleteFileName) {
+        fileName = deleteFileName;
+      }
+
+      public void onSuccess(Object n, HttpHeaders responseHeaders) {
+      }
+
+      public void onFailure(GoogleJsonError e, HttpHeaders responseHeaders) {
+        log.warning("Could not delete " + fileName);
+        errorList.add(fileName);
+        log.warning(e.toString());
+      }
+    }
+
+    public List<String> deleteFiles(String bucketName, List<String> deleteList)
+    throws ServiceFailedException {
+      BatchRequest batch = storage.batch();
+      errorList = new ArrayList<String>();
+
+      try {
+        for (String item : deleteList) {
+          if (item.endsWith("/")) {
+            List<StorageObject> folderContents = 
+              getBucketItems(bucketName, item, "/");
+            for (StorageObject subItem : folderContents) {
+              storage.objects().delete(bucketName,
+                                       subItem.getName())
+                               .queue(batch, new DeleteBatchCallback(item));
+              log.info("Queued " + subItem.getName());
+            }
+          } else {
+          storage.objects().delete(bucketName, item)
+                           .queue(batch, new DeleteBatchCallback(item));
+          log.info("Queued " + item);
+          }
+        }
+
+        batch.execute();
+      } catch (IOException e) {
+        log.warning(e.getMessage());
+        throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+      }
+
+      return errorList;
+    }
   }
 }

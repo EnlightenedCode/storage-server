@@ -1,0 +1,20 @@
+<html>
+<head>
+<script src="api-test-page.js"></script>
+<script src="https://apis.google.com/js/client.js?onload=init"></script>
+<title>API Test</title>
+</head>
+<body>
+<button id="createBucket" type="button">createBucket</button>
+<button id="deleteBucket" type="button" >deleteBucket</button>
+
+<div id="response"></div>
+
+<script>
+document.getElementById("createBucket")
+        .addEventListener("click", createBucket);
+document.getElementById("deleteBucket")
+        .addEventListener("click", deleteBucket);
+</script>
+</body>
+</html>

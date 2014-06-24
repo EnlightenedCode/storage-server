@@ -14,6 +14,7 @@ import com.google.common.base.Joiner;
 import com.risevision.storage.Globals;
 import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.MediaLibraryServiceImpl;
+import com.risevision.storage.gcs.StorageServiceImpl;
 import com.risevision.storage.info.MediaItemInfo;
 import com.risevision.storage.queue.QueueServlet;
 
@@ -117,10 +118,11 @@ public class ImportFiles extends AbstractTask {
 		
 		if (files.size() > 0) {
 			MediaLibraryService service = MediaLibraryService.getInstance();
+			StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
 			
 			log.info("Removing Files (" + files.size() + ") first: " + files.get(0) + " last: " + files.get(files.size() - 1));
 			
-			List<String> failedFiles = service.deleteMediaItems(Globals.LOGS_BUCKET_NAME, files);
+			List<String> failedFiles = gcsService.deleteMediaItems(Globals.LOGS_BUCKET_NAME, files);
 			
 			if (failedFiles.size() > 0) {
 				filesString = Joiner.on(",").join(failedFiles);
