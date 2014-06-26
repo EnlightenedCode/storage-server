@@ -24,6 +24,7 @@ import com.google.api.client.googleapis.batch.BatchRequest;
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonError.ErrorInfo;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.ByteArrayContent;
 import com.risevision.storage.Globals;
 
@@ -93,13 +94,15 @@ public class StorageServiceImpl extends MediaLibraryService {
     do {
       try {
         listResult = listRequest.execute();
-      } catch (IOException e) {
-        log.warning(e.getMessage());
-        if (e.getMessage().substring(0, 3).equals("404")) {
-          throw new ServiceFailedException(ServiceFailedException.NOT_FOUND);
-        } else {
-          throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+      } catch (GoogleJsonResponseException e) {
+        if (e.getStatusCode() != ServiceFailedException.NOT_FOUND) {
+          log.warning(e.getStatusCode() + " - " + e.getMessage());
         }
+
+        throw new ServiceFailedException(e.getStatusCode());
+      }  catch (IOException e) {
+        log.warning(e.getMessage());
+        throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
       }
 
       try {
