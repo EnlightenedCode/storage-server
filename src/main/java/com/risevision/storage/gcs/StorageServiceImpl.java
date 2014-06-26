@@ -95,7 +95,11 @@ public class StorageServiceImpl extends MediaLibraryService {
         listResult = listRequest.execute();
       } catch (IOException e) {
         log.warning(e.getMessage());
-        throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+        if (e.getMessage().substring(0, 3).equals("404")) {
+          throw new ServiceFailedException(ServiceFailedException.NOT_FOUND);
+        } else {
+          throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+        }
       }
 
       try {
