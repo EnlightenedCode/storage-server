@@ -13,9 +13,12 @@ import com.risevision.storage.Globals;
 import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.Utils;
 import com.risevision.storage.api.responses.FilesResponse;
+import com.risevision.storage.api.responses.GCSFilesResponse;
 import com.risevision.storage.api.responses.StringResponse;
 import com.risevision.storage.api.responses.SimpleResponse;
 import com.risevision.storage.info.MediaItemInfo;
+import com.risevision.storage.gcs.StorageServiceImpl;
+import com.google.api.services.storage.model.StorageObject;
 import com.risevision.storage.info.ServiceFailedException;
 import com.risevision.storage.security.AccessResource;
 
@@ -26,7 +29,14 @@ import com.risevision.storage.security.AccessResource;
 )
 
 public class StorageAPI extends AbstractAPI {
-	
+
+        private void verifyUserCompany(String companyId, String email)
+        throws ServiceFailedException {
+          if (Globals.devserver) {return;}
+          AccessResource resource = new AccessResource(companyId, email);
+          resource.verify();
+        }
+
 	@ApiMethod(
 			name = "files.get",
 			path = "files",
@@ -34,9 +44,10 @@ public class StorageAPI extends AbstractAPI {
 	)
 	public SimpleResponse getFiles(
 			@Nullable @Named("companyId") String companyId,
+			@Nullable @Named("folder") String folder,
 			User user) {
 
-		FilesResponse result = new FilesResponse();
+		GCSFilesResponse result = new GCSFilesResponse();
 
 		try {
 
@@ -49,13 +60,12 @@ public class StorageAPI extends AbstractAPI {
 			log.info("User: " + user.getEmail());
 
 			try {
-				AccessResource resource = new AccessResource(companyId, user.getEmail());
-				resource.verify();
+                                verifyUserCompany(companyId, user.getEmail());
+				MediaLibraryService gcsService = MediaLibraryService.getGCSInstance();
+                                List<StorageObject> items;
 				
-				MediaLibraryService service = MediaLibraryService.getInstance();
-				
-				List<MediaItemInfo> items =  service.getBucketItems(MediaLibraryService.getBucketName(companyId));
-				
+                                items =  gcsService.getBucketItems(MediaLibraryService.getBucketName(companyId), folder, "/");
+
 				result.result = true;
 				result.code = ServiceFailedException.OK;
 				result.files = items;
@@ -92,7 +102,7 @@ public class StorageAPI extends AbstractAPI {
 			@Nullable @Named("files") List<String> files,
 			User user) {
 
-		FilesResponse result = new FilesResponse();
+		GCSFilesResponse result = new GCSFilesResponse();
 
 		try {
 
@@ -104,21 +114,16 @@ public class StorageAPI extends AbstractAPI {
 			log.info("User: " + user.getEmail());
 
 				try {
-					AccessResource resource = new AccessResource(companyId, user.getEmail());
-					resource.verify();
+                                        verifyUserCompany(companyId, user.getEmail());
 					
 					MediaLibraryService service = MediaLibraryService.getInstance();
-					
-					service.deleteMediaItems(MediaLibraryService.getBucketName(companyId), files);
-					
+					StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
+					gcsService.deleteMediaItems(MediaLibraryService.getBucketName(companyId), files);
+
 					log.info("Files Deleted");
-					
-					List<MediaItemInfo> items =  service.getBucketItems(MediaLibraryService.getBucketName(companyId));
 					
 					result.result = true;
 					result.code = ServiceFailedException.OK;
-					
-					result.files = items;
 					
 				} catch (ServiceFailedException e) {
 
@@ -127,7 +132,65 @@ public class StorageAPI extends AbstractAPI {
 					result.message = "File Deletion Failed";
 					
 					log.warning("File Deletion Failed - Status: " + e.getReason());
+				}
+
+
+		} catch (Exception e) {
+			Utils.logException(e);
+			
+			result.result = false;
+			result.code = ServiceFailedException.SERVER_ERROR;
+			result.message = "Internal Error.";
+		}
+
+		return result;
+
+	}
+	
+	@ApiMethod(
+			name = "createFolder",
+			path = "folder",
+			httpMethod = HttpMethod.POST
+	)
+	public SimpleResponse createFolder(
+			@Nullable @Named("companyId") String companyId,
+			@Nullable @Named("folder") String folder,
+                        User user) {
+
+		GCSFilesResponse result = new GCSFilesResponse();
+
+		try {
+
+			if (user == null) {
+				result.message = "No user";
+				return result;
+			}
+			if (folder == null) {
+				result.message = "No folder specified";
+				return result;
+			}
+
+			log.info("User: " + user.getEmail());
+
+				try {
+                                        verifyUserCompany(companyId, user.getEmail());
 					
+					StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
+					
+					gcsService.createFolder(MediaLibraryService.getBucketName(companyId), folder);
+					
+					log.info("Folder created");
+					
+					result.result = true;
+					result.code = ServiceFailedException.OK;
+					
+				} catch (ServiceFailedException e) {
+
+					result.result = false;
+					result.code = e.getReason();
+					result.message = "Folder creation failed";
+					
+					log.warning("Folder creation failed - Status: " + e.getReason());
 				}
 
 
@@ -167,9 +230,7 @@ public class StorageAPI extends AbstractAPI {
 
 			try {
 
-				AccessResource resource = new AccessResource(companyId, user.getEmail());
-				resource.verify();
-				
+                          verifyUserCompany(companyId, user.getEmail());
 			} catch (ServiceFailedException e) {
 
 				result.result = false;
@@ -220,23 +281,13 @@ SimpleResponse result = new SimpleResponse(); try { if (user == null) {
 			log.info("User: " + user.getEmail());
 
 			try {
-				AccessResource resource = new AccessResource(companyId, user.getEmail());
-
-				resource.verify();
-				
-				MediaLibraryService service = MediaLibraryService.getInstance();
+                              verifyUserCompany(companyId, user.getEmail());
+			      MediaLibraryService service = MediaLibraryService.getInstance();
                               bucketName = MediaLibraryService.getBucketName(companyId);
+
+                              MediaLibraryService gcsService = MediaLibraryService.getGCSInstance();
+                              gcsService.createBucket(bucketName);
                               
-                              service.createBucket(bucketName);
-                              
-                              log.info("Bucket Created");
-
-
-
-                              service.updateBucketProperty(bucketName, "logging", Globals.LOGGING_ENABLED_XML.replace("%bucketName%", bucketName).replace("%logBucket%", Globals.LOGS_BUCKET_NAME));
-
-                              log.info("Bucket Logging Enabled");
-
                               result.result = true;
                               result.code = ServiceFailedException.OK;
                               
@@ -247,6 +298,56 @@ SimpleResponse result = new SimpleResponse(); try { if (user == null) {
                               result.message = "Bucket Creation Failed";
                               
                               log.warning("Bucket Creation Failed - Status: " + e.getReason());
+                              
+                      }
+
+              } catch (Exception e) {
+                      Utils.logException(e);
+                      
+                      result.result = false;
+                      result.code = ServiceFailedException.SERVER_ERROR;
+			result.message = "Internal Error.";
+		}
+
+		return result;
+
+	}
+
+	@ApiMethod(
+			name = "deleteBucket",
+			path = "bucket",
+			httpMethod = HttpMethod.DELETE
+	)
+	public SimpleResponse deleteBucket(
+			@Nullable @Named("companyId") String companyId,
+			User user) {
+SimpleResponse result = new SimpleResponse(); try { if (user == null) {
+				result.message = "No user";
+				return result;
+			}
+
+                        String bucketName; 
+
+			log.info("User: " + user.getEmail());
+
+			try {
+                              verifyUserCompany(companyId, user.getEmail());
+			      MediaLibraryService service = MediaLibraryService.getInstance();
+                              bucketName = MediaLibraryService.getBucketName(companyId);
+
+                              StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
+                              gcsService.deleteBucket(bucketName);
+                              
+                              result.result = true;
+                              result.code = ServiceFailedException.OK;
+                              
+                      } catch (ServiceFailedException e) {
+
+                              result.result = false;
+                              result.code = e.getReason();
+                              result.message = "Bucket deletion failed";
+                              
+                              log.warning("Bucket Deletion Failed - Status: " + e.getReason());
                               
                       }
 
@@ -284,10 +385,7 @@ SimpleResponse result = new SimpleResponse(); try { if (user == null) {
 			log.info("User: " + user.getEmail());
 
 			try {
-
-				AccessResource resource = new AccessResource(companyId, user.getEmail());
-				resource.verify();
-				
+                          verifyUserCompany(companyId, user.getEmail());
 			} catch (ServiceFailedException e) {
 
 				result.result = false;

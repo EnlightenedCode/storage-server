@@ -1,0 +1,1 @@
+npm install connect serve-static && sh -c 'node server &' && cd .. && mvn appengine:devserver_start && cd api-tests && casperjs --cookies-file=../../cookies test api-tests-casper.js && cd .. && mvn appengine:devserver_stop && kill $(ps aux |grep "node server" | head -n 1 | awk '{print $2}')

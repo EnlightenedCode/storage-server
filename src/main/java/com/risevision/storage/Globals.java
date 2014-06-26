@@ -4,8 +4,21 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import com.google.appengine.api.utils.SystemProperty;
 
 public final class Globals {
+  public static final Boolean devserver = 
+    SystemProperty.environment.value() == 
+    SystemProperty.Environment.Value.Development;
+
+  public static final String STORAGE_APP_NAME =
+    "RVA Media Library";
+
+  public static final String STORAGE_SCOPE =
+    "https://www.googleapis.com/auth/devstorage.full_control";
+
+  public static final String LOCAL_P12_PATH =
+    "./WEB-INF/classes/65bd1c5e62dadd4852c8b04bf5124749985e8ff8-privatekey.p12";
 
   public static final String BUCKET_NAME_PREFIX =
     "risemedialibrary-";
