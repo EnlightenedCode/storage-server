@@ -71,6 +71,32 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
+    casper.echo("Creating folder.");
+    casper.click("#createFolder");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":true');
+  });
+
+  casper.then(function() {
+    casper.echo("Deleting folder.");
+    casper.click("#deleteFolder");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":true');
+  });
+
+  casper.then(function() {
     casper.echo("Deleting bucket.");
     casper.click("#deleteBucket");
   });
