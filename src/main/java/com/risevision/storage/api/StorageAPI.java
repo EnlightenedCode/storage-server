@@ -178,6 +178,7 @@ public class StorageAPI extends AbstractAPI {
 					StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
 					
 					gcsService.createFolder(MediaLibraryService.getBucketName(companyId), folder);
+					gcsService.setBucketPublicRead(MediaLibraryService.getBucketName(companyId));
 					
 					log.info("Folder created");
 					

@@ -25,13 +25,32 @@ function createBucket() {
   storageApiCall("createBucket", {"companyId": randomId});
 }
 
+function createFolder() {
+  storageApiCall("createFolder", {"companyId": randomId,
+                                  "folder": "test folder"});
+}
+
+function deleteFolder() {
+  storageApiCall("files.delete", {"companyId": randomId,
+                                  "files": ["test folder/"]});
+}
+
 function deleteBucket() {
   storageApiCall("deleteBucket", {"companyId": randomId});
 }
 
-function storageApiCall(apiCommand, paramObj) {
+
+function storageApiCall(commandString, paramObj) {
+  var commandObject, commandArray;
   document.getElementById("response").style.display="none";
-  gapi.client.storage[apiCommand](paramObj)
+  commandArray = commandString.split(".");
+
+  commandObject = gapi.client.storage;
+  commandArray.forEach(function(val) {
+    commandObject = commandObject[val];
+  });
+ 
+  commandObject(paramObj)
       .execute(function(resp) {
         console.log(resp);
         document.getElementById("response").innerHTML=JSON.stringify(resp);

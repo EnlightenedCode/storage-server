@@ -18,6 +18,7 @@ import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Objects;
 import com.google.api.services.storage.model.StorageObject;
+import com.google.api.services.storage.model.BucketAccessControl;
 import com.google.api.services.storage.Storage.Buckets.*;
 import com.google.api.client.googleapis.batch.BatchRequest;
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
@@ -127,7 +128,11 @@ public class StorageServiceImpl extends MediaLibraryService {
     Bucket newBucket = new Bucket().setName(bucketName)
                                    .setLogging(new Bucket.Logging()
                                      .setLogBucket(Globals.LOGS_BUCKET_NAME)
-                                     .setLogObjectPrefix(bucketName));
+                                     .setLogObjectPrefix(bucketName))
+                                   .setAcl(new ArrayList<BucketAccessControl>()
+                                       {{this.add(new BucketAccessControl()
+                                                .setEntity("allUsers")
+                                                .setRole("READER"));}});
 
     try {
       storage.buckets().insert(Globals.PROJECT_ID, newBucket).execute();
@@ -149,7 +154,7 @@ public class StorageServiceImpl extends MediaLibraryService {
       log.warning(e.getMessage());
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
     }
-    log.info("Bucket created: " + bucketName);
+    log.info("Bucket deleted: " + bucketName);
   }
 
   public void createFolder(String bucketName, String folderName)
@@ -168,6 +173,23 @@ public class StorageServiceImpl extends MediaLibraryService {
                      objectMetadata,
                      ByteArrayContent.fromString("text/plain", ""))
              .execute();
+    } catch (IOException e) {
+      log.warning(e.getMessage());
+      throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+    }
+  }
+
+  public void setBucketPublicRead(String bucketName)
+  throws ServiceFailedException {
+    log.info("Setting bucket acl to public read");
+
+    try {
+      storage.buckets().patch(bucketName,
+          new Bucket().setAcl(new ArrayList<BucketAccessControl>()
+                                  {{this.add(new BucketAccessControl()
+                                                .setEntity("allUsers")
+                                                .setRole("READER"));}}))
+                       .execute();
     } catch (IOException e) {
       log.warning(e.getMessage());
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);

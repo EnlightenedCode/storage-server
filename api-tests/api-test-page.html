@@ -6,6 +6,8 @@
 </head>
 <body>
 <button id="createBucket" type="button">createBucket</button>
+<button id="createFolder" type="button" >createFolder</button>
+<button id="deleteFolder" type="button" >deleteFolder</button>
 <button id="deleteBucket" type="button" >deleteBucket</button>
 
 <div id="response"></div>
@@ -15,6 +17,10 @@ document.getElementById("createBucket")
         .addEventListener("click", createBucket);
 document.getElementById("deleteBucket")
         .addEventListener("click", deleteBucket);
+document.getElementById("createFolder")
+        .addEventListener("click", createFolder);
+document.getElementById("deleteFolder")
+        .addEventListener("click", deleteFolder);
 </script>
 </body>
 </html>
