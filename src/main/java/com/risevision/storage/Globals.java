@@ -17,6 +17,9 @@ public final class Globals {
   public static final String STORAGE_SCOPE =
     "https://www.googleapis.com/auth/devstorage.full_control";
 
+  public static final String EDITOR_GROUP =
+    "group-00b4903a979339148b85b8e79b1639b92ab14bf82fe03b33c5aa2aedd0ac5172";
+
   public static final String LOCAL_P12_PATH =
     "./WEB-INF/classes/65bd1c5e62dadd4852c8b04bf5124749985e8ff8-privatekey.p12";
 

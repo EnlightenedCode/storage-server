@@ -138,8 +138,11 @@ public class StorageServiceImpl extends MediaLibraryService {
                                      .setLogObjectPrefix(bucketName))
                                    .setAcl(new ArrayList<BucketAccessControl>()
                                        {{this.add(new BucketAccessControl()
-                                                .setEntity("allUsers")
-                                                .setRole("READER"));}});
+                                               .setEntity("allUsers")
+                                               .setRole("READER"));
+                                        this.add(new BucketAccessControl()
+                                               .setEntity(Globals.EDITOR_GROUP)
+                                               .setRole("WRITER"));}});
 
     try {
       storage.buckets().insert(Globals.PROJECT_ID, newBucket).execute();
@@ -195,7 +198,10 @@ public class StorageServiceImpl extends MediaLibraryService {
           new Bucket().setAcl(new ArrayList<BucketAccessControl>()
                                   {{this.add(new BucketAccessControl()
                                                 .setEntity("allUsers")
-                                                .setRole("READER"));}}))
+                                                .setRole("READER"));
+                                    this.add(new BucketAccessControl()
+                                          .setEntity(Globals.EDITOR_GROUP)
+                                          .setRole("WRITER"));}}))
                        .execute();
     } catch (IOException e) {
       log.warning(e.getMessage());
