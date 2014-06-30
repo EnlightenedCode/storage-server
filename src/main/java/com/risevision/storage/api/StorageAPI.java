@@ -46,39 +46,28 @@ public class StorageAPI extends AbstractAPI {
                                  User user) {
 
     GCSFilesResponse result = new GCSFilesResponse();
+    if (user == null) {
+      result.message = "No user";
+      result.code = ServiceFailedException.AUTHENTICATION_FAILED;
+      return result;
+    }
+
+    log.info("User: " + user.getEmail());
     try {
-      if (user == null) {
-        result.message = "No user";
-        result.code = ServiceFailedException.AUTHENTICATION_FAILED;
-        return result;
-      }
+      verifyUserCompany(companyId, user.getEmail());
+      MediaLibraryService gcsService = MediaLibraryService.getGCSInstance();
+      List<StorageObject> items = gcsService.getBucketItems(
+        MediaLibraryService.getBucketName(companyId),
+        folder, "/");
 
-      log.info("User: " + user.getEmail());
-
-      try {
-        verifyUserCompany(companyId, user.getEmail());
-        MediaLibraryService gcsService = MediaLibraryService.getGCSInstance();
-        List<StorageObject> items;
-
-        items =  gcsService.getBucketItems(MediaLibraryService.getBucketName(companyId),
-                                           folder, "/");
-
-        result.result = true;
-        result.code = ServiceFailedException.OK;
-        result.files = items;
-
-      } catch (ServiceFailedException e) {
-        result.result = false;
-        result.code = e.getReason();
-        result.message = "Could not retrieve Bucket Items";
-        log.warning("Could not retrieve Bucket Items - Status: " + e.getReason());
-      }
-
-    } catch (Exception e) {
-      Utils.logException(e);
+      result.result = true;
+      result.code = ServiceFailedException.OK;
+      result.files = items;
+    } catch (ServiceFailedException e) {
       result.result = false;
-      result.code = ServiceFailedException.SERVER_ERROR;
-      result.message = "Internal Error.";
+      result.code = e.getReason();
+      result.message = "Could not retrieve Bucket Items";
+      log.warning("Could not retrieve Bucket Items - Status: " + e.getReason());
     }
 
     return result;
@@ -92,39 +81,27 @@ public class StorageAPI extends AbstractAPI {
                                     @Nullable @Named("files") List<String> files,
                                     User user) {
     GCSFilesResponse result = new GCSFilesResponse();
+    if (user == null) {
+      result.message = "No user";
+      return result;
+    }
+    log.info("User: " + user.getEmail());
     try {
-      if (user == null) {
-        result.message = "No user";
-        return result;
-      }
-      log.info("User: " + user.getEmail());
+      verifyUserCompany(companyId, user.getEmail());
 
-      try {
-        verifyUserCompany(companyId, user.getEmail());
+      MediaLibraryService service = MediaLibraryService.getInstance();
+      StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
+      gcsService.deleteMediaItems(MediaLibraryService.getBucketName(companyId), files);
 
-        MediaLibraryService service = MediaLibraryService.getInstance();
-        StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
-        gcsService.deleteMediaItems(MediaLibraryService.getBucketName(companyId), files);
+      log.info("Files Deleted");
 
-        log.info("Files Deleted");
-
-        result.result = true;
-        result.code = ServiceFailedException.OK;
-
-      } catch (ServiceFailedException e) {
-
-        result.result = false;
-        result.code = e.getReason();
-        result.message = "File Deletion Failed";
-
-        log.warning("File Deletion Failed - Status: " + e.getReason());
-      }
-    } catch (Exception e) {
-      Utils.logException(e);
-
+      result.result = true;
+      result.code = ServiceFailedException.OK;
+    } catch (ServiceFailedException e) {
       result.result = false;
-      result.code = ServiceFailedException.SERVER_ERROR;
-      result.message = "Internal Error.";
+      result.code = e.getReason();
+      result.message = "File Deletion Failed";
+      log.warning("File Deletion Failed - Status: " + e.getReason());
     }
 
     return result;
@@ -138,45 +115,31 @@ public class StorageAPI extends AbstractAPI {
                                      @Nullable @Named("folder") String folder,
                                      User user) {
     GCSFilesResponse result = new GCSFilesResponse();
+    if (user == null) {
+      result.message = "No user";
+      return result;
+    }
+    if (folder == null) {
+      result.message = "No folder specified";
+      return result;
+    }
+
+    log.info("User: " + user.getEmail());
+
     try {
-      if (user == null) {
-        result.message = "No user";
-        return result;
-      }
-      if (folder == null) {
-        result.message = "No folder specified";
-        return result;
-      }
+      verifyUserCompany(companyId, user.getEmail());
+      StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
+      gcsService.createFolder(MediaLibraryService.getBucketName(companyId), folder);
+      gcsService.setBucketPublicRead(MediaLibraryService.getBucketName(companyId));
+      log.info("Folder created");
 
-      log.info("User: " + user.getEmail());
-
-      try {
-        verifyUserCompany(companyId, user.getEmail());
-
-        StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
-
-        gcsService.createFolder(MediaLibraryService.getBucketName(companyId), folder);
-        gcsService.setBucketPublicRead(MediaLibraryService.getBucketName(companyId));
-
-        log.info("Folder created");
-
-        result.result = true;
-        result.code = ServiceFailedException.OK;
-
-      } catch (ServiceFailedException e) {
-
-        result.result = false;
-        result.code = e.getReason();
-        result.message = "Folder creation failed";
-
-        log.warning("Folder creation failed - Status: " + e.getReason());
-      }
-    } catch (Exception e) {
-      Utils.logException(e);
-
+      result.result = true;
+      result.code = ServiceFailedException.OK;
+    } catch (ServiceFailedException e) {
       result.result = false;
-      result.code = ServiceFailedException.SERVER_ERROR;
-      result.message = "Internal Error.";
+      result.code = e.getReason();
+      result.message = "Folder creation failed";
+      log.warning("Folder creation failed - Status: " + e.getReason());
     }
 
     return result;
@@ -190,35 +153,34 @@ public class StorageAPI extends AbstractAPI {
                                    @Nullable @Named("file") String file,
                                    User user) {
     StringResponse result = new StringResponse();
+    if (user == null) {
+      result.message = "No user";
+      return result;
+    }
+
+    log.info("User: " + user.getEmail());
+
     try {
-      if (user == null) {
-        result.message = "No user";
-        return result;
-      }
+      verifyUserCompany(companyId, user.getEmail());
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.code = e.getReason();
+      result.message = "Authentication Failed";
+      log.warning("Authentication Failed - Status: " + e.getReason());
+      return result;
+    }
 
-      log.info("User: " + user.getEmail());
-
-      try {
-        verifyUserCompany(companyId, user.getEmail());
-      } catch (ServiceFailedException e) {
-        result.result = false;
-        result.code = e.getReason();
-        result.message = "Authentication Failed";
-        log.warning("Authentication Failed - Status: " + e.getReason());
-      }
-      MediaLibraryService service = MediaLibraryService.getInstance();
+    MediaLibraryService service = MediaLibraryService.getInstance();
+    try {
       String fileUrl = service.getMediaItemUrl(MediaLibraryService.getBucketName(companyId), file);
-
       log.warning(fileUrl);
-
       result.result = true;
       result.code = ServiceFailedException.OK;
       result.response = fileUrl;
     } catch (Exception e) {
-      Utils.logException(e);
       result.result = false;
       result.code = ServiceFailedException.SERVER_ERROR;
-      result.message = "Internal Error.";
+      result.message = "File error: " + e.getMessage();
     }
 
     return result;
@@ -231,39 +193,31 @@ public class StorageAPI extends AbstractAPI {
   public SimpleResponse createBucket(@Nullable @Named("companyId") String companyId,
                                      User user) {
     SimpleResponse result = new SimpleResponse();
-    try { 
-      if (user == null) {
-        result.message = "No user";
-        return result;
-      }
+    if (user == null) {
+      result.message = "No user";
+      return result;
+    }
 
-      String bucketName; 
-      log.info("User: " + user.getEmail());
+    String bucketName; 
+    log.info("User: " + user.getEmail());
 
-      try {
-        verifyUserCompany(companyId, user.getEmail());
-        MediaLibraryService service = MediaLibraryService.getInstance();
-        bucketName = MediaLibraryService.getBucketName(companyId);
+    try {
+      verifyUserCompany(companyId, user.getEmail());
+      MediaLibraryService service = MediaLibraryService.getInstance();
+      bucketName = MediaLibraryService.getBucketName(companyId);
 
-        MediaLibraryService gcsService = MediaLibraryService.getGCSInstance();
-        gcsService.createBucket(bucketName);
+      MediaLibraryService gcsService = MediaLibraryService.getGCSInstance();
+      gcsService.createBucket(bucketName);
 
-        result.result = true;
-        result.code = ServiceFailedException.OK;
+      result.result = true;
+      result.code = ServiceFailedException.OK;
 
-      } catch (ServiceFailedException e) {
-        result.result = false;
-        result.code = e.getReason();
-        result.message = "Bucket Creation Failed";
-
-        log.warning("Bucket Creation Failed - Status: " + e.getReason());
-      }
-    } catch (Exception e) {
-      Utils.logException(e);
-
+    } catch (ServiceFailedException e) {
       result.result = false;
-      result.code = ServiceFailedException.SERVER_ERROR;
-      result.message = "Internal Error.";
+      result.code = e.getReason();
+      result.message = "Bucket Creation Failed";
+
+      log.warning("Bucket Creation Failed - Status: " + e.getReason());
     }
 
     return result;
@@ -277,42 +231,31 @@ public class StorageAPI extends AbstractAPI {
                                      User user) {
     SimpleResponse result = new SimpleResponse();
     String bucketName; 
+    if (user == null) {
+      result.message = "No user";
+      return result;
+    }
 
+    log.info("User: " + user.getEmail());
     try {
-      if (user == null) {
-        result.message = "No user";
-        return result;
-      }
+      verifyUserCompany(companyId, user.getEmail());
+      MediaLibraryService service = MediaLibraryService.getInstance();
+      bucketName = MediaLibraryService.getBucketName(companyId);
 
-      log.info("User: " + user.getEmail());
+      StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
+      gcsService.deleteBucket(bucketName);
 
-      try {
-        verifyUserCompany(companyId, user.getEmail());
-        MediaLibraryService service = MediaLibraryService.getInstance();
-        bucketName = MediaLibraryService.getBucketName(companyId);
+      result.result = true;
+      result.code = ServiceFailedException.OK;
 
-        StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
-        gcsService.deleteBucket(bucketName);
-
-        result.result = true;
-        result.code = ServiceFailedException.OK;
-
-      } catch (ServiceFailedException e) {
-        result.result = false;
-        result.code = e.getReason();
-        result.message = "Bucket deletion failed";
-        log.warning("Bucket Deletion Failed - Status: " + e.getReason());
-      }
-    } catch (Exception e) {
-      Utils.logException(e);
-
+    } catch (ServiceFailedException e) {
       result.result = false;
-      result.code = ServiceFailedException.SERVER_ERROR;
-      result.message = "Internal Error.";
+      result.code = e.getReason();
+      result.message = "Bucket deletion failed";
+      log.warning("Bucket Deletion Failed - Status: " + e.getReason());
     }
 
     return result;
-
   }
 
   @ApiMethod(
@@ -323,23 +266,23 @@ public class StorageAPI extends AbstractAPI {
                                    @Nullable @Named("policyBase64") String policyBase64,
                                    User user) {
     StringResponse result = new StringResponse();
+    if (user == null) {
+      result.message = "No user";
+      return result;
+    }
+    log.info("User: " + user.getEmail());
+
     try {
-      if (user == null) {
-        result.message = "No user";
-        return result;
-      }
+      verifyUserCompany(companyId, user.getEmail());
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.code = e.getReason();
+      result.message = "Authentication Failed";
+      log.warning("Authentication Failed - Status: " + e.getReason());
+      return result;
+    }
 
-      log.info("User: " + user.getEmail());
-
-      try {
-        verifyUserCompany(companyId, user.getEmail());
-      } catch (ServiceFailedException e) {
-        result.result = false;
-        result.code = e.getReason();
-        result.message = "Authentication Failed";
-        log.warning("Authentication Failed - Status: " + e.getReason());
-      }
-
+    try {
       MediaLibraryService service = MediaLibraryService.getInstance();
       String signedPolicy = service.getSignedPolicy(policyBase64);
       log.info("Policy Signed");
