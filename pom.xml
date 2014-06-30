@@ -44,7 +44,7 @@
       <id>test</id>
       <activation>
           <file>
-            <missing>${project.build.outputDirectory/build.properties</missing>
+            <missing>${basedir/target/classes/build.properties</missing>
           </file>
       </activation>
       <build>
