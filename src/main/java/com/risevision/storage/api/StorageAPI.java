@@ -173,7 +173,7 @@ public class StorageAPI extends AbstractAPI {
     MediaLibraryService service = MediaLibraryService.getInstance();
     try {
       String fileUrl = service.getMediaItemUrl(MediaLibraryService.getBucketName(companyId), file);
-      log.warning(fileUrl);
+      log.info(fileUrl);
       result.result = true;
       result.code = ServiceFailedException.OK;
       result.response = fileUrl;
