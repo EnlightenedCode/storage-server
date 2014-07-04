@@ -7,7 +7,7 @@ import org.mockito.InOrder;
 import org.mockito.ArgumentCaptor;
 import static org.junit.Assert.*;
 
-import com.risevision.storage.gcs.StorageServiceImpl;
+import com.risevision.storage.gcs.StorageService;
 import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.gcs.LocalCredentialBuilder;
 
@@ -17,17 +17,17 @@ import com.google.api.services.storage.model.StorageObject;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.AbstractInputStreamContent;
 
-public class ServiceImplTest {
+public class ServiceTest {
 
   @Test
   public void confirmGCSInstance() {
-    MediaLibraryService gcsInstance = MediaLibraryService.getGCSInstance();
-    assertThat(gcsInstance, instanceOf(StorageServiceImpl.class));
+    StorageService gcsInstance = StorageService.getInstance();
+    assertThat(gcsInstance, instanceOf(StorageService.class));
   }
 
   @Test
   public void folderCanBeCreated() {
-    StorageServiceImpl gcsInstance = MediaLibraryService.getGCSInstance();
+    StorageService gcsInstance = StorageService.getInstance();
     
     //Mock the google client objects
     Storage storageMock = mock(Storage.class);
@@ -69,7 +69,7 @@ public class ServiceImplTest {
 
   @Test
   public void bucketListRequestWithNoParameters() {
-    StorageServiceImpl gcsInstance = MediaLibraryService.getGCSInstance();
+    StorageService gcsInstance = StorageService.getInstance();
     
     //Mock the google client objects
     Storage storageMock = mock(Storage.class);

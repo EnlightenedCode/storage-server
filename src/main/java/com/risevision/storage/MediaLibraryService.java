@@ -14,11 +14,10 @@ import com.google.common.base.Strings;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
 import com.risevision.storage.info.MediaItemInfo;
 import com.risevision.storage.info.ServiceFailedException;
-import com.risevision.storage.gcs.StorageServiceImpl;
+import com.risevision.storage.gcs.StorageService;
 
 public abstract class MediaLibraryService {
   private static MediaLibraryService instance; 
-  private static StorageServiceImpl GCSinstance; 
   protected static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 
   protected static final Logger log = Logger.getAnonymousLogger();
@@ -31,16 +30,6 @@ public abstract class MediaLibraryService {
       e.printStackTrace();
     }
     return instance;
-  }
-
-  public static StorageServiceImpl getGCSInstance() {
-    try {
-      if (GCSinstance == null)
-        GCSinstance = new StorageServiceImpl();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return GCSinstance;
   }
 
   public abstract ListAllMyBucketsResponse getAllMyBuckets() 

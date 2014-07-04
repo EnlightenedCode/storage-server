@@ -5,6 +5,7 @@ import java.util.List;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
@@ -27,9 +28,11 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.ByteArrayContent;
 import com.risevision.storage.Globals;
 
-public class StorageServiceImpl extends MediaLibraryService {
+public final class StorageService {
   private static HttpRequestInitializer credential;
   private static Storage storage;
+  private static StorageService instance;
+  protected static final Logger log = Logger.getAnonymousLogger();
 
   static {
     if (Globals.devserver) {
@@ -41,23 +44,33 @@ public class StorageServiceImpl extends MediaLibraryService {
     storage = GCSClient.getStorageClient(credential);
   }
 
+  private StorageService() {}
+
+  public static StorageService getInstance() {
+    try {
+      if (instance == null) {
+        instance = new StorageService();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return instance;
+  }
+
   public void setClient(Storage client) {
     this.storage = client;
   }
 
-  @Override
   public ListAllMyBucketsResponse getAllMyBuckets()
   throws ServiceFailedException {
     return null;
   }
 
-  @Override
   public InputStream getBucketProperty(String bucketName, String property)
   throws ServiceFailedException {
     return null;
   }
 
-  @Override
   public String getBucketPropertyString(String bucketName, String property)
   throws ServiceFailedException {
     return null;
@@ -126,7 +139,6 @@ public class StorageServiceImpl extends MediaLibraryService {
     return items;
   }
 
-  @Override
   public void createBucket(String bucketName)
   throws ServiceFailedException {
 
@@ -208,7 +220,6 @@ public class StorageServiceImpl extends MediaLibraryService {
     }
   }
 
-  @Override
   public void updateBucketProperty(String bucketName, 
                                   String property,
                                   String propertyXMLdoc) 
@@ -238,13 +249,11 @@ public class StorageServiceImpl extends MediaLibraryService {
     return errorItems;
   }
 
-  @Override
   public InputStream getMediaItem(String bucketName, String itemName)
   throws ServiceFailedException {
     return null;
   }
 
-  @Override
   public String getSignedPolicy(String policyBase64) {
     return null;
   }
