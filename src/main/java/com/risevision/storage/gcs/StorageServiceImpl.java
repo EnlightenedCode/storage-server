@@ -245,12 +245,6 @@ public class StorageServiceImpl extends MediaLibraryService {
   }
 
   @Override
-  public String getMediaItemUrl(String bucketName, String itemName)
-  throws Exception {
-    return null;
-  }
-
-  @Override
   public String getSignedPolicy(String policyBase64) {
     return null;
   }

@@ -16,7 +16,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
                        return document.getElementById("response").innerHTML === "logged-in";
                      });},
                    function() {},
-                   function(){signIn();});
+                   function(){signIn();}, 10000);
   });
 
   function signIn() {
