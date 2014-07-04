@@ -5,12 +5,23 @@
 <title>API Test</title>
 </head>
 <body>
+<h1>API Tests</h1>
+<div><span>Response: </span><span id="response"></span></div>
+
+<h3>Expect Success</h3>
 <button id="createBucket" type="button">createBucket</button>
 <button id="createFolder" type="button" >createFolder</button>
 <button id="deleteFolder" type="button" >deleteFolder</button>
 <button id="deleteBucket" type="button" >deleteBucket</button>
 
-<div id="response"></div>
+<h3>Expect Failure</h3>
+<button id="createFolderMissingCompany" type="button" >
+  createFolder - MissingCompany
+</button>
+<button id="createFolderMissingFolder" type="button" >
+  createFolder - MissingFolder
+</button>
+
 
 <script>
 document.getElementById("createBucket")
@@ -21,6 +32,10 @@ document.getElementById("createFolder")
         .addEventListener("click", createFolder);
 document.getElementById("deleteFolder")
         .addEventListener("click", deleteFolder);
+document.getElementById("createFolderMissingCompany")
+        .addEventListener("click", createFolderMissingCompany);
+document.getElementById("createFolderMissingFolder")
+        .addEventListener("click", createFolderMissingFolder);
 </script>
 </body>
 </html>

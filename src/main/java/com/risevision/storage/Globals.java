@@ -23,7 +23,7 @@ public final class Globals {
   public static final String LOCAL_P12_PATH =
     "./WEB-INF/classes/65bd1c5e62dadd4852c8b04bf5124749985e8ff8-privatekey.p12";
 
-  public static final String BUCKET_NAME_PREFIX =
+  public static final String COMPANY_BUCKET_PREFIX =
     "risemedialibrary-";
           
   public static final String PROJECT_ID =

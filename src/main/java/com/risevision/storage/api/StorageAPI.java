@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.inject.Named;
+import com.google.common.base.Strings;
 
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
@@ -57,7 +58,7 @@ public class StorageAPI extends AbstractAPI {
       verifyUserCompany(companyId, user.getEmail());
       MediaLibraryService gcsService = MediaLibraryService.getGCSInstance();
       List<StorageObject> items = gcsService.getBucketItems(
-        MediaLibraryService.getBucketName(companyId),
+        Globals.COMPANY_BUCKET_PREFIX + companyId,
         folder, "/");
 
       result.result = true;
@@ -89,9 +90,9 @@ public class StorageAPI extends AbstractAPI {
     try {
       verifyUserCompany(companyId, user.getEmail());
 
-      MediaLibraryService service = MediaLibraryService.getInstance();
       StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
-      gcsService.deleteMediaItems(MediaLibraryService.getBucketName(companyId), files);
+      gcsService.deleteMediaItems(Globals.COMPANY_BUCKET_PREFIX + companyId,
+                                  files);
 
       log.info("Files Deleted");
 
@@ -111,16 +112,18 @@ public class StorageAPI extends AbstractAPI {
   name = "createFolder",
   path = "folder",
   httpMethod = HttpMethod.POST)
-  public SimpleResponse createFolder(@Nullable @Named("companyId") String companyId,
-                                     @Nullable @Named("folder") String folder,
+  public SimpleResponse createFolder(@Named("companyId") String companyId,
+                                     @Named("folder") String folder,
                                      User user) {
     GCSFilesResponse result = new GCSFilesResponse();
     if (user == null) {
       result.message = "No user";
       return result;
     }
-    if (folder == null) {
-      result.message = "No folder specified";
+
+    if (Strings.isNullOrEmpty(companyId) ||
+        Strings.isNullOrEmpty(folder)) {
+      result.message = "Unspecified folder or company";
       return result;
     }
 
@@ -129,9 +132,9 @@ public class StorageAPI extends AbstractAPI {
     try {
       verifyUserCompany(companyId, user.getEmail());
       StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
-      gcsService.createFolder(MediaLibraryService.getBucketName(companyId), folder);
-      gcsService.setBucketPublicRead(MediaLibraryService.getBucketName(companyId));
-      log.info("Folder created");
+      gcsService.createFolder(Globals.COMPANY_BUCKET_PREFIX + companyId, folder);
+      gcsService.setBucketPublicRead(Globals.COMPANY_BUCKET_PREFIX + companyId);
+      log.info("Folder created for company " + companyId);
 
       result.result = true;
       result.code = ServiceFailedException.OK;
@@ -171,8 +174,9 @@ public class StorageAPI extends AbstractAPI {
     }
 
     MediaLibraryService service = MediaLibraryService.getInstance();
+
     try {
-      String fileUrl = service.getMediaItemUrl(MediaLibraryService.getBucketName(companyId), file);
+      String fileUrl = service.getMediaItemUrl(Globals.COMPANY_BUCKET_PREFIX + companyId, file);
       log.info(fileUrl);
       result.result = true;
       result.code = ServiceFailedException.OK;
@@ -203,8 +207,7 @@ public class StorageAPI extends AbstractAPI {
 
     try {
       verifyUserCompany(companyId, user.getEmail());
-      MediaLibraryService service = MediaLibraryService.getInstance();
-      bucketName = MediaLibraryService.getBucketName(companyId);
+      bucketName = Globals.COMPANY_BUCKET_PREFIX + companyId;
 
       MediaLibraryService gcsService = MediaLibraryService.getGCSInstance();
       gcsService.createBucket(bucketName);
@@ -239,8 +242,7 @@ public class StorageAPI extends AbstractAPI {
     log.info("User: " + user.getEmail());
     try {
       verifyUserCompany(companyId, user.getEmail());
-      MediaLibraryService service = MediaLibraryService.getInstance();
-      bucketName = MediaLibraryService.getBucketName(companyId);
+      bucketName = Globals.COMPANY_BUCKET_PREFIX + companyId;
 
       StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
       gcsService.deleteBucket(bucketName);
