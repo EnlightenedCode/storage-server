@@ -18,7 +18,7 @@ import com.risevision.storage.api.responses.GCSFilesResponse;
 import com.risevision.storage.api.responses.StringResponse;
 import com.risevision.storage.api.responses.SimpleResponse;
 import com.risevision.storage.info.MediaItemInfo;
-import com.risevision.storage.gcs.StorageServiceImpl;
+import com.risevision.storage.gcs.StorageService;
 import com.google.api.services.storage.model.StorageObject;
 import com.risevision.storage.info.ServiceFailedException;
 import com.risevision.storage.security.AccessResource;
@@ -56,7 +56,7 @@ public class StorageAPI extends AbstractAPI {
     log.info("User: " + user.getEmail());
     try {
       verifyUserCompany(companyId, user.getEmail());
-      MediaLibraryService gcsService = MediaLibraryService.getGCSInstance();
+      StorageService gcsService = StorageService.getInstance();
       List<StorageObject> items = gcsService.getBucketItems(
         Globals.COMPANY_BUCKET_PREFIX + companyId,
         folder, "/");
@@ -90,7 +90,7 @@ public class StorageAPI extends AbstractAPI {
     try {
       verifyUserCompany(companyId, user.getEmail());
 
-      StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
+      StorageService gcsService = StorageService.getInstance();
       gcsService.deleteMediaItems(Globals.COMPANY_BUCKET_PREFIX + companyId,
                                   files);
 
@@ -131,7 +131,7 @@ public class StorageAPI extends AbstractAPI {
 
     try {
       verifyUserCompany(companyId, user.getEmail());
-      StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
+      StorageService gcsService = StorageService.getInstance();
       gcsService.createFolder(Globals.COMPANY_BUCKET_PREFIX + companyId, folder);
       gcsService.setBucketPublicRead(Globals.COMPANY_BUCKET_PREFIX + companyId);
       log.info("Folder created for company " + companyId);
@@ -167,7 +167,7 @@ public class StorageAPI extends AbstractAPI {
       verifyUserCompany(companyId, user.getEmail());
       bucketName = Globals.COMPANY_BUCKET_PREFIX + companyId;
 
-      MediaLibraryService gcsService = MediaLibraryService.getGCSInstance();
+      StorageService gcsService = StorageService.getInstance();
       gcsService.createBucket(bucketName);
 
       result.result = true;
@@ -202,7 +202,7 @@ public class StorageAPI extends AbstractAPI {
       verifyUserCompany(companyId, user.getEmail());
       bucketName = Globals.COMPANY_BUCKET_PREFIX + companyId;
 
-      StorageServiceImpl gcsService = MediaLibraryService.getGCSInstance();
+      StorageService gcsService = StorageService.getInstance();
       gcsService.deleteBucket(bucketName);
 
       result.result = true;
