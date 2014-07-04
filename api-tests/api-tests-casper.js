@@ -109,6 +109,32 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
     this.test.assertSelectorHasText("#response", '"result":true');
   });
 
+  casper.then(function() {
+    casper.echo("Attempting to create folder with missing company.");
+    casper.click("#createFolderMissingCompany");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":false');
+  });
+
+  casper.then(function() {
+    casper.echo("Attempting to create folder with missing folder.");
+    casper.click("#createFolderMissingFolder");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":false');
+  });
+
   casper.run(function() {
     test.done();
   });

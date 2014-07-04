@@ -39,6 +39,14 @@ function deleteBucket() {
   storageApiCall("deleteBucket", {"companyId": randomId});
 }
 
+function createFolderMissingCompany() {
+  storageApiCall("createFolder", {"folder": "test folder"});
+}
+
+function createFolderMissingFolder() {
+  storageApiCall("createFolder", {"companyId": randomId});
+}
+
 
 function storageApiCall(commandString, paramObj) {
   var commandObject, commandArray;
@@ -54,6 +62,6 @@ function storageApiCall(commandString, paramObj) {
       .execute(function(resp) {
         console.log(resp);
         document.getElementById("response").innerHTML=JSON.stringify(resp);
-        document.getElementById("response").style.display="block";
+        document.getElementById("response").style.display="inline";
       });
 }
