@@ -149,48 +149,6 @@ public class StorageAPI extends AbstractAPI {
   }
 
   @ApiMethod(
-  name = "file.url",
-  path = "file",
-  httpMethod = HttpMethod.POST)
-  public SimpleResponse getFileUrl(@Nullable @Named("companyId") String companyId,
-                                   @Nullable @Named("file") String file,
-                                   User user) {
-    StringResponse result = new StringResponse();
-    if (user == null) {
-      result.message = "No user";
-      return result;
-    }
-
-    log.info("User: " + user.getEmail());
-
-    try {
-      verifyUserCompany(companyId, user.getEmail());
-    } catch (ServiceFailedException e) {
-      result.result = false;
-      result.code = e.getReason();
-      result.message = "Authentication Failed";
-      log.warning("Authentication Failed - Status: " + e.getReason());
-      return result;
-    }
-
-    MediaLibraryService service = MediaLibraryService.getInstance();
-
-    try {
-      String fileUrl = service.getMediaItemUrl(Globals.COMPANY_BUCKET_PREFIX + companyId, file);
-      log.info(fileUrl);
-      result.result = true;
-      result.code = ServiceFailedException.OK;
-      result.response = fileUrl;
-    } catch (Exception e) {
-      result.result = false;
-      result.code = ServiceFailedException.SERVER_ERROR;
-      result.message = "File error: " + e.getMessage();
-    }
-
-    return result;
-  }
-
-  @ApiMethod(
   name = "createBucket",
   path = "bucket",
   httpMethod = HttpMethod.POST)

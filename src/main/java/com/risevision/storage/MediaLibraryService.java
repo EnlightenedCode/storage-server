@@ -131,8 +131,5 @@ public abstract class MediaLibraryService {
   public abstract InputStream getMediaItem(String bucketName, String itemName)
   throws ServiceFailedException;
 
-  public abstract String getMediaItemUrl(String bucketName, String itemName)
-  throws Exception;
-
   public abstract String getSignedPolicy(String policyBase64);
 }
