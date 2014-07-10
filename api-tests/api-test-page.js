@@ -69,6 +69,7 @@ function storageApiCall(commandString, paramObj) {
 
 function createFiles(fileNames) {
   if (fileNames.length === 0) {return;}
+  document.getElementById("response").style.display="none";
   createFile(fileNames.shift());
 
   function createFile(fileName) {
