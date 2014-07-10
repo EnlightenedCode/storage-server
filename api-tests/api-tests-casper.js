@@ -71,8 +71,60 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
+    casper.echo("Creating file.");
+    casper.click("#createFile");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":true');
+  });
+
+  casper.then(function() {
+    casper.echo("Deleting file.");
+    casper.click("#deleteFile");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":true');
+  });
+
+  casper.then(function() {
     casper.echo("Creating folder.");
     casper.click("#createFolder");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":true');
+  });
+
+  casper.then(function() {
+    casper.echo("Creating files.");
+    casper.click("#createFiles");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '{"kind"');
+  });
+
+  casper.then(function() {
+    casper.echo("Deleting files.");
+    casper.click("#deleteFiles");
   });
 
   casper.then(function() {

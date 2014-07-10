@@ -94,7 +94,7 @@ public class StorageAPI extends AbstractAPI {
       gcsService.deleteMediaItems(Globals.COMPANY_BUCKET_PREFIX + companyId,
                                   files);
 
-      log.info("Files Deleted");
+      log.info("Deletion complete");
 
       result.result = true;
       result.code = ServiceFailedException.OK;
