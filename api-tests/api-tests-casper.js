@@ -80,7 +80,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    this.test.assertSelectorHasText("#response", '"result":true');
+    this.test.assertSelectorHasText("#response", '{"kind"');
   });
 
   casper.then(function() {
