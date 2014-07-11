@@ -228,11 +228,13 @@ public final class StorageService {
 
   public List<String> deleteMediaItems(String bucketName, List<String> items)
   throws ServiceFailedException {
-    log.info("Deleting objects using gcs client library");
-    log.info(items.toString());
     List<String> errorItems = new ArrayList<String>();
-
     if (items.size() == 0) {return errorItems;}
+    String plurality = items.size() > 1 ? "s" : "";
+
+    log.info("Deleting " + Integer.toString(items.size()) +
+             " object" + plurality + " using gcs client library");
+
     if (items.size() == 1 && items.get(0).endsWith("/") == false) {
       try {
         storage.objects().delete(bucketName, items.get(0)).execute();
@@ -296,12 +298,10 @@ public final class StorageService {
               storage.objects().delete(bucketName,
                                        subItem.getName())
                                .queue(batch, new DeleteBatchCallback(item));
-              log.info("Queued " + subItem.getName());
             }
           } else {
-          storage.objects().delete(bucketName, item)
-                           .queue(batch, new DeleteBatchCallback(item));
-          log.info("Queued " + item);
+            storage.objects().delete(bucketName, item)
+                             .queue(batch, new DeleteBatchCallback(item));
           }
         }
 

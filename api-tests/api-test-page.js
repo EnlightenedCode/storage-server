@@ -8,7 +8,8 @@ function init() {
     gapi.client.load("oauth2", "v2", function() {
       gapi.auth
           .authorize({client_id: "614513768474.apps.googleusercontent.com"
-                      ,scope: "https://www.googleapis.com/auth/userinfo.email"
+                      ,scope: ["https://www.googleapis.com/auth/userinfo.email"
+                              ,"https://www.googleapis.com/auth/devstorage.full_control"]
                       ,immediate: false}, authCallback);
     });
   }, ROOT);
@@ -64,4 +65,34 @@ function storageApiCall(commandString, paramObj) {
         document.getElementById("response").innerHTML=JSON.stringify(resp);
         document.getElementById("response").style.display="inline";
       });
+}
+
+function createFiles(fileNames) {
+  if (fileNames.length === 0) {return;}
+  document.getElementById("response").style.display="none";
+  createFile(fileNames.shift());
+
+  function createFile(fileName) {
+    gapi.client.request({
+      "path": "/upload/storage/v1/b/" + "risemedialibrary-" + randomId + "/o",
+      "method": "POST",
+      "params": {"uploadType": "media", "name": fileName},
+      "body": {"media": {"data": "test file data"}}})
+    .execute(function(resp) {
+      processNextFile(resp);
+    });
+  }
+
+  function processNextFile(resp) {
+    if (fileNames.length > 0 && resp.hasOwnProperty("kind")) {
+      createFile(fileNames.shift());
+    } else {
+      document.getElementById("response").innerHTML=JSON.stringify(resp);
+      document.getElementById("response").style.display="inline";
+    }
+  }
+}
+
+function deleteFiles(fileNames) {
+  storageApiCall("files.delete", {"companyId": randomId, "files": fileNames});
 }

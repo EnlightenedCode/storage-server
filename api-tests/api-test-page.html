@@ -8,9 +8,13 @@
 <h1>API Tests</h1>
 <div><span>Response: </span><span id="response"></span></div>
 
-<h3>Expect Success</h3>
+<h3>Expect Success (execute in order)</h3>
 <button id="createBucket" type="button">createBucket</button>
+<button id="createFile" type="button" >createFile</button>
+<button id="deleteFile" type="button" >deleteFile</button>
 <button id="createFolder" type="button" >createFolder</button>
+<button id="createFiles" type="button" >createFiles</button>
+<button id="deleteFiles" type="button" >deleteFiles</button>
 <button id="deleteFolder" type="button" >deleteFolder</button>
 <button id="deleteBucket" type="button" >deleteBucket</button>
 
@@ -28,6 +32,18 @@ document.getElementById("createBucket")
         .addEventListener("click", createBucket);
 document.getElementById("deleteBucket")
         .addEventListener("click", deleteBucket);
+document.getElementById("createFile")
+        .addEventListener("click", function(){createFiles(["testFileName"]);});
+document.getElementById("deleteFile")
+        .addEventListener("click", function(){deleteFiles(["testFileName"]);});
+document.getElementById("createFiles")
+        .addEventListener("click", function() {
+          createFiles(["test1", "test2", "test3"]);
+        });
+document.getElementById("deleteFiles")
+        .addEventListener("click", function() {
+          deleteFiles(["test1", "test2", "test3"]);
+        });
 document.getElementById("createFolder")
         .addEventListener("click", createFolder);
 document.getElementById("deleteFolder")
