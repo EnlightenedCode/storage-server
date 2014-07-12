@@ -233,17 +233,22 @@ public final class StorageService {
     String plurality = items.size() > 1 ? "s" : "";
 
     log.info("Deleting " + Integer.toString(items.size()) +
-             " object" + plurality + " using gcs client library");
+             " object" + plurality + " from " + bucketName +
+             " using gcs client library");
 
     if (items.size() == 1 && items.get(0).endsWith("/") == false) {
       try {
         storage.objects().delete(bucketName, items.get(0)).execute();
-        return errorItems;
+      } catch (GoogleJsonResponseException e) {
+        if (e.getDetails().getCode() != ServiceFailedException.NOT_FOUND) {
+          log.warning(e.getDetails().getMessage());
+          errorItems.add(items.get(0));
+        }
       } catch (IOException e) {
         log.warning(e.getMessage());
         errorItems.add(items.get(0));
-        return errorItems;
       }
+      return errorItems;
     }
 
     BatchDelete batchDelete = new BatchDelete();
@@ -278,9 +283,11 @@ public final class StorageService {
       }
 
       public void onFailure(GoogleJsonError e, HttpHeaders responseHeaders) {
-        log.warning("Could not delete " + fileName);
-        errorList.add(fileName);
-        log.warning(e.toString());
+        if (e.getCode() != ServiceFailedException.NOT_FOUND) {
+          log.warning("Could not delete " + fileName);
+          errorList.add(fileName);
+          log.warning(e.getMessage());
+        }
       }
     }
 

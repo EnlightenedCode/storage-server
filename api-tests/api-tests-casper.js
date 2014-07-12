@@ -4,6 +4,7 @@ var url = "http://localhost:8055/api-test-page.html"
      "--cookies-file=../../cookies test api-tests-casper.js" +
      " --password=password\nAlso make sure appengine devserver is running";
 
+casper.options.waitTimeout = 10000;
 casper.test.begin('Connecting to ' + url, function suite(test) {
   casper.start(url, function(resp) {
     this.echo('Response ' + resp.status + " " + resp.statusText +
@@ -16,7 +17,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
                        return document.getElementById("response").innerHTML === "logged-in";
                      });},
                    function() {},
-                   function(){signIn();}, 10000);
+                   function(){signIn();});
   });
 
   function signIn() {
