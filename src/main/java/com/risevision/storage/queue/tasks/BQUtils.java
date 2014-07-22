@@ -3,6 +3,7 @@ package com.risevision.storage.queue.tasks;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import com.google.api.client.googleapis.extensions.appengine.auth.oauth2.AppIdentityCredential;
@@ -12,13 +13,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.bigquery.Bigquery;
 import com.google.api.services.bigquery.Bigquery.Jobs.Insert;
-import com.google.api.services.bigquery.model.Job;
-import com.google.api.services.bigquery.model.JobConfiguration;
-import com.google.api.services.bigquery.model.JobConfigurationLoad;
-import com.google.api.services.bigquery.model.JobConfigurationQuery;
-import com.google.api.services.bigquery.model.JobReference;
-import com.google.api.services.bigquery.model.TableReference;
-import com.google.api.services.bigquery.model.TableSchema;
+import com.google.api.services.bigquery.model.*;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
 import com.risevision.storage.Globals;
@@ -29,16 +24,16 @@ public class BQUtils {
 	private static final JsonFactory JSON_FACTORY = new GsonFactory();
 	private static final String BIGQUERY_SCOPE = "https://www.googleapis.com/auth/bigquery";
 	
-	private static final String WRITE_DISPOSITION_TRUNCATE = "WRITE_TRUNCATE";
-	private static final String WRITE_DISPOSITION_APPEND = "WRITE_APPEND";
+	public static final String WRITE_DISPOSITION_TRUNCATE = "WRITE_TRUNCATE";
+	public static final String WRITE_DISPOSITION_APPEND = "WRITE_APPEND";
 	
 	protected static final Logger log = Logger.getAnonymousLogger();
 	
 	private static Bigquery bigquery;
 	
-	public static String startQuery(String query, String tableId) throws IOException {
+	public static String startQuery(String query, String tableId, String tableDisposition) throws IOException {
 		
-		log.info("Starting Move Job: " + query);
+		log.info("Starting Query: " + query);
 		
 		Bigquery bigquery = getBigquery();
 		
@@ -57,7 +52,7 @@ public class BQUtils {
 		tableRef.setTableId(tableId);
 		tableRef.setProjectId(Globals.PROJECT_ID);
 		queryConfig.setDestinationTable(tableRef);
-		queryConfig.setWriteDisposition(WRITE_DISPOSITION_APPEND);
+		queryConfig.setWriteDisposition(tableDisposition);
 
 	    Insert insert = bigquery.jobs().insert(Globals.PROJECT_ID, job);
 		JobReference jobRef =  insert.execute().getJobReference();
@@ -104,7 +99,7 @@ public class BQUtils {
 		return jobRef.getJobId();
 	}
 	
-	public static Job checkResponse(String jobId) throws IOException {
+	public static Job getJob(String jobId) throws IOException {
 //		long startTime = System.currentTimeMillis();
 //		long elapsedTime = 0;
 
@@ -118,112 +113,67 @@ public class BQUtils {
 //					"\nTime:" + elapsedTime + 
 					"\nJobId=" + jobId);
 			
-			if (pollJob.getStatus().getState().equals("DONE")) {
-				return pollJob;
-				
-			}
-			// Pause execution for one second before polling job status again
-//			try {
-//				Thread.sleep(1000);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-			
 			return pollJob;
 //		}
 	}
-	
-	private static Bigquery getBigquery() {
-		if (bigquery == null) {
-			Environment env = ApiProxy.getCurrentEnvironment();
-			String appId = env.getAppId();
-			
-			AppIdentityCredential credential = new AppIdentityCredential(Arrays.asList(BIGQUERY_SCOPE));
-			bigquery = new Bigquery.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(appId).build();
-		}
-		
-		return bigquery;
-	}
-	
-	
-//	static public TableDataInsertAllResponse streamInsert(String tableId, List<Map<String, Object>> rows, List<String> insertIds) throws IOException {
-//		
-//		assert insertIds == null || rows.size() == insertIds.size();
-//		
-//		Environment env = ApiProxy.getCurrentEnvironment();
-//		String appId = env.getAppId();
-//		
-//		AppIdentityCredential credential = new AppIdentityCredential(Arrays.asList(BIGQUERY_SCOPE));
-//		Bigquery bigquery = new Bigquery.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(appId).build();
-//		
-//		ArrayList<TableDataInsertAllRequest.Rows> rowList = new ArrayList<>();
-//		
-//		for (int i = 0; i < rows.size(); i++) {
-//
-//			Map<String, Object> row = rows.get(i);
-//			
-//			String insertId = null;
-//
-//			if (insertIds != null) {
-//				insertId = insertIds.get(i);
-//			}
-//			
-//			TableDataInsertAllRequest.Rows requestRow = new TableDataInsertAllRequest.Rows();
-//			requestRow.setJson(row);
-//			requestRow.setInsertId(insertId);
-//			rowList.add(requestRow);
-//		}
-//
-//		TableDataInsertAllRequest content = new TableDataInsertAllRequest().setRows(rowList);
-//		
-//		return bigquery.tabledata().insertAll(Globals.PROJECT_ID, DATASET_ID, tableId, content).execute();
-//		
-//	}
-//	
-//	static public Table insertTable(String tableId, TableSchema schema) throws IOException {
-//		
-//		Environment env = ApiProxy.getCurrentEnvironment();
-//		String appId = env.getAppId();
-//		
-//		AppIdentityCredential credential = new AppIdentityCredential(Arrays.asList(BIGQUERY_SCOPE));
-//		Bigquery bigquery = new Bigquery.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(appId).build();
-//		
-//		Table table = new Table();
-//		table.setSchema(schema);
-//		TableReference tableRef = new TableReference();
-//		tableRef.setDatasetId(DATASET_ID);
-//		tableRef.setProjectId(Globals.PROJECT_ID);
-//		tableRef.setTableId(tableId);
-//		table.setTableReference(tableRef);
-//
-//		return bigquery.tables().insert(Globals.PROJECT_ID, DATASET_ID, table).execute();
-//	}
-//	
-//	static public boolean checkResponse(TableDataInsertAllResponse response) {
-//		
-//		List<InsertErrors> insertErrors = response.getInsertErrors();
-//		
-//		boolean result = insertErrors == null;
-//
-//		if (!result) {
-//
-//			for (InsertErrors errors : insertErrors) {
-//
-//				List<ErrorProto> protos = errors.getErrors();
-//
-//				if (protos != null) {
-//
-//					for (ErrorProto error : protos)	{
-//
-//						Logger.getAnonymousLogger().warning("BQ Insert Error: " + error.getMessage());
-//					}
-//				}
-//
-//			}
-//		}
-//		
-//		return result;
-//	}
-	
-}
+
+        public static List<TableRow> getTableRows(String tableId) {
+          int initialCapacity = 2000;
+          List<TableRow> rowList = new ArrayList<TableRow>(initialCapacity);
+          if (tableId == null) {
+            return rowList;
+          }
+
+          Bigquery bigquery = getBigquery();
+          try {
+            Bigquery.Tabledata.List listRequest = bigquery.tabledata().list(
+                                        Globals.PROJECT_ID
+                                       ,Globals.DATASET_ID
+                                       ,tableId);
+
+            TableDataList dataListResult;
+            do {
+              dataListResult = listRequest.execute();
+              rowList.addAll(dataListResult.getRows());
+              listRequest.setPageToken(dataListResult.getPageToken());
+            } while (dataListResult.getPageToken() != null);
+          } catch (IOException e) {
+            log.warning(e.getMessage());
+            return new ArrayList<TableRow>();
+          }
+
+          return rowList;
+        }
+
+        public static Object getSingleValueFromQuery(String query) {
+          Bigquery bigquery = getBigquery();
+          TableRow tableRow; 
+          log.info(query);
+          try {
+            tableRow = bigquery.jobs().query(Globals.PROJECT_ID,
+                                  new QueryRequest().setQuery(query))
+                               .execute().getRows().get(0);
+          } catch(IOException e) {
+            log.warning(e.getMessage());
+            return null;
+          } catch(NullPointerException e) {
+            log.warning(e.getMessage());
+            return null;
+          }
+
+          List<TableCell> cells = tableRow.getF();
+          return cells.get(0).getV();
+        }
+          
+          private static Bigquery getBigquery() {
+                  if (bigquery == null) {
+                          Environment env = ApiProxy.getCurrentEnvironment();
+                          String appId = env.getAppId();
+                          
+                          AppIdentityCredential credential = new AppIdentityCredential(Arrays.asList(BIGQUERY_SCOPE));
+                          bigquery = new Bigquery.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(appId).build();
+                  }
+                  
+                  return bigquery;
+          }
+  }
