@@ -14,6 +14,8 @@ import com.risevision.storage.info.ServiceFailedException;
 import com.google.api.client.googleapis.extensions.appengine.auth.oauth2.AppIdentityCredential;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpHeaders;
+import java.math.BigInteger;
+import com.google.api.client.util.DateTime;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Objects;
@@ -110,7 +112,6 @@ public final class StorageService {
         if (e.getStatusCode() != ServiceFailedException.NOT_FOUND) {
           log.warning(e.getStatusCode() + " - " + e.getMessage());
         }
-
         throw new ServiceFailedException(e.getStatusCode());
       }  catch (IOException e) {
         log.warning(e.getMessage());
@@ -122,6 +123,19 @@ public final class StorageService {
           StorageObject folderItem = new StorageObject();
           folderItem.setName(folderName);
           folderItem.setKind("folder");
+          long folderSize = 0;
+          long latestDt = 0;
+          long folderFileDt = 0;
+          List<StorageObject> folderFiles = getBucketItems(bucketName
+                                                          ,folderName
+                                                          ,"/");
+          for (StorageObject folderFile : folderFiles) {
+            folderSize += folderFile.getSize().longValue();
+            folderFileDt = folderFile.getUpdated().getValue();
+            latestDt = folderFileDt > latestDt ? folderFileDt : latestDt;
+          }
+          folderItem.setSize(BigInteger.valueOf(folderSize));
+          folderItem.setUpdated(new DateTime(latestDt));
           items.add(folderItem);
         }
       } catch (NullPointerException e) {
