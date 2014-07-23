@@ -107,7 +107,7 @@ public class QueueServlet extends HttpServlet {
 					
 				} else {
 					
-					Job job = BQUtils.checkResponse(jobId);
+					Job job = BQUtils.getJob(jobId);
 					
 					
 					if (job.getStatus().getErrorResult() != null) {
@@ -141,7 +141,7 @@ public class QueueServlet extends HttpServlet {
 				
 				String jobId = req.getParameter(QueryParam.JOB_ID);
 
-				Job job = BQUtils.checkResponse(jobId);
+				Job job = BQUtils.getJob(jobId);
 				
 				if (job.getStatus().getErrorResult() != null) {
 					int jobType = NumberUtils.toInt(req.getParameter(QueryParam.JOB_TYPE), 0);

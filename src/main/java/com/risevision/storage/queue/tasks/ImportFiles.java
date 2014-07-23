@@ -156,7 +156,7 @@ public class ImportFiles extends AbstractTask {
 				
 //		try {
 			
-		    String jobId = BQUtils.startQuery(query, STORAGE_TABLE);
+		    String jobId = BQUtils.startQuery(query, STORAGE_TABLE, BQUtils.WRITE_DISPOSITION_APPEND);
 //		    BQUtils.checkResponse(jobId);
 			
 		    QueueServlet.enqueueCheckMoveJob(jobId, Integer.toString(JOB_STORAGE));
@@ -180,7 +180,7 @@ public class ImportFiles extends AbstractTask {
 				
 //		try {
 			
-		    String jobId = BQUtils.startQuery(query, USAGE_TABLE);
+		    String jobId = BQUtils.startQuery(query, USAGE_TABLE, BQUtils.WRITE_DISPOSITION_APPEND);
 //		    BQUtils.checkResponse(jobId);
 			
 		    QueueServlet.enqueueCheckMoveJob(jobId, Integer.toString(JOB_USAGE));

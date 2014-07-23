@@ -1,10 +1,19 @@
 package com.risevision.storage.api;
 
 import java.util.List;
+import java.util.ArrayList;
+import static java.util.Arrays.asList;
 
 import javax.annotation.Nullable;
 import javax.inject.Named;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
+
+import static java.util.logging.Level.WARNING;
+
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
+import com.google.appengine.api.memcache.ErrorHandlers;
 
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
@@ -17,6 +26,7 @@ import com.risevision.storage.api.responses.FilesResponse;
 import com.risevision.storage.api.responses.GCSFilesResponse;
 import com.risevision.storage.api.responses.StringResponse;
 import com.risevision.storage.api.responses.SimpleResponse;
+import com.risevision.storage.queue.tasks.BQUtils;
 import com.risevision.storage.info.MediaItemInfo;
 import com.risevision.storage.gcs.StorageService;
 import com.google.api.services.storage.model.StorageObject;
@@ -30,6 +40,28 @@ clientIds = {com.google.api.server.spi.Constant.API_EXPLORER_CLIENT_ID, Globals.
 )
 
 public class StorageAPI extends AbstractAPI {
+
+  private static final String bandwidthQryBegin = 
+          "select bytes_this_month from " + Globals.DATASET_ID +
+          ".BucketBandwidthMonthly where bucket = '";
+
+  protected static final MemcacheService syncCache = 
+       MemcacheServiceFactory.getMemcacheService("month-bucket-bandwidth");
+
+  public void StorageAPI() {
+    syncCache.setErrorHandler(ErrorHandlers
+                             .getConsistentLogAndContinue(WARNING));
+  }
+
+
+  private boolean hasNull(List parameters) {
+    for (Object param : parameters) {
+      if (param == null) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   private void verifyUserCompany(String companyId, String email)
     throws ServiceFailedException {
@@ -179,6 +211,47 @@ public class StorageAPI extends AbstractAPI {
       result.message = "Bucket Creation Failed";
 
       log.warning("Bucket Creation Failed - Status: " + e.getReason());
+    }
+
+    return result;
+  }
+
+  @ApiMethod(
+  name = "getBucketBandwidth",
+  path = "bucketBandwidth",
+  httpMethod = HttpMethod.GET)
+  public SimpleResponse getBucketBandwidth(
+                           @Nullable @Named("companyId") String companyId
+                          ,User user) {
+    SimpleResponse result = new SimpleResponse();
+    if (hasNull(new ArrayList<Object>(asList(companyId, user)))) {
+      result.message = "Unexpected null parameter";
+      result.result = false;
+      return result;
+    }
+
+    log.info("User: " + user.getEmail());
+
+    try {
+      verifyUserCompany(companyId, user.getEmail());
+      String bandwidth = (String)syncCache.get(companyId);
+      if (bandwidth == null) {
+        log.info("Cache miss - Fetching value from bigquery.");
+        String bandwidthQry = bandwidthQryBegin + companyId + "'";
+        bandwidth = (String)BQUtils.getSingleValueFromQuery(bandwidthQry);
+        syncCache.put(companyId, bandwidth);
+      }
+
+      result.message = bandwidth;
+      result.result = true;
+      result.code = ServiceFailedException.OK;
+
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.code = e.getReason();
+      result.message = "Bucket bandwidth query failed";
+
+      log.warning("Bucket bandwidth query failed - Status: " + e.getReason());
     }
 
     return result;

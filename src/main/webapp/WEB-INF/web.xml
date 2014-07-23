@@ -55,6 +55,25 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>BucketBandwidthServlet</servlet-name>
+		<servlet-class>com.risevision.storage.BucketBandwidthServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>BucketBandwidthServlet</servlet-name>
+		<url-pattern>/bucketBandwidthQuery</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>BucketBandwidthMemcacheServlet</servlet-name>
+		<servlet-class>com.risevision.storage.BucketBandwidthMemcacheServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>BucketBandwidthMemcacheServlet</servlet-name>
+		<url-pattern>/bucketBandwidthMemcache</url-pattern>
+	</servlet-mapping>
+
+
+	<servlet>
 		<servlet-name>AuthCallbackServlet</servlet-name>
 		<servlet-class>com.risevision.storage.gcs.AuthCallbackServlet</servlet-class>
 	</servlet>
@@ -78,7 +97,9 @@
 	<security-constraint>
 		<web-resource-collection>
 			<url-pattern>/queue</url-pattern>
-			<url-pattern>/job/*</url-pattern>			
+			<url-pattern>/job/*</url-pattern>
+                        <url-pattern>/bucketBandwidthQuery</url-pattern>	
+                        <url-pattern>/bucketBandwidthMemcache</url-pattern>	
 		</web-resource-collection>
 		<auth-constraint>
 			<role-name>admin</role-name>
