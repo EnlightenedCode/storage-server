@@ -2,7 +2,7 @@
 var url = "http://localhost:8055/api-test-page.html"
    ,noPasswordMessage="\n\nGoogle Sign-in requested.\n\n" +
      "For first run or expired cache use\ncasperjs " +
-     "--cookies-file=../../cookies test api-tests-casper.js" +
+     "--cookies-file=$HOME/.api-test-cookies test api-tests-casper.js" +
      " --password=password\n" +
      "This can be done from the api-tests directory via\n" +
      "./run-tests --password=password\n\n" +
