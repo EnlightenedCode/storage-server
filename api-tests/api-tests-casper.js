@@ -1,9 +1,12 @@
 "use strict";
 var url = "http://localhost:8055/api-test-page.html"
-   ,noPasswordMessage="\n\nGoogle Sign-in requested.\n" +
+   ,noPasswordMessage="\n\nGoogle Sign-in requested.\n\n" +
      "For first run or expired cache use\ncasperjs " +
      "--cookies-file=../../cookies test api-tests-casper.js" +
-     " --password=password\nAlso make sure appengine devserver is running";
+     " --password=password\n" +
+     "This can be done from the api-tests directory via\n" +
+     "./run-tests --password=password\n\n" +
+     "Also make sure appengine devserver is running";
 
 casper.options.waitTimeout = 10000;
 casper.test.begin('Connecting to ' + url, function suite(test) {
