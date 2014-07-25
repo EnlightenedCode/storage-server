@@ -1,6 +1,7 @@
 "use strict";
 var url = "http://localhost:8055/api-test-page.html"
-   ,noPasswordMessage="For first invocation use casperjs " +
+   ,noPasswordMessage="\n\nGoogle Sign-in requested.\n" +
+     "For first run or expired cache use\ncasperjs " +
      "--cookies-file=../../cookies test api-tests-casper.js" +
      " --password=password\nAlso make sure appengine devserver is running";
 
@@ -11,19 +12,20 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
               ' from ' + resp.url);
   });
 
-  casper.then(function() {
+  casper.then(function() {waitForLogin(true);});
+
+  function waitForLogin(signInOnFail) {
     casper.waitFor(function() {
-                     return casper.evaluate(function() {
-                       return document.getElementById("response").innerHTML === "logged-in";
-                     });},
-                   function() {},
-                   function(){signIn();});
-  });
+      return casper.evaluate(function() {
+        return document.getElementById("response").innerHTML === "logged-in";
+      });
+    }, undefined, signInOnFail ? function(){signIn();} : undefined);
+  }
 
   function signIn() {
     casper.then(function() {
       if (! casper.cli.options.password) {
-        casper.echo(noPasswordMessage, "error");
+        casper.echo(noPasswordMessage, "ERROR");
         casper.exit(1);
       }
       casper.waitForPopup("ServiceLogin");
@@ -43,12 +45,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
       });
     });
 
-    casper.then(function() {
-      casper.waitFor(function() {
-                       return casper.evaluate(function() {
-                         return document.getElementById("response").innerHTML === "logged-in";
-                       });}
-    );});
+    casper.then(function() {waitForLogin(false);});
   }
 
   casper.on("popup.closed", function() {
@@ -56,7 +53,6 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
       document.getElementById("response").innerHTML = "logged-in";
     });
   });
-
 
   casper.then(function() {
     casper.echo("Creating bucket.");
