@@ -1,21 +1,29 @@
 "use strict";
 /* global gapi: true */
 function init() {
+  var ROOT = "http://localhost:8888/_ah/api"
+     ,SCOPE = ["https://www.googleapis.com/auth/userinfo.email"
+              ,"https://www.googleapis.com/auth/devstorage.full_control"]
+     ,CLIENT = "614513768474.apps.googleusercontent.com";
+
   console.log("Initializing");
-  var ROOT = "http://localhost:8888/_ah/api";
   gapi.client.load("storage", "v0.01", function() {
-    console.log("storage API loaded");
+    console.log("Storage API loaded");
     gapi.client.load("oauth2", "v2", function() {
+      console.log("Authorizing");
       gapi.auth
-          .authorize({client_id: "614513768474.apps.googleusercontent.com"
-                      ,scope: ["https://www.googleapis.com/auth/userinfo.email"
-                              ,"https://www.googleapis.com/auth/devstorage.full_control"]
-                      ,immediate: false}, authCallback);
+        .authorize({client_id: CLIENT, scope: SCOPE, immediate: false}
+                  ,authCallback);
     });
   }, ROOT);
 
-  function authCallback() {
-    document.getElementById("response").innerHTML = "logged-in";
+  function authCallback(resp) {
+    if (resp.error) {
+      document.getElementById("response").innerHTML = "not authorized: "
+                                                      + resp.error;
+    } else {
+      document.getElementById("response").innerHTML = "authorized";
+    }
   }
 }
 
@@ -61,7 +69,6 @@ function storageApiCall(commandString, paramObj) {
  
   commandObject(paramObj)
       .execute(function(resp) {
-        console.log(resp);
         document.getElementById("response").innerHTML=JSON.stringify(resp);
         document.getElementById("response").style.display="inline";
       });

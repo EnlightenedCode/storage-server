@@ -9,53 +9,60 @@ var url = "http://localhost:8055/api-test-page.html"
      "Also make sure appengine devserver is running";
 
 casper.options.waitTimeout = 10000;
+casper.on("remote.message", function(msg) {
+  casper.echo("DOM console: " + msg);
+});
+
 casper.test.begin('Connecting to ' + url, function suite(test) {
   casper.start(url, function(resp) {
-    this.echo('Response ' + resp.status + " " + resp.statusText +
+    casper.echo('Response ' + resp.status + " " + resp.statusText +
               ' from ' + resp.url);
   });
 
-  casper.then(function() {waitForLogin(true);});
+  casper.then(waitForAuthResponse);
+  
+  casper.then(function() {
+    if (checkResponse() !== "authorized") { 
+      casper.echo("Authorization not granted", "ERROR");
+      casper.exit(1);
+    }
 
-  function waitForLogin(signInOnFail) {
+    function checkResponse() {
+      return casper.evaluate(function() {
+        return document.getElementById("response").innerHTML;
+      });
+    }
+  });
+
+  function waitForAuthResponse() {
     casper.waitFor(function() {
       return casper.evaluate(function() {
-        return document.getElementById("response").innerHTML === "logged-in";
+        return document.getElementById("response").innerHTML
+                       .indexOf("authorized") > -1;
       });
-    }, undefined, signInOnFail ? function(){signIn();} : undefined);
+    });
   }
 
-  function signIn() {
-    casper.then(function() {
-      if (! casper.cli.options.password) {
+  casper.on("popup.loaded", 
+    function(page) {
+      casper.echo("Pop up detected: " + page.title);
+      if (page.title !== "Sign in - Google Accounts") {
+        return;
+      }
+
+      if (!casper.cli.options.password) {
         casper.echo(noPasswordMessage, "ERROR");
         casper.exit(1);
       }
-      casper.waitForPopup("ServiceLogin");
-    });
 
-    casper.then(function() {
-      casper.withPopup("ServiceLogin", function() {
-        this.test.assertTitle("Sign in - Google Accounts");
-        var loginFormId = casper.evaluate(function() {
-          return document.querySelector('#Email').parentNode.id;
-        });
-
-        this.fill('form#' + loginFormId, {
-          "Email": "jenkins@risevision.com"
-          ,"Passwd": casper.cli.options.password
-        }, true);
-      });
-    });
-
-    casper.then(function() {waitForLogin(false);});
-  }
-
-  casper.on("popup.closed", function() {
-    casper.evaluate(function() {
-      document.getElementById("response").innerHTML = "logged-in";
-    });
-  });
+      casper.echo("Signing in");
+      page.evaluate(function(pass) {
+        document.querySelector('#Email').value = "jenkins@risevision.com";
+        document.querySelector("#Passwd").value = pass;
+        document.querySelector("#signIn").click();
+      }, casper.cli.options.password);
+    }
+  );
 
   casper.then(function() {
     casper.echo("Creating bucket.");
