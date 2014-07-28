@@ -65,7 +65,7 @@ public class CacheUtils {
 
 			if (result == null) {
 				
-				Logger.getAnonymousLogger().warning("Instance of " + c.getName() + " (ID: " + getKeyPrefix(c) + id + ") not found in the cache, retrieving from data store.");
+				Logger.getAnonymousLogger().info("Instance of " + c.getName() + " (ID: " + getKeyPrefix(c) + id + ") not found in the cache, retrieving from data store.");
 				
 				result = recreate(c, id);
 				
@@ -97,7 +97,7 @@ public class CacheUtils {
 
 			if (result == null) {
 				
-				Logger.getAnonymousLogger().warning("Instance of " + c.getName() + " (ID: " + getKeyPrefix(c) + id + ") not found in the cache, retrieving from data store.");
+				Logger.getAnonymousLogger().info("Instance of " + c.getName() + " (ID: " + getKeyPrefix(c) + id + ") not found in the cache, retrieving from data store.");
 				
 				result = recreate(c, key);
 				
