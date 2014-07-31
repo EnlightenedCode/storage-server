@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.logging.Logger;
+import com.google.common.collect.ImmutableList;
 
 import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
@@ -157,17 +158,16 @@ public final class StorageService {
   throws ServiceFailedException {
 
     log.info("Creating bucket using gcs client library");
-    Bucket newBucket = new Bucket().setName(bucketName)
-                                   .setLogging(new Bucket.Logging()
-                                     .setLogBucket(Globals.LOGS_BUCKET_NAME)
-                                     .setLogObjectPrefix(bucketName))
-                                   .setAcl(new ArrayList<BucketAccessControl>()
-                                       {{this.add(new BucketAccessControl()
-                                               .setEntity("allUsers")
-                                               .setRole("READER"));
-                                        this.add(new BucketAccessControl()
-                                               .setEntity(Globals.EDITOR_GROUP)
-                                               .setRole("WRITER"));}});
+    Bucket newBucket = new Bucket()
+                      .setName(bucketName)
+                      .setLogging(new Bucket.Logging()
+                        .setLogBucket(Globals.LOGS_BUCKET_NAME)
+                        .setLogObjectPrefix(bucketName))
+                      .setAcl(ImmutableList.of(
+          new BucketAccessControl().setEntity("allUsers")
+                                   .setRole("READER"),
+          new BucketAccessControl().setEntity(Globals.EDITOR_GROUP)
+                                   .setRole("OWNER")));
 
     try {
       storage.buckets().insert(Globals.PROJECT_ID, newBucket).execute();
@@ -198,36 +198,12 @@ public final class StorageService {
 
     StorageObject objectMetadata = new StorageObject()
       .setName(folderName + "/");
-      /*.setAcl(ImmutableList.of(
-            new ObjectAccessControl().setEntity("domain-example.com").setRole("READER"),
-            new ObjectAccessControl().setEntity("user-administrator@example.com").setRole("OWNER")
-            ))*/
     try {
       storage.objects()
              .insert(bucketName,
                      objectMetadata,
                      ByteArrayContent.fromString("text/plain", ""))
              .execute();
-    } catch (IOException e) {
-      log.warning(e.getMessage());
-      throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
-    }
-  }
-
-  public void setBucketPublicRead(String bucketName)
-  throws ServiceFailedException {
-    log.info("Setting bucket acl to public read");
-
-    try {
-      storage.buckets().patch(bucketName,
-          new Bucket().setAcl(new ArrayList<BucketAccessControl>()
-                                  {{this.add(new BucketAccessControl()
-                                                .setEntity("allUsers")
-                                                .setRole("READER"));
-                                    this.add(new BucketAccessControl()
-                                          .setEntity(Globals.EDITOR_GROUP)
-                                          .setRole("WRITER"));}}))
-                       .execute();
     } catch (IOException e) {
       log.warning(e.getMessage());
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
