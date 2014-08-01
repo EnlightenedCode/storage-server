@@ -164,8 +164,8 @@ public class StorageAPI extends AbstractAPI {
     try {
       verifyUserCompany(companyId, user.getEmail());
       StorageService gcsService = StorageService.getInstance();
-      gcsService.createFolder(Globals.COMPANY_BUCKET_PREFIX + companyId, folder);
-      gcsService.setBucketPublicRead(Globals.COMPANY_BUCKET_PREFIX + companyId);
+      gcsService.createFolder(Globals.COMPANY_BUCKET_PREFIX + companyId
+                             ,folder);
       log.info("Folder created for company " + companyId);
 
       result.result = true;
