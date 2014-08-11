@@ -87,7 +87,6 @@ public class StorageAPI extends AbstractAPI {
 
     log.info("User: " + user.getEmail());
     try {
-      verifyUserCompany(companyId, user.getEmail());
       StorageService gcsService = StorageService.getInstance();
       List<StorageObject> items = gcsService.getBucketItems(
         Globals.COMPANY_BUCKET_PREFIX + companyId,
