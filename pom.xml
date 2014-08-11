@@ -13,7 +13,7 @@
     <maven.compiler.target>1.7</maven.compiler.target>
     <restlet.version>2.1.1</restlet.version>
     <google.client.version>1.18.0-rc</google.client.version>
-    <appengine.api.version>1.9.5</appengine.api.version>
+    <appengine.api.version>1.9.8</appengine.api.version>
   </properties>
 
   <repositories>
