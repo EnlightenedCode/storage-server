@@ -25,7 +25,15 @@
 <button id="createFolderMissingFolder" type="button" >
   createFolder - MissingFolder
 </button>
-
+  <button id="invalidateToken" type="button" onclick="gapi.auth.setToken({})">
+  invalidate auth token
+</button>
+<button id="noTokenBucket" type="button" onclick="document.getElementById('createBucket').click()">
+  createBucket
+</button>
+<button id="noTokenFolder" type="button" onclick="document.getElementById('createFolder').click()">
+  createFolder
+</button>
 
 <script>
 document.getElementById("createBucket")
