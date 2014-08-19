@@ -147,22 +147,19 @@ public class BQUtils {
 
         public static Object getSingleValueFromQuery(String query) {
           Bigquery bigquery = getBigquery();
-          TableRow tableRow; 
+          List<TableRow> tableRowList; 
           log.info(query);
           try {
-            tableRow = bigquery.jobs().query(Globals.PROJECT_ID,
+            tableRowList = bigquery.jobs().query(Globals.PROJECT_ID,
                                   new QueryRequest().setQuery(query))
-                               .execute().getRows().get(0);
+                               .execute().getRows();
           } catch(IOException e) {
-            log.warning(e.getMessage());
-            return null;
-          } catch(NullPointerException e) {
             log.warning(e.getMessage());
             return null;
           }
 
-          List<TableCell> cells = tableRow.getF();
-          return cells.get(0).getV();
+          if (tableRowList == null) { return null; }
+          return tableRowList.get(0).getF().get(0).getV();
         }
           
           private static Bigquery getBigquery() {
