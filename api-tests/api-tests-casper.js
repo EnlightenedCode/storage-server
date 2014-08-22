@@ -194,6 +194,37 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
     this.test.assertSelectorHasText("#response", '"result":false');
   });
 
+  casper.then(function() {
+    casper.echo("Invalidating auth token");
+    casper.click("#invalidateToken");
+  });
+
+  casper.then(function() {
+    casper.echo("Attempting to create bucket with no token");
+    casper.click("#noTokenBucket");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", 'No user');
+  });
+
+  casper.then(function() {
+    casper.echo("Attempting to create folder with no token");
+    casper.click("#noTokenFolder");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", 'No user');
+  });
+
   casper.run(function() {
     test.done();
   });

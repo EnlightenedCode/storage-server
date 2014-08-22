@@ -77,15 +77,13 @@ public class StorageAPI extends AbstractAPI {
   public SimpleResponse getFiles(@Nullable @Named("companyId") String companyId,
                                  @Nullable @Named("folder") String folder,
                                  User user) {
-
-    GCSFilesResponse result = new GCSFilesResponse();
-    if (user == null) {
-      result.message = "No user";
-      result.code = ServiceFailedException.AUTHENTICATION_FAILED;
-      return result;
+    GCSFilesResponse result;
+    try {
+      result = new GCSFilesResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
 
-    log.info("User: " + user.getEmail());
     try {
       StorageService gcsService = StorageService.getInstance();
       List<StorageObject> items = gcsService.getBucketItems(
@@ -112,12 +110,13 @@ public class StorageAPI extends AbstractAPI {
   public SimpleResponse deleteFiles(@Nullable @Named("companyId") String companyId,
                                     @Nullable @Named("files") List<String> files,
                                     User user) {
-    GCSFilesResponse result = new GCSFilesResponse();
-    if (user == null) {
-      result.message = "No user";
-      return result;
+    GCSFilesResponse result;
+    try {
+      result = new GCSFilesResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
-    log.info("User: " + user.getEmail());
+
     try {
       verifyUserCompany(companyId, user.getEmail());
 
@@ -146,19 +145,19 @@ public class StorageAPI extends AbstractAPI {
   public SimpleResponse createFolder(@Named("companyId") String companyId,
                                      @Named("folder") String folder,
                                      User user) {
-    GCSFilesResponse result = new GCSFilesResponse();
-    if (user == null) {
-      result.message = "No user";
-      return result;
+    GCSFilesResponse result;
+    try {
+      result = new GCSFilesResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
 
     if (Strings.isNullOrEmpty(companyId) ||
         Strings.isNullOrEmpty(folder)) {
       result.message = "Unspecified folder or company";
+      result.result = false;
       return result;
     }
-
-    log.info("User: " + user.getEmail());
 
     try {
       verifyUserCompany(companyId, user.getEmail());
@@ -185,14 +184,14 @@ public class StorageAPI extends AbstractAPI {
   httpMethod = HttpMethod.POST)
   public SimpleResponse createBucket(@Nullable @Named("companyId") String companyId,
                                      User user) {
-    SimpleResponse result = new SimpleResponse();
-    if (user == null) {
-      result.message = "No user";
-      return result;
+    SimpleResponse result;
+    try {
+      result = new SimpleResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
 
     String bucketName; 
-    log.info("User: " + user.getEmail());
 
     try {
       verifyUserCompany(companyId, user.getEmail());
@@ -262,14 +261,15 @@ public class StorageAPI extends AbstractAPI {
   httpMethod = HttpMethod.DELETE)
   public SimpleResponse deleteBucket(@Nullable @Named("companyId") String companyId,
                                      User user) {
-    SimpleResponse result = new SimpleResponse();
-    String bucketName; 
-    if (user == null) {
-      result.message = "No user";
-      return result;
+    SimpleResponse result;
+    try {
+      result = new SimpleResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
 
-    log.info("User: " + user.getEmail());
+    String bucketName; 
+
     try {
       verifyUserCompany(companyId, user.getEmail());
       bucketName = Globals.COMPANY_BUCKET_PREFIX + companyId;
@@ -302,8 +302,8 @@ public class StorageAPI extends AbstractAPI {
       result.message = "No user";
       return result;
     }
-    log.info("User: " + user.getEmail());
 
+    log.info("User: " + user.getEmail());
     try {
       verifyUserCompany(companyId, user.getEmail());
     } catch (ServiceFailedException e) {
