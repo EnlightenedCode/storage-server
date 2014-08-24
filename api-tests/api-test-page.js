@@ -56,8 +56,15 @@ function createFolderMissingFolder() {
   storageApiCall("createFolder", {"companyId": randomId});
 }
 
+function getUploadToken(fileName, cb) {
+  storageApiCall("getResumableUploadURI", {"companyId": randomId, "fileName": fileName}, cb, true);
+}
 
-function storageApiCall(commandString, paramObj) {
+function deleteFiles(fileNames) {
+  storageApiCall("files.delete", {"companyId": randomId, "files": fileNames});
+}
+
+function storageApiCall(commandString, paramObj, callback, doNotUpdateResponse) {
   var commandObject, commandArray;
   document.getElementById("response").style.display="none";
   commandArray = commandString.split(".");
@@ -67,10 +74,11 @@ function storageApiCall(commandString, paramObj) {
     commandObject = commandObject[val];
   });
  
-  commandObject(paramObj)
+  commandObject(paramObj, doNotUpdateResponse)
       .execute(function(resp) {
         document.getElementById("response").innerHTML=JSON.stringify(resp);
-        document.getElementById("response").style.display="inline";
+        if (!doNotUpdateResponse) {document.getElementById("response").style.display="inline";}
+        if (callback) {callback(resp);}
       });
 }
 
@@ -80,26 +88,34 @@ function createFiles(fileNames) {
   createFile(fileNames.shift());
 
   function createFile(fileName) {
-    gapi.client.request({
-      "path": "/upload/storage/v1/b/" + "risemedialibrary-" + randomId + "/o",
-      "method": "POST",
-      "params": {"uploadType": "media", "name": fileName},
-      "body": {"media": {"data": "test file data"}}})
-    .execute(function(resp) {
-      processNextFile(resp);
-    });
+    getUploadToken(fileName, uploadFile);
+
+    function uploadFile(tokenResponse) {
+      console.log(tokenResponse);
+
+      var xhr = new XMLHttpRequest();
+      xhr.open("PUT", tokenResponse.message, true);
+      xhr.onload = function() {processNextFile(fileUploaded(fileName));};
+      xhr.onerror = function() {processNextFile(fileUploaded(fileName));};
+      xhr.send("test data");
+    }
   }
 
-  function processNextFile(resp) {
-    if (fileNames.length > 0 && resp.hasOwnProperty("kind")) {
+  function processNextFile(withoutError) {
+    if (fileNames.length > 0 && withoutError) {
       createFile(fileNames.shift());
     } else {
-      document.getElementById("response").innerHTML=JSON.stringify(resp);
+      document.getElementById("response").innerHTML = "Without error: " + withoutError;
       document.getElementById("response").style.display="inline";
     }
   }
-}
 
-function deleteFiles(fileNames) {
-  storageApiCall("files.delete", {"companyId": randomId, "files": fileNames});
+  function fileUploaded(fileName) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET",
+             "https://www.googleapis.com/storage/v1/b/risemedialibrary-" +
+             randomId + "/o/" + fileName, false);
+    xhr.send();
+    return !xhr.response.error;
+  }
 }

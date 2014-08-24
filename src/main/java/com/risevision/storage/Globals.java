@@ -34,6 +34,9 @@ public final class Globals {
   public static final String STORE_CLIENT_ID = 
     "614513768474.apps.googleusercontent.com";
 
+  public static final String RESUMABLE_UPLOAD_REQUEST_URI =
+    "https://www.googleapis.com/upload/storage/v1/b/myBucket/o?uploadType=resumable&predefinedAcl=publicRead&name=";
+
   public static final String DELETED_NAMESPACE =
     "-deleted-";
 
