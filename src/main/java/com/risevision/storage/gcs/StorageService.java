@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 import com.google.common.collect.ImmutableList;
+import com.google.common.base.Strings;
 
 import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
@@ -15,6 +16,9 @@ import com.risevision.storage.info.ServiceFailedException;
 import com.google.api.client.googleapis.extensions.appengine.auth.oauth2.AppIdentityCredential;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.GenericUrl;
 import java.math.BigInteger;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.storage.Storage;
@@ -253,6 +257,37 @@ public final class StorageService {
 
   public String getSignedPolicy(String policyBase64) {
     return null;
+  }
+
+  public String getResumableUploadURI(String bucketId, String fileName)
+  throws ServiceFailedException {
+    HttpResponse response; HttpRequest request;
+
+    String requestURI = new String(Globals.RESUMABLE_UPLOAD_REQUEST_URI)
+                            .replace("myBucket", bucketId)
+                            .concat(fileName);
+    try {
+      request = storage.getRequestFactory()
+                       .buildPostRequest(new GenericUrl(requestURI), null);
+    } catch (IOException e) {
+      log.warning(e.getMessage());
+      throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+    }
+    
+    request.setHeaders(new HttpHeaders()
+                      .setContentLength(0L));
+
+    try {
+      response = request.execute();
+    } catch (GoogleJsonResponseException e) {
+      log.warning(e.getDetails().getMessage());
+      throw new ServiceFailedException(e.getDetails().getCode());
+    } catch (IOException e) {
+      log.warning(e.getMessage());
+      throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+    }
+
+    return response.getHeaders().getLocation();
   }
 
   class BatchDelete {

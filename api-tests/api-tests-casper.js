@@ -87,7 +87,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    this.test.assertSelectorHasText("#response", '{"kind"');
+    this.test.assertSelectorHasText("#response", 'Without error: true');
   });
 
   casper.then(function() {
@@ -126,7 +126,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    this.test.assertSelectorHasText("#response", '{"kind"');
+    this.test.assertSelectorHasText("#response", 'Without error: true');
   });
 
   casper.then(function() {

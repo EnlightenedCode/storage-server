@@ -291,6 +291,36 @@ public class StorageAPI extends AbstractAPI {
   }
 
   @ApiMethod(
+  name = "getResumableUploadURI",
+  path = "getUploadURI",
+  httpMethod = HttpMethod.POST)
+  public SimpleResponse getResumableUploadURI(@Named("companyId") String companyId,
+                                              @Named("fileName") String fileName,
+                                              User user) {
+    SimpleResponse result;
+    try {
+      result = new SimpleResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+
+    try {
+      StorageService gcsService = StorageService.getInstance();
+      verifyUserCompany(companyId, user.getEmail());
+      log.info("Requesting resumable upload for " + result.userEmail);
+      result.message = gcsService.getResumableUploadURI(Globals.COMPANY_BUCKET_PREFIX +
+                                                        companyId,
+                                                        fileName);
+      result.result = true;
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.message = "Upload URI request failed";
+      log.warning("Upload URI request failed - Status: " + e.getReason());
+    }
+    return result;
+  }
+
+  @ApiMethod(
   name = "signPolicy",
   path = "policy",
   httpMethod = HttpMethod.POST)
