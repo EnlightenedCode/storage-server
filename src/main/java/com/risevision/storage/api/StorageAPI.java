@@ -45,10 +45,10 @@ public class StorageAPI extends AbstractAPI {
           "select bytes_this_month from " + Globals.DATASET_ID +
           ".BucketBandwidthMonthly where bucket = '";
 
-  protected static final MemcacheService syncCache = 
+  private static final MemcacheService syncCache = 
        MemcacheServiceFactory.getMemcacheService("month-bucket-bandwidth");
 
-  public void StorageAPI() {
+  {
     syncCache.setErrorHandler(ErrorHandlers
                              .getConsistentLogAndContinue(WARNING));
   }
