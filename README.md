@@ -20,10 +20,6 @@ Chrome is the only supported browser to use to view the Storage Server API Explo
 
 #### Linux
 
-Using Ubuntu 14.04 default installation from the home directory ~/
-
-* Press ALT + CTRL + T to bring up a command prompt from ubuntu desktop
-
 * Maven 3 is required so you need to do some things to make sure your apt-get doesn't install an older version of maven. run this cmd to edit your sources file.
 ```bash
 sudo -H gedit /etc/apt/sources.list
@@ -54,21 +50,6 @@ Outputs:
 Maven home: /usr/share/maven3
 Java version: 1.7.0_65, vendor: Oracle Corporation
 Java home: /usr/lib/jvm/java-7-openjdk-amd64/jre
-```
-
-* you need Git to pull this code and make pushes / pull requests, run this to install Git, check version:
-```bash
-sudo apt-get install git
-git --version
-output:
-git version 1.9.1 (as of this update)
-```
-
-* configure your Git to have a user.name and email address (same as Github email). this will show on your pull requests.
-
-```bash
-git config --global user.name "YOUR NAME"
-git config --global user.email "YOUR EMAIL ADDRESS"
 ```
 
 * clone the repo using Git to your local:
@@ -120,15 +101,8 @@ Java home: C:\Program Files (x86)\Java\jdk1.7.0_67\jre
 
 * this will confirm that maven and java paths are correct and you have both installed correctly.
 
-* go to http://git-scm.com/download/win and download the installer for Git for your version of windows. run the installer
-* make sure to put where you Git is located in the Environment Variables under System Variables Path. By default on a 64 bit system this is "C:\Program Files (x86)\Git\bin".
-* go to any directory in your hard drive you want to clone the repo and right click in the file explorer and select "git bash here".
-* in the Git bash console window, configure your Git to have a user.name and email address (same as Github email). this will show on your pull requests.
+* With Git Bash for Windows open git bash in the directory that you want to clone the repo to 
 
-```bash
-git config --global user.name "YOUR NAME"
-git config --global user.email "YOUR EMAIL ADDRESS"
-```
 * in git bash run this cmd:
 ```bash
 git clone https://github.com/Rise-Vision/storage-server.git
@@ -186,7 +160,10 @@ Each jar file is specified as a dependency in pom.xml:
 ```
 
 ### External Registrations and Requirements
-> Private p12 and client_secret files should go into src/private-keys.  These allow server to server authentication for google cloud storage. (this must be provided on request from the facilitator and is not stored on github)
+* Private p12 and client_secret files should go into src/private-keys.  These allow server to server authentication for google cloud storage. (this must be provided on request from the facilitator and is not stored on github)
+* To register your own p12 for google app engine please refer to Google's help page on this topic: 
+https://developers.google.com/storage/docs/authentication
+
 
 
 ### Testing Setup and Use
@@ -200,6 +177,8 @@ mvn appengine:update -Dappengine.version=your-module-version \
 ```
 
 ## Submitting Issues 
+
+Issues should be reported in the github issue list at https://github.com/Rise-Vision/storage-server/issues  
 
 Issues should be reported with the template format as follows:
 
@@ -222,17 +201,11 @@ All contributions greatly appreciated and welcome! If you would first like to so
 
 ### Languages
 
-If you would like translate the user interface for this product to another language please complete the following:
-* Download the english translation file from this repository.
-* Download and install [POEdit](http://www.poedit.net/ "POEdit"). This is software that you can use to write translations into another language.
-* Open the translation file in the POEdit program and set the language for which you are writing a translation.
-* In the *Source text* window, you will see the English word or phrase to be translated. You can provide a translation for it in the *Translation* window.
-* When the translation is complete, save it with a .po extension and email the file to **support@risevision.com**. Please be sure to indicate the Widget or app the translation file is for, as well as the language that it has been translated into, and we will integrate it after the translation has been verified.
+In order to support languages i18n needs to be added to this repository.  Please refer to our Suggested Contributions.
 
 ### Suggested Contributions
 
-## Facilitator
-[Tyler Johnson](https://github.com/tejohnso "Tyler Johnson")
+* i18n Language Support
 
 ## Resources
 
@@ -245,3 +218,5 @@ If you have any questions or problems please don't hesitate to join our lively a
 If you are looking for user documentation on Rise Vision please see http://www.risevision.com/help/users/
 
 If you would like more information on developing applications for Rise Vision please visit http://www.risevision.com/help/developers/. 
+
+Facilitator: [Tyler Johnson](https://github.com/tejohnso "Tyler Johnson")
