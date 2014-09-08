@@ -20,37 +20,7 @@ Chrome is the only supported browser to use to view the Storage Server API Explo
 
 #### Linux
 
-* Maven 3 is required so you need to do some things to make sure your apt-get doesn't install an older version of maven. run this cmd to edit your sources file.
-```bash
-sudo -H gedit /etc/apt/sources.list
-```
-
-* Add the following lines to the sources.list file you are now in 
-```bash
-deb http://ppa.launchpad.net/natecarlson/maven3/ubuntu precise main
-
-deb-src http://ppa.launchpad.net/natecarlson/maven3/ubuntu precise main
-```
-* save the file from gedit and go back to the command prompt.
-* run this command to update your apt-get and install maven 3:
-
-```bash
-sudo apt-get update && sudo apt-get install maven3
-```
-
-* you need to make a sym link to be able to use mvn in the command prompt run this cmd:
-```bash
-sudo ln -s /usr/share/maven3/bin/mvn /usr/bin/mvn
-```
-
-* run this command to check if Maven 3 is installed:
-```bash
-mvn -v
-Outputs:
-Maven home: /usr/share/maven3
-Java version: 1.7.0_65, vendor: Oracle Corporation
-Java home: /usr/lib/jvm/java-7-openjdk-amd64/jre
-```
+* Maven 3 is required so you need to do some things to make sure your apt-get doesn't install an older version of maven.
 
 * clone the repo using Git to your local:
 ```bash
@@ -163,10 +133,6 @@ Each jar file is specified as a dependency in pom.xml:
 * Private p12 and client_secret files should go into src/private-keys.  These allow server to server authentication for google cloud storage. (this must be provided on request from the facilitator and is not stored on github)
 * To register your own p12 for google app engine please refer to Google's help page on this topic: 
 https://developers.google.com/storage/docs/authentication
-
-
-
-### Testing Setup and Use
 
 ### Build and Deployment Process
 
