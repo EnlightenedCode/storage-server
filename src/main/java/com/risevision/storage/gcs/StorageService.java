@@ -42,13 +42,7 @@ public final class StorageService {
   protected static final Logger log = Logger.getAnonymousLogger();
 
   static {
-    if (Globals.devserver) {
-      credential = LocalCredentialBuilder.getCredentialFromP12File();
-    } else {
-      credential = new AppIdentityCredential(Arrays.asList(Globals.STORAGE_SCOPE));
-    }
-
-    storage = GCSClient.getStorageClient(credential);
+    storage = GCSClient.getStorageClient();
   }
 
   private StorageService() {}

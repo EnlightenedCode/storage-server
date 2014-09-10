@@ -31,11 +31,21 @@ public class GCSClient {
   private static final JsonFactory JSON_FACTORY =
     JacksonFactory.getDefaultInstance();
 
+  private static final HttpRequestInitializer credential;
+
+  static {
+    if (Globals.devserver) {
+      credential = LocalCredentialBuilder.getCredentialFromP12File();
+    } else {
+      credential = new AppIdentityCredential(Arrays.asList(Globals.STORAGE_SCOPE));
+    }
+  }
+
   public static StorageObject getStorageObject() {
     return new StorageObject();
   }
 
-  public static Storage getStorageClient(HttpRequestInitializer credential) {
+  public static Storage getStorageClient() {
     Storage storage = 
       new Storage.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                  .setApplicationName(Globals.STORAGE_APP_NAME)
