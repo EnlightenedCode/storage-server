@@ -185,4 +185,5 @@ If you are looking for user documentation on Rise Vision please see http://www.r
 
 If you would like more information on developing applications for Rise Vision please visit http://www.risevision.com/help/developers/. 
 
-Facilitator: [Tyler Johnson](https://github.com/tejohnso "Tyler Johnson")
+## Facilitator
+[Tyler Johnson](https://github.com/tejohnso "Tyler Johnson")
