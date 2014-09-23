@@ -32,6 +32,12 @@ import com.risevision.storage.gcs.StorageService;
 import com.google.api.services.storage.model.StorageObject;
 import com.risevision.storage.info.ServiceFailedException;
 import com.risevision.storage.security.AccessResource;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+
 
 @Api(
 name = "storage",
@@ -68,6 +74,67 @@ public class StorageAPI extends AbstractAPI {
     if (Globals.devserver) {return;}
     AccessResource resource = new AccessResource(companyId, email);
     resource.verify();
+  }
+
+  private void verifySubscription(String companyId)
+  throws ServiceFailedException {
+    if (Globals.devserver) {return;}
+    if (Strings.isNullOrEmpty(companyId)) {
+      throw new ServiceFailedException(ServiceFailedException.BAD_REQUEST);
+    }
+
+    try {
+      URL url = new URL(Globals.SUBSCRIPTION_STATUS_URL
+                       .replace("companyId", companyId));
+      java.net.HttpURLConnection httpConn = 
+        (java.net.HttpURLConnection)url.openConnection();
+      httpConn.setInstanceFollowRedirects(false);
+
+      BufferedReader reader = new BufferedReader(
+                              new InputStreamReader(httpConn.getInputStream()));
+
+      String result = reader.readLine();
+      log.info("Store product status result: " + result);
+      reader.close();
+
+      if (!result.contains("\"status\":null") &&
+          !result.contains("\"status\":\"Subscribed\"") &&
+          !result.contains("\"status\":\"On Trial\"") &&
+          !result.contains("\"status\":\"Trial Available\"")) {
+        throw new ServiceFailedException(ServiceFailedException.FORBIDDEN);
+      }
+    } catch (MalformedURLException e) {
+      throw new ServiceFailedException(ServiceFailedException.BAD_REQUEST);
+    } catch (IOException e) {
+      throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+    }
+  }
+
+  private void initiateTrial(String companyId)
+  throws ServiceFailedException {
+    if (Globals.devserver) {return;}
+    if (Strings.isNullOrEmpty(companyId)) {
+      throw new ServiceFailedException(ServiceFailedException.BAD_REQUEST);
+    }
+
+    try {
+      //The store subscription api will create a trial if one is available
+      URL url = new URL(Globals.SUBSCRIPTION_AUTH_URL + companyId);
+      java.net.HttpURLConnection httpConn = 
+        (java.net.HttpURLConnection)url.openConnection();
+      httpConn.setInstanceFollowRedirects(false);
+
+      BufferedReader reader = new BufferedReader(
+                              new InputStreamReader(httpConn.getInputStream()));
+
+      String result = reader.readLine();
+      log.info("Store auth result: " + result);
+      reader.close();
+    } catch (MalformedURLException e) {
+      throw new ServiceFailedException(ServiceFailedException.BAD_REQUEST);
+    } catch (IOException e) {
+      throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+    }
   }
 
   @ApiMethod(
@@ -195,6 +262,8 @@ public class StorageAPI extends AbstractAPI {
 
     try {
       verifyUserCompany(companyId, user.getEmail());
+      initiateTrial(companyId);
+
       bucketName = Globals.COMPANY_BUCKET_PREFIX + companyId;
 
       StorageService gcsService = StorageService.getInstance();
@@ -307,6 +376,7 @@ public class StorageAPI extends AbstractAPI {
     try {
       StorageService gcsService = StorageService.getInstance();
       verifyUserCompany(companyId, user.getEmail());
+      verifySubscription(companyId);
       log.info("Requesting resumable upload for " + result.userEmail);
       result.message = gcsService.getResumableUploadURI(Globals.COMPANY_BUCKET_PREFIX +
                                                         companyId,

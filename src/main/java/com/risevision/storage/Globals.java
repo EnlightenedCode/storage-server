@@ -28,6 +28,10 @@ public final class Globals {
           
   public static final String PROJECT_ID =
     "452091732215";
+
+  public static final String STORE_PRODUCT_CODE =
+    "b0cba08a4baa0c62b8cdc621b6f6a124f89a03db";
+
   public static final String ACCESS_ID =
     "452091732215@developer.gserviceaccount.com";
 
@@ -49,10 +53,12 @@ public final class Globals {
   public static final String LOGGING_ENABLED_XML; 
   public static final String LOGS_BUCKET_NAME;
   public static final String DATASET_ID;
+  public static final String STORE_BASE_URL;
 
   private static String loggingParameter;
   private static String bucketParameter;
   private static String datasetParameter;
+  private static String storeBaseURL;
 
   static {
     Properties buildProperties = new Properties();
@@ -65,6 +71,7 @@ public final class Globals {
       loggingParameter = buildProperties.getProperty("LOGGING_ENABLED_XML");
       bucketParameter = buildProperties.getProperty("LOGS_BUCKET_NAME");
       datasetParameter = buildProperties.getProperty("DATASET_ID");
+      storeBaseURL = buildProperties.getProperty("STORE_BASE_URL");
     } catch (IOException e) {
       e.printStackTrace();
       System.exit(1);
@@ -72,6 +79,7 @@ public final class Globals {
       LOGGING_ENABLED_XML = loggingParameter;
       LOGS_BUCKET_NAME = bucketParameter;
       DATASET_ID = datasetParameter;
+      STORE_BASE_URL = storeBaseURL;
 
       if (fileData != null) {
         try {
@@ -82,4 +90,12 @@ public final class Globals {
       }
     }
   }
+
+  public static final String SUBSCRIPTION_AUTH_URL =
+    STORE_BASE_URL + "/v1/widget/auth?pc=" +
+    STORE_PRODUCT_CODE + "&cid=";
+
+  public static final String SUBSCRIPTION_STATUS_URL =
+    STORE_BASE_URL + "/v1/company/companyId/product/status?pc=" +
+    STORE_PRODUCT_CODE;
 }
