@@ -97,7 +97,7 @@ public class StorageAPI extends AbstractAPI {
       log.info("Store product status result: " + result);
       reader.close();
 
-      if (!result.contains("\"status\":null") &&
+      if (!result.contains("\"status\":\"\"") &&
           !result.contains("\"status\":\"Subscribed\"") &&
           !result.contains("\"status\":\"On Trial\"") &&
           !result.contains("\"status\":\"Trial Available\"")) {
