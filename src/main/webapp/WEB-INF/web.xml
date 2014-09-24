@@ -72,6 +72,15 @@
 		<url-pattern>/bucketBandwidthMemcache</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>TrialInitiatorServlet</servlet-name>
+		<servlet-class>com.risevision.storage.TrialInitiatorServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>TrialInitiatorServlet</servlet-name>
+		<url-pattern>/initiateStoreTrials</url-pattern>
+	</servlet-mapping>
+
 
 	<servlet>
 		<servlet-name>AuthCallbackServlet</servlet-name>
@@ -100,6 +109,7 @@
 			<url-pattern>/job/*</url-pattern>
                         <url-pattern>/bucketBandwidthQuery</url-pattern>	
                         <url-pattern>/bucketBandwidthMemcache</url-pattern>	
+                        <url-pattern>/initiateStoreTrials</url-pattern>	
 		</web-resource-collection>
 		<auth-constraint>
 			<role-name>admin</role-name>
