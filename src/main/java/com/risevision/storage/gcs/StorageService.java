@@ -220,7 +220,6 @@ public final class StorageService {
     List<String> errorItems = new ArrayList<String>();
     if (items.size() == 0) {return errorItems;}
     String plurality = items.size() > 1 ? "s" : "";
-
     log.info("Deleting " + Integer.toString(items.size()) +
              " object" + plurality + " from " + bucketName +
              " using gcs client library");
@@ -315,20 +314,29 @@ public final class StorageService {
     throws ServiceFailedException {
       BatchRequest batch = storage.batch();
       errorList = new ArrayList<String>();
+      Storage.Objects.List listRequest;
+      com.google.api.services.storage.model.Objects listResult;
 
       try {
-        for (String item : deleteList) {
-          if (item.endsWith("/")) {
-            List<StorageObject> folderContents = 
-              getBucketItems(bucketName, item, "/");
-            for (StorageObject subItem : folderContents) {
-              storage.objects().delete(bucketName,
-                                       subItem.getName())
-                               .queue(batch, new DeleteBatchCallback(item));
-            }
+        for (String deleteItem : deleteList) {
+          if (deleteItem.endsWith("/")) {
+            listRequest = storage.objects().list(bucketName)
+                                           .setPrefix(null)
+                                           .setDelimiter(null);
+            do {
+                listResult = listRequest.execute();
+                for (StorageObject bucketItem : listResult.getItems()) {
+                  if (bucketItem.getName().startsWith(deleteItem)) {
+                    storage.objects().delete(bucketName,
+                                           bucketItem.getName())
+                       .queue(batch, new DeleteBatchCallback(bucketItem.getName()));
+                  }
+                }
+                listRequest.setPageToken(listResult.getNextPageToken());
+            } while (null != listResult.getNextPageToken());
           } else {
-            storage.objects().delete(bucketName, item)
-                             .queue(batch, new DeleteBatchCallback(item));
+            storage.objects().delete(bucketName, deleteItem)
+                             .queue(batch, new DeleteBatchCallback(deleteItem));
           }
         }
 
