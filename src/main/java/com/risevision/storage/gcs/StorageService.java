@@ -196,7 +196,7 @@ public final class StorageService {
     log.info("Creating folder using gcs client library");
 
     StorageObject objectMetadata = new StorageObject()
-      .setName(folderName + "/");
+      .setName(folderName.endsWith("/") ? folderName : folderName + "/");
     try {
       storage.objects()
              .insert(bucketName,
