@@ -84,7 +84,7 @@ public final class StorageService {
   throws ServiceFailedException {
     Storage.Objects.List listRequest;
 
-    prefix = (prefix != null && !prefix.endsWith(delimiter)) ? 
+    prefix = (!Strings.isNullOrEmpty(prefix) && !prefix.endsWith(delimiter)) ? 
       prefix + delimiter : prefix;
 
     log.info("Fetching object list from " +
