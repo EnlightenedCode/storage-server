@@ -203,6 +203,9 @@ public final class StorageService {
                      objectMetadata,
                      ByteArrayContent.fromString("text/plain", ""))
              .execute();
+    } catch (GoogleJsonResponseException e) {
+      log.warning(e.getDetails().getMessage());
+      throw new ServiceFailedException(e.getDetails().getCode());
     } catch (IOException e) {
       log.warning(e.getMessage());
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
