@@ -17,6 +17,7 @@ import com.google.api.client.googleapis.extensions.appengine.auth.oauth2.AppIden
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.GenericUrl;
 import java.math.BigInteger;
@@ -273,9 +274,9 @@ public final class StorageService {
 
     try {
       response = request.execute();
-    } catch (GoogleJsonResponseException e) {
-      log.warning(e.getDetails().getMessage());
-      throw new ServiceFailedException(e.getDetails().getCode());
+    } catch (HttpResponseException e) {
+      log.warning(e.getContent());
+      throw new ServiceFailedException(e.getStatusCode());
     } catch (IOException e) {
       log.warning(e.getMessage());
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
