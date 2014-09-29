@@ -256,7 +256,9 @@ public final class StorageService {
     return null;
   }
 
-  public String getResumableUploadURI(String bucketId, String fileName)
+  public String getResumableUploadURI(String bucketId,
+                                      String fileName,
+                                      String fileType)
   throws ServiceFailedException {
     HttpResponse response; HttpRequest request;
 
@@ -272,8 +274,10 @@ public final class StorageService {
     }
     
     request.setHeaders(new HttpHeaders()
-                      .setContentLength(0L));
-
+                      .setContentLength(0L)
+                      .set("X-Upload-Content-Type", fileType));
+    log.info("Requesting uri for " + fileName);
+    log.info(request.getHeaders().toString());
     try {
       response = request.execute();
     } catch (HttpResponseException e) {
@@ -283,7 +287,7 @@ public final class StorageService {
       log.warning(e.getMessage());
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
     }
-
+    log.info("Upload uri received");
     return response.getHeaders().getLocation();
   }
 
