@@ -1,43 +1,35 @@
 package com.risevision.storage.gcs;
 
-import java.io.InputStream;
-import java.util.List;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.logging.Logger;
-import com.google.common.collect.ImmutableList;
-import com.google.common.base.Strings;
-
-import com.risevision.storage.MediaLibraryService;
-import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
-import com.risevision.storage.info.MediaItemInfo;
-import com.risevision.storage.info.ServiceFailedException;
-import com.google.api.client.googleapis.extensions.appengine.auth.oauth2.AppIdentityCredential;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.HttpHeaders;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpResponseException;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.GenericUrl;
+import java.io.InputStream;
 import java.math.BigInteger;
-import com.google.api.client.util.DateTime;
-import com.google.api.services.storage.Storage;
-import com.google.api.services.storage.model.Bucket;
-import com.google.api.services.storage.model.Objects;
-import com.google.api.services.storage.model.StorageObject;
-import com.google.api.services.storage.model.BucketAccessControl;
-import com.google.api.services.storage.Storage.Buckets.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
 import com.google.api.client.googleapis.batch.BatchRequest;
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
 import com.google.api.client.googleapis.json.GoogleJsonError;
-import com.google.api.client.googleapis.json.GoogleJsonError.ErrorInfo;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.ByteArrayContent;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.HttpResponseException;
+import com.google.api.client.util.DateTime;
+import com.google.api.services.storage.Storage;
+import com.google.api.services.storage.model.Bucket;
+import com.google.api.services.storage.model.BucketAccessControl;
+import com.google.api.services.storage.model.StorageObject;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.risevision.storage.Globals;
+import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
+import com.risevision.storage.info.ServiceFailedException;
 
 public final class StorageService {
-  private static HttpRequestInitializer credential;
+  public static final String TRASH = "--TRASH--/";
   private static Storage storage;
   private static StorageService instance;
   protected static final Logger log = Logger.getAnonymousLogger();
@@ -60,7 +52,7 @@ public final class StorageService {
   }
 
   public void setClient(Storage client) {
-    this.storage = client;
+    StorageService.storage = client;
   }
 
   public ListAllMyBucketsResponse getAllMyBuckets()
@@ -103,7 +95,6 @@ public final class StorageService {
 
     com.google.api.services.storage.model.Objects listResult;
     List<StorageObject> items = new ArrayList<StorageObject>();
-    List<String> prefixes = new ArrayList<String>();
 
     do {
       try {
@@ -120,23 +111,30 @@ public final class StorageService {
 
       try {
         for (String folderName : listResult.getPrefixes()) {
-          StorageObject folderItem = new StorageObject();
-          folderItem.setName(folderName);
-          folderItem.setKind("folder");
-          long folderSize = 0;
-          long latestDt = 0;
-          long folderFileDt = 0;
-          List<StorageObject> folderFiles = getBucketItems(bucketName
-                                                          ,folderName
-                                                          ,"/");
-          for (StorageObject folderFile : folderFiles) {
-            folderSize += folderFile.getSize().longValue();
-            folderFileDt = folderFile.getUpdated().getValue();
-            latestDt = folderFileDt > latestDt ? folderFileDt : latestDt;
+          if (folderName.equals(prefix)) {
+            items.add(new StorageObject().setName(folderName).setKind("folder"));
+            continue;
           }
-          folderItem.setSize(BigInteger.valueOf(folderSize));
-          folderItem.setUpdated(new DateTime(latestDt));
-          items.add(folderItem);
+
+          if(!folderName.equals(TRASH)) {
+            StorageObject folderItem = new StorageObject();
+            folderItem.setName(folderName);
+            folderItem.setKind("folder");
+            long folderSize = 0;
+            long latestDt = 0;
+            long folderFileDt = 0;
+            List<StorageObject> folderFiles = getBucketItems(bucketName
+                                                            ,folderName
+                                                            ,"/");
+            for (StorageObject folderFile : folderFiles) {
+              folderSize += folderFile.getSize().longValue();
+              folderFileDt = folderFile.getUpdated().getValue();
+              latestDt = folderFileDt > latestDt ? folderFileDt : latestDt;
+            }
+            folderItem.setSize(BigInteger.valueOf(folderSize));
+            folderItem.setUpdated(new DateTime(latestDt));
+            items.add(folderItem);
+          }
         }
       } catch (NullPointerException e) {
         log.info("No folders to list");
@@ -252,6 +250,51 @@ public final class StorageService {
     errorItems = batchDelete.deleteFiles(bucketName, items);
     return errorItems;
   }
+  
+  /**
+   * Moves the list of provided items into the trash folder 
+   *  
+   * @param bucketName The bucket containing the items
+   * @param items The items to move
+   * @return The list of files that were not moved successfully
+   * 
+   * @throws ServiceFailedException In case an unexpected error occurs
+   */
+  public List<String> moveToTrash(String bucketName, List<String> items) throws ServiceFailedException {
+    if(!objectExists(bucketName, TRASH)) {
+      // Create the Trash folder
+      createFolder(bucketName, TRASH);
+    }
+    
+    return new BatchMove(storage).execute(bucketName, items, TRASH);
+  }
+  
+  /**
+   * Moves the list of provided items from trash into their original folders 
+   *  
+   * @param bucketName The bucket containing the items
+   * @param items The items to move
+   * @return The list of files that were not restored successfully
+   * 
+   * @throws ServiceFailedException In case an unexpected error occurs
+   */
+  public List<String> restoreFromTrash(String bucketName, List<String> items) throws ServiceFailedException {
+    return new BatchRestore(storage).execute(bucketName, items);
+  }
+  
+  /**
+   * Moves the list of provided items into destinationFolder (copies + deletes). 
+   *  
+   * @param bucketName The bucket containing the items
+   * @param items The items to move
+   * @param destinationFolder The destination where to move the files (new prefix name)
+   * @return The list of files that were not moved successfully
+   * 
+   * @throws ServiceFailedException In case an unexpected error occurs
+   */
+  public List<String> moveMediaItems(String bucketName, List<String> items, String destinationFolder) throws ServiceFailedException {
+    return new BatchMove(storage).execute(bucketName, items, destinationFolder);
+  }
 
   public InputStream getMediaItem(String bucketName, String itemName)
   throws ServiceFailedException {
@@ -300,6 +343,7 @@ public final class StorageService {
       errorList = new ArrayList<String>();
     }
 
+    @SuppressWarnings("rawtypes")
     class DeleteBatchCallback extends JsonBatchCallback {
       String fileName;
 
@@ -319,6 +363,7 @@ public final class StorageService {
       }
     }
 
+    @SuppressWarnings("unchecked")
     public List<String> deleteFiles(String bucketName, List<String> deleteList)
     throws ServiceFailedException {
       BatchRequest batch = storage.batch();
@@ -357,5 +402,18 @@ public final class StorageService {
 
       return errorList;
     }
+  }
+  
+  public boolean objectExists(String bucketName, String objectName) {
+    try {
+      Storage.Objects.Get getRequest = storage.objects().get(bucketName, objectName);
+      
+      // If objectName does not exist, an exception will be thrown and the method will return false
+      getRequest.execute();
+      
+      return true;
+    } catch (IOException e) {
+      return false;
+    }    
   }
 }

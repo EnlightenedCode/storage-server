@@ -46,13 +46,13 @@ mvn install:install-file -DlocalRepositoryPath=lib/ \
   -DartifactId=directory -Dversion=1.0
 ```
 
-* Run this cmd to start the server locally
+* Run this command to start the server locally
 ``` bash
 mvn clean install
 mvn appengine:devserver
 ```
 
-* Open a Chrome browser and go to localhost:8888, click the "API Explorer" link
+* Open a Chrome browser and go to localhost:8888 then click the "API Explorer" link
 
 ### Windows
 (this walkthrough uses Windows 64 bit 8.1)

@@ -1,42 +1,38 @@
 package com.risevision.storage.api;
 
-import java.util.List;
-import java.util.ArrayList;
 import static java.util.Arrays.asList;
+import static java.util.logging.Level.WARNING;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.inject.Named;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
-
-import static java.util.logging.Level.WARNING;
-
-import com.google.appengine.api.memcache.MemcacheService;
-import com.google.appengine.api.memcache.MemcacheServiceFactory;
-import com.google.appengine.api.memcache.ErrorHandlers;
 
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiMethod.HttpMethod;
+import com.google.api.services.storage.model.StorageObject;
+import com.google.appengine.api.memcache.ErrorHandlers;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.users.User;
+import com.google.common.base.Strings;
 import com.risevision.storage.Globals;
 import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.Utils;
-import com.risevision.storage.api.responses.FilesResponse;
 import com.risevision.storage.api.responses.GCSFilesResponse;
-import com.risevision.storage.api.responses.StringResponse;
 import com.risevision.storage.api.responses.SimpleResponse;
-import com.risevision.storage.queue.tasks.BQUtils;
-import com.risevision.storage.info.MediaItemInfo;
+import com.risevision.storage.api.responses.StringResponse;
 import com.risevision.storage.gcs.StorageService;
-import com.google.api.services.storage.model.StorageObject;
 import com.risevision.storage.info.ServiceFailedException;
+import com.risevision.storage.queue.tasks.BQUtils;
 import com.risevision.storage.security.AccessResource;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
 
 
 @Api(
@@ -60,7 +56,7 @@ public class StorageAPI extends AbstractAPI {
   }
 
 
-  private boolean hasNull(List parameters) {
+  private boolean hasNull(List<?> parameters) {
     for (Object param : parameters) {
       if (param == null) {
         return true;
@@ -396,4 +392,71 @@ public class StorageAPI extends AbstractAPI {
     return result;
   }
 
+  @ApiMethod(
+  name = "trash.move",
+  path = "trash",
+  httpMethod = HttpMethod.POST)
+  public SimpleResponse moveToTrash(@Nullable @Named("companyId") String companyId,
+                                    @Nullable @Named("files") List<String> files,
+                                    User user) {
+    GCSFilesResponse result;
+    try {
+      result = new GCSFilesResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+
+    try {
+      verifyUserCompany(companyId, user.getEmail());
+
+      StorageService gcsService = StorageService.getInstance();
+      gcsService.moveToTrash(Globals.COMPANY_BUCKET_PREFIX + companyId, files);
+
+      log.info("Move to trash complete");
+
+      result.result = true;
+      result.code = ServiceFailedException.OK;
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.code = e.getReason();
+      result.message = "File move to trash Failed";
+      log.warning("File Move To Trash Failed - Status: " + e.getReason());
+    }
+
+    return result;
+  }
+
+  @ApiMethod(
+  name = "trash.restore",
+  path = "trash",
+  httpMethod = HttpMethod.PUT)
+  public SimpleResponse restoreFromTrash(@Nullable @Named("companyId") String companyId,
+                                         @Nullable @Named("files") List<String> files,
+                                         User user) {
+    GCSFilesResponse result;
+    try {
+      result = new GCSFilesResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+
+    try {
+      verifyUserCompany(companyId, user.getEmail());
+
+      StorageService gcsService = StorageService.getInstance();
+      gcsService.restoreFromTrash(Globals.COMPANY_BUCKET_PREFIX + companyId, files);
+
+      log.info("Restore from trash complete");
+
+      result.result = true;
+      result.code = ServiceFailedException.OK;
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.code = e.getReason();
+      result.message = "File restore from trash Failed";
+      log.warning("File Restore From Trash Failed - Status: " + e.getReason());
+    }
+
+    return result;
+  }
 }
