@@ -9,3 +9,5 @@
 target/
 lib/com/
 src/private-keys/
+.settings/
+.classpath

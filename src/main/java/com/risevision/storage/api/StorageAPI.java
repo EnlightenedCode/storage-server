@@ -290,7 +290,7 @@ public class StorageAPI extends AbstractAPI {
                           ,User user) {
     SimpleResponse result = new SimpleResponse();
     if (hasNull(new ArrayList<Object>(asList(companyId, user)))) {
-      result.message = "Unexpected null parameter";
+      result.message = "unexpected-null-parameter";
       result.result = false;
       return result;
     }
@@ -314,7 +314,7 @@ public class StorageAPI extends AbstractAPI {
     } catch (ServiceFailedException e) {
       result.result = false;
       result.code = e.getReason();
-      result.message = "Bucket bandwidth query failed";
+      result.message = "bandwidth-query-failed";
 
       log.warning("Bucket bandwidth query failed - Status: " + e.getReason());
     }
@@ -384,7 +384,7 @@ public class StorageAPI extends AbstractAPI {
       result.result = true;
     } catch (ServiceFailedException e) {
       result.result = false;
-      result.message = "Upload URI request failed";
+      result.message = "upload-uri-request-failed";
       log.warning("Upload URI request failed - Status: " + e.getReason());
     }
     return result;
