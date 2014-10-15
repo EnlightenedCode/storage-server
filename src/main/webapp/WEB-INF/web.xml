@@ -17,7 +17,22 @@
 		<servlet-name>GetFiles</servlet-name>
 		<url-pattern>/getFiles</url-pattern>
 	</servlet-mapping>
-
+    <servlet>
+        <servlet-name>CheckThirdPartyCookie</servlet-name>
+        <servlet-class>com.risevision.storage.api.CheckThirdPartyCookieServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CheckThirdPartyCookie</servlet-name>
+        <url-pattern>/checkThirdPartyCookie</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>CreateThirdPartyCookie</servlet-name>
+        <servlet-class>com.risevision.storage.api.CreateThirdPartyCookieServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CreateThirdPartyCookie</servlet-name>
+        <url-pattern>/createThirdPartyCookie</url-pattern>
+    </servlet-mapping>
 	<servlet>
 		<servlet-name>UploadComplete</servlet-name>
 		<servlet-class>com.risevision.storage.api.UploadCompleteServlet</servlet-class>
