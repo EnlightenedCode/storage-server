@@ -6,6 +6,7 @@
 </head>
 <body>
 <h1>API Tests</h1>
+<div><span>Bucket Path: </span><span id="bucketPath"></span></div>
 <div><span>Response: </span><span id="response"></span></div>
 
 <h3>Expect Success (execute in order)</h3>
@@ -14,6 +15,10 @@
 <button id="deleteFile" type="button" >deleteFile</button>
 <button id="createFolder" type="button" >createFolder</button>
 <button id="createFiles" type="button" >createFiles</button>
+<button id="removePublicReadOneFile" type="button">removePublicReadOneFile</button>
+<button id="removePublicReadBucket" type="button">removePublicReadBucket</button>
+<button id="addPublicReadOneFile" type="button">addPublicReadOneFile</button>
+<button id="addPublicReadBucket" type="button">addPublicReadBucket</button>
 <button id="deleteFiles" type="button" >deleteFiles</button>
 <button id="deleteFolder" type="button" >deleteFolder</button>
 <button id="deleteBucket" type="button" >deleteBucket</button>
@@ -41,9 +46,9 @@ document.getElementById("createBucket")
 document.getElementById("deleteBucket")
         .addEventListener("click", deleteBucket);
 document.getElementById("createFile")
-        .addEventListener("click", function(){createFiles(["testFileName"]);});
+        .addEventListener("click", function(){createFiles(["test1"]);});
 document.getElementById("deleteFile")
-        .addEventListener("click", function(){deleteFiles(["testFileName"]);});
+        .addEventListener("click", function(){deleteFiles(["test1"]);});
 document.getElementById("createFiles")
         .addEventListener("click", function() {
           createFiles(["test1", "test2", "test3"]);
@@ -60,6 +65,14 @@ document.getElementById("createFolderMissingCompany")
         .addEventListener("click", createFolderMissingCompany);
 document.getElementById("createFolderMissingFolder")
         .addEventListener("click", createFolderMissingFolder);
+document.getElementById("addPublicReadBucket")
+        .addEventListener("click", addPublicReadBucket);
+document.getElementById("removePublicReadBucket")
+        .addEventListener("click", removePublicReadBucket);
+document.getElementById("removePublicReadOneFile")
+        .addEventListener("click", removePublicReadOneFile);
+document.getElementById("addPublicReadOneFile")
+        .addEventListener("click", addPublicReadOneFile);
 </script>
 </body>
 </html>
