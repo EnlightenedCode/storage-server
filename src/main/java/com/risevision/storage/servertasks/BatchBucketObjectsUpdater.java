@@ -109,13 +109,13 @@ class BatchBucketObjectsUpdater <T extends StorageRequest> {
 
     TaskOptions options = TaskOptions.Builder.withUrl("/servertask");
     for (String param : requestParams.keySet()) {
-      options.param(param, requestParams.get(param)[0]);
+      if (!param.equals("pageToken")) {
+        options.param(param, requestParams.get(param)[0]);
+      }
     }
 
-    options.removeParam("pageToken");
     options.param("pageToken", listResult.getNextPageToken());
     options.method(queueMethod);
-
     QueueFactory.getDefaultQueue().add(options);
   }
 }
