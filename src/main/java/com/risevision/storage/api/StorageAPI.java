@@ -97,10 +97,8 @@ public class StorageAPI extends AbstractAPI {
       log.info("Store product status result: " + result);
       reader.close();
 
-      if (!result.contains("\"status\":\"\"") &&
-          !result.contains("\"status\":\"Subscribed\"") &&
-          !result.contains("\"status\":\"On Trial\"") &&
-          !result.contains("\"status\":\"Trial Available\"")) {
+      if (!result.contains("\"status\":\"Subscribed\"") &&
+          !result.contains("\"status\":\"On Trial\"")) {
         throw new ServiceFailedException(ServiceFailedException.FORBIDDEN);
       }
     } catch (MalformedURLException e) {
