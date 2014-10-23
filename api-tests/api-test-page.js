@@ -1,5 +1,7 @@
 "use strict";
 /* global gapi: true */
+var responseId;
+
 function init() {
   var ROOT = "http://localhost:8888/_ah/api"
      ,SCOPE = ["https://www.googleapis.com/auth/userinfo.email"
@@ -18,17 +20,22 @@ function init() {
   }, ROOT);
 
   function authCallback(resp) {
+    responseId = document.getElementById("response");
+    document.getElementById("bucketPath").innerHTML = 
+    "https://www.googleapis.com/storage/v1/b/risemedialibrary-" + randomId;
+
     if (resp.error) {
-      document.getElementById("response").innerHTML = "not authorized: "
+      responseId.innerHTML = "not authorized: "
                                                       + resp.error;
     } else {
-      document.getElementById("response").innerHTML = "authorized";
+      responseId.innerHTML = "authorized";
     }
   }
 }
 
 var randomId = Math.floor(Math.random()*90000) + 10000;
 randomId = "api-test-" + randomId;
+
 
 function createBucket() {
   storageApiCall("createBucket", {"companyId": randomId});
@@ -66,7 +73,7 @@ function deleteFiles(fileNames) {
 
 function storageApiCall(commandString, paramObj, callback, doNotUpdateResponse) {
   var commandObject, commandArray;
-  document.getElementById("response").style.display="none";
+  responseId.style.display="none";
   commandArray = commandString.split(".");
 
   commandObject = gapi.client.storage;
@@ -74,17 +81,16 @@ function storageApiCall(commandString, paramObj, callback, doNotUpdateResponse) 
     commandObject = commandObject[val];
   });
  
-  commandObject(paramObj, doNotUpdateResponse)
-      .execute(function(resp) {
-        document.getElementById("response").innerHTML=JSON.stringify(resp);
-        if (!doNotUpdateResponse) {document.getElementById("response").style.display="inline";}
+  commandObject(paramObj).execute(function(resp) {
+        responseId.innerHTML=JSON.stringify(resp);
+        if (!doNotUpdateResponse) {responseId.style.display="inline";}
         if (callback) {callback(resp);}
       });
 }
 
 function createFiles(fileNames) {
   if (fileNames.length === 0) {return;}
-  document.getElementById("response").style.display="none";
+  responseId.style.display="none";
   createFile(fileNames.shift());
 
   function createFile(fileName) {
@@ -105,8 +111,8 @@ function createFiles(fileNames) {
     if (fileNames.length > 0 && withoutError) {
       createFile(fileNames.shift());
     } else {
-      document.getElementById("response").innerHTML = "Without error: " + withoutError;
-      document.getElementById("response").style.display="inline";
+      responseId.innerHTML = "Without error: " + withoutError;
+      responseId.style.display="inline";
     }
   }
 
@@ -116,6 +122,50 @@ function createFiles(fileNames) {
              "https://www.googleapis.com/storage/v1/b/risemedialibrary-" +
              randomId + "/o/" + fileName, false);
     xhr.send();
-    return !xhr.response.error;
+    return !xhr.response.error && xhr.status === 200;
   }
+}
+
+function initiateServerTask(task, params, cb) {
+  var uri = "http://localhost:8888/servertask" +
+            "?task=" + task;
+
+  var xhr = new XMLHttpRequest();
+
+  responseId.style.display="none";
+
+  for (var paramKey in params) {
+    uri += "&" + paramKey + "=" + params[paramKey];
+  }
+
+  xhr.onerror = function() {
+    responseId.innerHTML = "Server task complete";
+    responseId.style.display = "inline";
+  };
+  xhr.onload = xhr.onerror;
+  xhr.open("GET", uri , true);
+  xhr.withCredentials = true;
+
+  console.log("initiating server task: " + uri);
+  xhr.send();
+}
+
+function addPublicReadOneFile() {
+  initiateServerTask("AddPublicReadObject",
+  {bucket: "risemedialibrary-" + randomId, object: "test1"})
+}
+
+function removePublicReadOneFile() {
+  initiateServerTask("RemovePublicReadObject",
+  {bucket: "risemedialibrary-" + randomId, object: "test1"});
+}
+
+function addPublicReadBucket() {
+  initiateServerTask("AddPublicReadBucket",
+  {bucket: "risemedialibrary-" + randomId});
+}
+
+function removePublicReadBucket() {
+  initiateServerTask("RemovePublicReadBucket",
+  {bucket: "risemedialibrary-" + randomId});
 }

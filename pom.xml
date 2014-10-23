@@ -12,8 +12,8 @@
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
     <restlet.version>2.1.1</restlet.version>
-    <google.client.version>1.18.0-rc</google.client.version>
-    <appengine.api.version>1.9.8</appengine.api.version>
+    <google.client.version>1.19.0</google.client.version>
+    <appengine.api.version>1.9.12</appengine.api.version>
   </properties>
 
   <repositories>
@@ -92,6 +92,11 @@
           <port>8888</port>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.17</version>
+      </plugin>
     </plugins>
   </build>
 
@@ -105,7 +110,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>1.9.5</version>
+      <version>1.10.7</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -144,6 +149,18 @@
       <version>${google.client.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.google.appengine</groupId>
+      <artifactId>appengine-testing</artifactId>
+      <version>${appengine.api.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.appengine</groupId>
+      <artifactId>appengine-api-stubs</artifactId>
+      <version>${appengine.api.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.google.api-client</groupId>
       <artifactId>google-api-client-appengine</artifactId>
       <version>${google.client.version}</version>
@@ -151,7 +168,7 @@
     <dependency>
       <groupId>com.google.apis</groupId>
       <artifactId>google-api-services-storage</artifactId>
-      <version>v1-rev1-${google.client.version}</version>
+      <version>v1-rev12-${google.client.version}</version>
     </dependency>
     <dependency>
       <groupId>com.google.http-client</groupId>
@@ -196,7 +213,7 @@
     <dependency>
       <groupId>com.google.apis</groupId>
       <artifactId>google-api-services-bigquery</artifactId>
-      <version>v2-rev147-1.18.0-rc</version>
+      <version>v2-rev168-${google.client.version}</version>
     </dependency>
     <dependency>
       <groupId>org.json</groupId>
