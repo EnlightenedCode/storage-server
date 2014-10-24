@@ -258,10 +258,6 @@ public final class StorageService {
     return null;
   }
 
-  public String getSignedPolicy(String policyBase64) {
-    return null;
-  }
-
   public String getResumableUploadURI(String bucketId,
                                       String fileName,
                                       String fileType)
