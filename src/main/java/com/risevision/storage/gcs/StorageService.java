@@ -163,10 +163,16 @@ public final class StorageService {
                         .setLogBucket(Globals.LOGS_BUCKET_NAME)
                         .setLogObjectPrefix(bucketName))
                       .setAcl(ImmutableList.of(
-          new BucketAccessControl().setEntity("allUsers")
-                                   .setRole("READER"),
-          new BucketAccessControl().setEntity(Globals.EDITOR_GROUP)
-                                   .setRole("OWNER")));
+      new BucketAccessControl().setEntity("allUsers")
+                               .setRole("READER"),
+      new BucketAccessControl().setEntity(Globals.EDITOR_GROUP)
+                               .setRole("OWNER")))
+                      .setCors(ImmutableList.of(
+      new Bucket.Cors().setMaxAgeSeconds(3600)
+                         .setMethod(ImmutableList.of("GET", "PUT", "POST"))
+                         .setOrigin(ImmutableList.of("*"))
+                         .setResponseHeader(ImmutableList.of(
+                         "Content-Type", "x-goog-resumable", "Content-Length"))));
 
     try {
       storage.buckets().insert(Globals.PROJECT_ID, newBucket).execute();
