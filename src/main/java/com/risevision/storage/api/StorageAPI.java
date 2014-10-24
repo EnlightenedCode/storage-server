@@ -288,7 +288,13 @@ public class StorageAPI extends AbstractAPI {
   public SimpleResponse getBucketBandwidth(
                            @Nullable @Named("companyId") String companyId
                           ,User user) {
-    SimpleResponse result = new SimpleResponse();
+    SimpleResponse result;
+
+    try {
+        result = new SimpleResponse(user);
+    } catch (IllegalArgumentException e) {
+        return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
     if (hasNull(new ArrayList<Object>(asList(companyId, user)))) {
       result.message = "unexpected-null-parameter";
       result.result = false;
