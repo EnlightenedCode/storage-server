@@ -390,45 +390,4 @@ public class StorageAPI extends AbstractAPI {
     return result;
   }
 
-  @ApiMethod(
-  name = "signPolicy",
-  path = "policy",
-  httpMethod = HttpMethod.POST)
-  public SimpleResponse signPolicy(@Nullable @Named("companyId") String companyId,
-                                   @Nullable @Named("policyBase64") String policyBase64,
-                                   User user) {
-    StringResponse result = new StringResponse();
-    if (user == null) {
-      result.message = "No user";
-      return result;
-    }
-
-    log.info("User: " + user.getEmail());
-    try {
-      verifyUserCompany(companyId, user.getEmail());
-    } catch (ServiceFailedException e) {
-      result.result = false;
-      result.code = e.getReason();
-      result.message = "Authentication Failed";
-      log.warning("Authentication Failed - Status: " + e.getReason());
-      return result;
-    }
-
-    try {
-      MediaLibraryService service = MediaLibraryService.getInstance();
-      String signedPolicy = service.getSignedPolicy(policyBase64);
-      log.info("Policy Signed");
-
-      result.result = true;
-      result.code = ServiceFailedException.OK;
-      result.response = signedPolicy;
-    } catch (Exception e) {
-      Utils.logException(e);
-      result.result = false;
-      result.code = ServiceFailedException.SERVER_ERROR;
-      result.message = "Internal Error.";
-    }
-
-    return result;
-  }
 }
