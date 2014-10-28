@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import com.google.api.client.googleapis.extensions.appengine.auth.oauth2.AppIdentityCredential;
+import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -17,13 +18,16 @@ import com.google.api.services.bigquery.model.*;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
 import com.risevision.storage.Globals;
+import com.risevision.storage.gcs.LocalCredentialBuilder;
+import com.risevision.storage.info.ServiceFailedException;
+
 
 public class BQUtils {
 	
 	private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 	private static final JsonFactory JSON_FACTORY = new GsonFactory();
 	private static final String BIGQUERY_SCOPE = "https://www.googleapis.com/auth/bigquery";
-	
+    private static HttpRequestInitializer credential;
 	public static final String WRITE_DISPOSITION_TRUNCATE = "WRITE_TRUNCATE";
 	public static final String WRITE_DISPOSITION_APPEND = "WRITE_APPEND";
 	
@@ -145,7 +149,7 @@ public class BQUtils {
           return rowList;
         }
 
-        public static Object getSingleValueFromQuery(String query) {
+        public static Object getSingleValueFromQuery(String query) throws ServiceFailedException {
           Bigquery bigquery = getBigquery();
           List<TableRow> tableRowList; 
           log.info(query);
@@ -155,7 +159,7 @@ public class BQUtils {
                                .execute().getRows();
           } catch(IOException e) {
             log.warning(e.getMessage());
-            return null;
+            throw new ServiceFailedException(500);
           }
 
           if (tableRowList == null) { return null; }
@@ -166,8 +170,11 @@ public class BQUtils {
                   if (bigquery == null) {
                           Environment env = ApiProxy.getCurrentEnvironment();
                           String appId = env.getAppId();
-                          
-                          AppIdentityCredential credential = new AppIdentityCredential(Arrays.asList(BIGQUERY_SCOPE));
+                          if (Globals.devserver) {
+                              credential = LocalCredentialBuilder.getCredentialFromP12File();
+                          } else {
+                              credential = new AppIdentityCredential(Arrays.asList(BIGQUERY_SCOPE));
+                          }
                           bigquery = new Bigquery.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(appId).build();
                   }
                   
