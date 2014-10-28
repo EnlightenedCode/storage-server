@@ -128,6 +128,7 @@
 	<!-- Security -->
 	<security-constraint>
 		<web-resource-collection>
+		    <web-resource-name>Buckets</web-resource-name>
 			<url-pattern>/queue</url-pattern>
 			<url-pattern>/job/*</url-pattern>
                         <url-pattern>/bucketBandwidthQuery</url-pattern>	
