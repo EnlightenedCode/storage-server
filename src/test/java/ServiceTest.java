@@ -99,4 +99,37 @@ public class ServiceTest {
       fail("Unexpected exception: " + e.toString());
     }
   }
+
+  @Test
+  public void bucketGetFoldersWithNoParameters(){
+    StorageService gcsInstance = StorageService.getInstance();
+
+    //Mock the google client objects
+    Storage storageMock = mock(Storage.class);
+    Storage.Objects objectsMock = mock(Storage.Objects.class);
+    Storage.Objects.List listMock = mock(Storage.Objects.List.class);
+//    com.google.api.services.storage.model.Objects listResult;
+    gcsInstance.setClient(storageMock);
+
+    //Set up the argument watching
+    try {
+      when(storageMock.objects()).thenReturn(objectsMock);
+      when(objectsMock.list(any(String.class)))
+          .thenReturn(listMock);
+      when(listMock.setPrefix(any(String.class))).thenReturn(listMock);
+      when(listMock.setDelimiter(any(String.class))).thenReturn(listMock);
+      when(listMock.execute())
+          .thenReturn(new com.google.api.services.storage.model.Objects());
+
+      gcsInstance.getBucketFolders("", "", "");
+
+      //Verify insert call was made properly
+      verify(objectsMock).list("");
+
+      //Verify execute was called
+      verify(listMock).execute();
+    } catch (Exception e) {
+      fail("Unexpected exception: " + e.toString());
+    }
+  }
 }

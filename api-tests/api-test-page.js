@@ -32,6 +32,12 @@ function init() {
   }
 }
 
+var randomId = Math.floor(Math.random()*90000) + 10000;
+var randomId2 = Math.floor(Math.random()*90000) + 9000;
+randomId = "api-test-" + randomId;
+randomId2 = "api-test-" + randomId2;
+
+
 function createBucket() {
   storageApiCall("createBucket", {"companyId": jenkinsCompany});
 }
@@ -57,6 +63,9 @@ function createBucketWrongCompany() {
 function createFolderMissingCompany() {
   storageApiCall("createFolder", {"folder": "test folder"});
 }
+function sameCompaniesAddShareFolder(){
+	storageApiCall("shareFolder.add", {"companyId": "same-company-id", "folder": "test folder", "sharedCompanyId": "same-company-id", "edit": true });
+}
 
 function createFolderMissingFolder() {
   storageApiCall("createFolder", {"companyId": jenkinsCompany});
@@ -68,6 +77,18 @@ function getUploadToken(fileName, cb) {
 
 function deleteFiles(fileNames) {
   storageApiCall("files.delete", {"companyId": jenkinsCompany, "files": fileNames});
+}
+
+function addShareFolder() {
+	storageApiCall("shareFolder.add", {"companyId": randomId, "folder": "test folder", "sharedCompanyId": randomId2, "edit": true });
+}
+
+function removeShareFolder() {
+	storageApiCall("shareFolder.unlink", {"companyId": randomId, "folder": "test folder", "sharedCompanyId": randomId2});
+}
+
+function getShareFolders() {
+	storageApiCall("shareFolder.getSharedFolders", {"companyId": randomId, "folder": "test folder", "sharedCompanyId": randomId2});
 }
 
 function storageApiCall(commandString, paramObj, callback, doNotUpdateResponse) {

@@ -1,11 +1,13 @@
 package com.risevision.storage.gcs;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import com.google.common.collect.ImmutableList;
+import com.google.common.base.Strings;
 
 import com.google.api.client.googleapis.batch.BatchRequest;
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
@@ -13,6 +15,8 @@ import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.GenericUrl;
+import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
+import com.risevision.storage.info.ServiceFailedException;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
@@ -22,11 +26,7 @@ import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.BucketAccessControl;
 import com.google.api.services.storage.model.StorageObject;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.risevision.storage.Globals;
-import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
-import com.risevision.storage.info.ServiceFailedException;
 
 public final class StorageService {
   public static final String TRASH = "--TRASH--/";
@@ -145,6 +145,66 @@ public final class StorageService {
       } catch (NullPointerException e) {
         log.info("No files to list");
       }
+      listRequest.setPageToken(listResult.getNextPageToken());
+    } while (null != listResult.getNextPageToken());
+
+    return items;
+  }
+
+  public List<StorageObject> getBucketFolders(String bucketName,
+                               String prefix,
+                               String delimiter)
+      throws ServiceFailedException {
+
+    Storage.Objects.List listRequest;
+
+    prefix = (!Strings.isNullOrEmpty(prefix) && !prefix.endsWith(delimiter)) ?
+        prefix + delimiter : prefix;
+
+    log.info("Fetching object list from " +
+        "\nbucket: " + bucketName +
+        "\nprefix: " + prefix +
+        "\ndelimiter: " + delimiter);
+
+    try {
+      listRequest = storage.objects().list(bucketName)
+          .setPrefix(prefix);
+    } catch (IOException e) {
+      log.warning(e.getMessage());
+      throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+    }
+
+    com.google.api.services.storage.model.Objects listResult;
+    List<StorageObject> items = new ArrayList<StorageObject>();
+
+    do {
+      try {
+        listResult = listRequest.execute();
+      } catch (GoogleJsonResponseException e) {
+        if (e.getStatusCode() != ServiceFailedException.NOT_FOUND) {
+          log.warning(e.getStatusCode() + " - " + e.getMessage());
+        }
+        throw new ServiceFailedException(e.getStatusCode());
+      }  catch (IOException e) {
+        log.warning(e.getMessage());
+        throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+      }
+
+      try {
+        for (StorageObject item : listResult.getItems()) {
+          String charAtEndOfName = item.getName().substring(item.getName().length() -1);
+          StorageObject folderItem = new StorageObject();
+          if(charAtEndOfName.equals("/")){
+            folderItem.setName(item.getName());
+            folderItem.setKind("folder");
+            folderItem.setSize(item.getSize());
+            items.add(folderItem);
+          }
+        }
+      } catch (NullPointerException e) {
+        log.info("No Items to list");
+      }
+
       listRequest.setPageToken(listResult.getNextPageToken());
     } while (null != listResult.getNextPageToken());
 

@@ -248,6 +248,45 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
     this.test.assertSelectorHasText("#response", '"result":true');
   });
 
+	casper.then(function() {
+		casper.echo("Adding share folder");
+		casper.click("#addShareFolder");
+	});
+
+	casper.then(function() {
+		casper.waitUntilVisible("#response");
+	});
+
+	casper.then(function() {
+		this.test.assertSelectorHasText("#response", '"result":true');
+	});
+
+	casper.then(function() {
+		casper.echo("Removing share folder");
+		casper.click("#removeShareFolder");
+	});
+
+	casper.then(function() {
+		casper.waitUntilVisible("#response");
+	});
+
+	casper.then(function() {
+		this.test.assertSelectorHasText("#response", '"result":true');
+	});
+
+	casper.then(function() {
+		casper.echo("Getting shared folders");
+		casper.click("#getShareFolders");
+	});
+
+	casper.then(function() {
+		casper.waitUntilVisible("#response");
+	});
+
+	casper.then(function() {
+		this.test.assertSelectorHasText("#response", '"result":true');
+	});
+
   casper.then(function() {
     casper.echo("Attempting to create bucket with incorrect company");
     casper.click("#createBucketWrongCompany");
@@ -287,6 +326,19 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
     this.test.assertSelectorHasText("#response", '"result":false');
   });
 
+	casper.then(function() {
+		casper.echo("Attempting to add share folder with same company id.");
+		casper.click("#sameCompaniesAddShareFolder");
+	});
+
+	casper.then(function() {
+		casper.waitUntilVisible("#response");
+	});
+
+	casper.then(function() {
+		this.test.assertSelectorHasText("#response", '"result":false');
+	});
+	
   casper.then(function() {
     casper.echo("Invalidating auth token");
     casper.click("#invalidateToken");
@@ -306,18 +358,17 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    casper.echo("Attempting to create folder with no token");
-    casper.click("#noTokenFolder");
-  });
+		casper.echo("Attempting to create folder with no token");
+		casper.click("#noTokenFolder");
+	});
 
-  casper.then(function() {
-    casper.waitUntilVisible("#response");
-  });
+	casper.then(function() {
+		casper.waitUntilVisible("#response");
+	});
 
-  casper.then(function() {
-    this.test.assertSelectorHasText("#response", 'No user');
-  });
-
+	casper.then(function() {
+		this.test.assertSelectorHasText("#response", 'No user');
+	});
   casper.run(function() {
     test.done();
   });

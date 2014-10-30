@@ -28,6 +28,9 @@ import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.Utils;
 import com.risevision.storage.api.responses.GCSFilesResponse;
 import com.risevision.storage.api.responses.SimpleResponse;
+import com.risevision.storage.datastore.datastoreService;
+import com.risevision.storage.entities.ShareFolderLink;
+import com.risevision.storage.queue.tasks.BQUtils;
 import com.risevision.storage.api.responses.StringResponse;
 import com.risevision.storage.gcs.StorageService;
 import com.risevision.storage.info.ServiceFailedException;
@@ -129,6 +132,111 @@ public class StorageAPI extends AbstractAPI {
   }
 
   @ApiMethod(
+          name = "shareFolder.add",
+          path = "shareFolder",
+          httpMethod = HttpMethod.POST)
+  public SimpleResponse addShareFolder(@Nullable @Named("companyId") String companyId,
+                                       @Nullable @Named("sharedCompanyId") String sharedCompanyId,
+                                       @Nullable @Named("folder") String folder,
+                                       @Nullable @Named("edit") boolean edit,
+                                       User user) {
+    GCSFilesResponse result;
+    try {
+      result = new GCSFilesResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+
+    try {
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
+      datastoreService dsService = datastoreService.getInstance();
+      dsService.addShareFolderLink(companyId, sharedCompanyId, folder, edit);
+
+      log.info("Add Folder "+ folder + " share from " + companyId + " to " + sharedCompanyId + " is successful");
+
+      result.result = true;
+      result.code = ServiceFailedException.OK;
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.code = e.getReason();
+      result.message = "Folder Share failed";
+      log.warning("Folder Share failed - Status: " + e.getReason());
+    }
+
+    return result;
+  }
+  @ApiMethod(
+          name = "shareFolder.unlink",
+          path = "shareFolder",
+          httpMethod = HttpMethod.DELETE)
+  public SimpleResponse unlinkShareFolder(@Nullable @Named("companyId") String companyId,
+                                       @Nullable @Named("sharedCompanyId") String sharedCompanyId,
+                                       @Nullable @Named("folder") String folder,
+                                       User user) {
+    GCSFilesResponse result;
+    try {
+      result = new GCSFilesResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+
+    try {
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
+      datastoreService dsService = datastoreService.getInstance();
+      dsService.removeShareFolderLink(companyId, sharedCompanyId, folder);
+
+      log.info("Unlink Folder "+ folder + " share from " + companyId + " to " + sharedCompanyId + " is successful");
+
+      result.result = true;
+      result.code = ServiceFailedException.OK;
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.code = e.getReason();
+      result.message = "Folder unlink failed";
+      log.warning("Folder unlink failed - Status: " + e.getReason());
+    }
+
+    return result;
+  }
+
+  @ApiMethod(
+          name = "shareFolder.getSharedFolders",
+          path = "shareFolder",
+          httpMethod = HttpMethod.GET)
+  public SimpleResponse getSharedFolders(@Nullable @Named("companyId") String companyId,
+                                         @Nullable @Named("sharedCompanyId") String sharedCompanyId,
+                                         @Nullable @Named("folder") String folder,
+                                         User user) {
+    GCSFilesResponse result;
+    try {
+      result = new GCSFilesResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+
+    try {
+      if(Strings.isNullOrEmpty(companyId) && Strings.isNullOrEmpty(sharedCompanyId)){
+        throw new ServiceFailedException(ServiceFailedException.BAD_REQUEST);
+      }
+      datastoreService dsService = datastoreService.getInstance();
+
+      List<ShareFolderLink> sharedList = dsService.getSharedFolders(companyId, sharedCompanyId, folder);
+
+      log.info("Shared Folders get succeeded");
+      result.sharedFolders = sharedList;
+      result.result = true;
+      result.code = ServiceFailedException.OK;
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.code = e.getReason();
+      result.message = "Folder Share failed";
+      log.warning("Folder Share failed - Status: " + e.getReason());
+    }
+
+    return result;
+  }
+
+  @ApiMethod(
   name = "files.get",
   path = "files",
   httpMethod = HttpMethod.GET)
@@ -147,7 +255,6 @@ public class StorageAPI extends AbstractAPI {
       List<StorageObject> items = gcsService.getBucketItems(
         Globals.COMPANY_BUCKET_PREFIX + companyId,
         folder, "/");
-
       result.result = true;
       result.code = ServiceFailedException.OK;
       result.files = items;
@@ -156,6 +263,39 @@ public class StorageAPI extends AbstractAPI {
       result.code = e.getReason();
       result.message = "Could not retrieve Bucket Items";
       log.warning("Could not retrieve Bucket Items - Status: " + e.getReason());
+    }
+
+    return result;
+  }
+
+
+  @ApiMethod(
+      name = "folders.get",
+      path = "folders",
+      httpMethod = HttpMethod.GET)
+  public SimpleResponse getFolders(@Nullable @Named("companyId") String companyId,
+                                 @Nullable @Named("folder") String folder,
+                                 User user) {
+    GCSFilesResponse result;
+    try {
+      result = new GCSFilesResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+
+    try {
+      StorageService gcsService = StorageService.getInstance();
+      List<StorageObject> items = gcsService.getBucketFolders(
+          Globals.COMPANY_BUCKET_PREFIX + companyId,
+          folder, "/");
+      result.result = true;
+      result.code = ServiceFailedException.OK;
+      result.folders = items;
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.code = e.getReason();
+      result.message = "Could not retrieve Bucket Folders";
+      log.warning("Could not retrieve Bucket Folders - Status: " + e.getReason());
     }
 
     return result;
