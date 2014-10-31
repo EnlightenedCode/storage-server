@@ -17,20 +17,16 @@ public class ShareFolderLink implements Serializable{
     @Index public String originCompanyId;
     @Index public String sharedCompanyId;
     @Index public String folderName;
-    public boolean view;
     public boolean edit;
-    public boolean add;
 
     public ShareFolderLink() {
 
     }
 
-    public ShareFolderLink (String originCompanyId, String sharedCompanyId, String folderName, boolean view, boolean edit, boolean add){
+    public ShareFolderLink (String originCompanyId, String sharedCompanyId, String folderName, boolean edit){
         this.originCompanyId = originCompanyId;
         this.sharedCompanyId = sharedCompanyId;
         this.folderName = folderName;
-        this.view = view;
         this.edit = edit;
-        this.add = add;
     }
 }

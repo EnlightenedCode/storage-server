@@ -138,9 +138,7 @@ public class StorageAPI extends AbstractAPI {
   public SimpleResponse addShareFolder(@Nullable @Named("companyId") String companyId,
                                        @Nullable @Named("sharedCompanyId") String sharedCompanyId,
                                        @Nullable @Named("folder") String folder,
-                                       @Nullable @Named("view") boolean view,
                                        @Nullable @Named("edit") boolean edit,
-                                       @Nullable @Named("add") boolean add,
                                        User user) {
     GCSFilesResponse result;
     try {
@@ -152,7 +150,7 @@ public class StorageAPI extends AbstractAPI {
     try {
       datastoreService dsService = datastoreService.getInstance();
 
-      dsService.addShareFolderLink(companyId, sharedCompanyId, folder, view, edit, add);
+      dsService.addShareFolderLink(companyId, sharedCompanyId, folder, edit);
 
       log.info("Add Folder "+ folder + " share from " + companyId + " to " + sharedCompanyId + " is successful");
 
