@@ -56,7 +56,8 @@ public class datastoreService {
   }
 
   public List<ShareFolderLink> getSharedFolders(String companyId, String sharedCompanyId, String folder) throws ServiceFailedException {
-    Query<ShareFolderLink> query = ofy().load().type(ShareFolderLink.class).filter("originCompanyId", companyId);
+    Query<ShareFolderLink> query = ofy().load().type(ShareFolderLink.class);
+    query = companyId != null ? query.filter("originCompanyId", companyId) : query;
     query = sharedCompanyId != null ? query.filter("sharedCompanyId", sharedCompanyId) : query;
     query = folder != null ? query.filter("folderName", folder) : query;
     return query.list();
