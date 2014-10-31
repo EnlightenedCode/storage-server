@@ -131,71 +131,74 @@ public class StorageAPI extends AbstractAPI {
     }
   }
 
-    @ApiMethod(
-            name = "shareFolder.add",
-            path = "shareFolder",
-            httpMethod = HttpMethod.POST)
-    public SimpleResponse addShareFolder(@Nullable @Named("companyId") String companyId,
-                                   @Nullable @Named("sharedCompanyId") String sharedCompanyId,
-                                   @Nullable @Named("folder") String folder,
-                                   @Nullable @Named("view") boolean view,
-                                   @Nullable @Named("edit") boolean edit,
-                                   @Nullable @Named("add") boolean add,
-                                   User user) {
-        GCSFilesResponse result;
-        try {
-            result = new GCSFilesResponse(user);
-        } catch (IllegalArgumentException e) {
-            return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
-        }
-
-        try {
-            datastoreService dsService = datastoreService.getInstance();
-
-            dsService.addShareFolderLink(companyId, sharedCompanyId, folder, view, edit, add);
-
-            log.info("Add Folder "+ folder + " share from " + companyId + " to " + sharedCompanyId + " is successful");
-
-            result.result = true;
-            result.code = ServiceFailedException.OK;
-        } catch (ServiceFailedException e) {
-            result.result = false;
-            result.code = e.getReason();
-            result.message = "Folder Share failed";
-            log.warning("Folder Share failed - Status: " + e.getReason());
-        }
-        return result;
+  @ApiMethod(
+          name = "shareFolder.add",
+          path = "shareFolder",
+          httpMethod = HttpMethod.POST)
+  public SimpleResponse addShareFolder(@Nullable @Named("companyId") String companyId,
+                                       @Nullable @Named("sharedCompanyId") String sharedCompanyId,
+                                       @Nullable @Named("folder") String folder,
+                                       @Nullable @Named("view") boolean view,
+                                       @Nullable @Named("edit") boolean edit,
+                                       @Nullable @Named("add") boolean add,
+                                       User user) {
+    GCSFilesResponse result;
+    try {
+      result = new GCSFilesResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
-    @ApiMethod(
-            name = "shareFolder.getSharedFolders",
-            path = "shareFolder",
-            httpMethod = HttpMethod.GET)
-    public SimpleResponse getSharedFolders(@Nullable @Named("companyId") String companyId,
+
+    try {
+      datastoreService dsService = datastoreService.getInstance();
+
+      dsService.addShareFolderLink(companyId, sharedCompanyId, folder, view, edit, add);
+
+      log.info("Add Folder "+ folder + " share from " + companyId + " to " + sharedCompanyId + " is successful");
+
+      result.result = true;
+      result.code = ServiceFailedException.OK;
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.code = e.getReason();
+      result.message = "Folder Share failed";
+      log.warning("Folder Share failed - Status: " + e.getReason());
+    }
+
+    return result;
+  }
+	
+  @ApiMethod(
+          name = "shareFolder.getSharedFolders",
+          path = "shareFolder",
+          httpMethod = HttpMethod.GET)
+  public SimpleResponse getSharedFolders(@Nullable @Named("companyId") String companyId,
                                          User user) {
-        GCSFilesResponse result;
-        try {
-            result = new GCSFilesResponse(user);
-        } catch (IllegalArgumentException e) {
-            return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
-        }
-
-        try {
-            datastoreService dsService = datastoreService.getInstance();
-
-            List<ShareFolderLink> sharedList = dsService.getSharedFolders(companyId);
-
-            log.info("Shared Folders get succeeded");
-            result.sharedFolders = sharedList;
-            result.result = true;
-            result.code = ServiceFailedException.OK;
-        } catch (ServiceFailedException e) {
-            result.result = false;
-            result.code = e.getReason();
-            result.message = "Folder Share failed";
-            log.warning("Folder Share failed - Status: " + e.getReason());
-        }
-        return result;
+    GCSFilesResponse result;
+    try {
+      result = new GCSFilesResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
+
+    try {
+      datastoreService dsService = datastoreService.getInstance();
+
+      List<ShareFolderLink> sharedList = dsService.getSharedFolders(companyId);
+
+      log.info("Shared Folders get succeeded");
+      result.sharedFolders = sharedList;
+      result.result = true;
+      result.code = ServiceFailedException.OK;
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.code = e.getReason();
+      result.message = "Folder Share failed";
+      log.warning("Folder Share failed - Status: " + e.getReason());
+    }
+
+    return result;
+  }
 
   @ApiMethod(
   name = "files.get",
