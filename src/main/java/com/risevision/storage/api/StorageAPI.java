@@ -167,12 +167,47 @@ public class StorageAPI extends AbstractAPI {
 
     return result;
   }
-	
+  @ApiMethod(
+          name = "shareFolder.unlink",
+          path = "shareFolder",
+          httpMethod = HttpMethod.DELETE)
+  public SimpleResponse unlinkShareFolder(@Nullable @Named("companyId") String companyId,
+                                       @Nullable @Named("sharedCompanyId") String sharedCompanyId,
+                                       @Nullable @Named("folder") String folder,
+                                       User user) {
+    GCSFilesResponse result;
+    try {
+      result = new GCSFilesResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+
+    try {
+      datastoreService dsService = datastoreService.getInstance();
+
+      dsService.removeShareFolderLink(companyId, sharedCompanyId, folder);
+
+      log.info("Unlink Folder "+ folder + " share from " + companyId + " to " + sharedCompanyId + " is successful");
+
+      result.result = true;
+      result.code = ServiceFailedException.OK;
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.code = e.getReason();
+      result.message = "Folder unlink failed";
+      log.warning("Folder unlink failed - Status: " + e.getReason());
+    }
+
+    return result;
+  }
+
   @ApiMethod(
           name = "shareFolder.getSharedFolders",
           path = "shareFolder",
           httpMethod = HttpMethod.GET)
   public SimpleResponse getSharedFolders(@Nullable @Named("companyId") String companyId,
+                                         @Nullable @Named("sharedCompanyId") String sharedCompanyId,
+                                         @Nullable @Named("folder") String folder,
                                          User user) {
     GCSFilesResponse result;
     try {
@@ -184,7 +219,7 @@ public class StorageAPI extends AbstractAPI {
     try {
       datastoreService dsService = datastoreService.getInstance();
 
-      List<ShareFolderLink> sharedList = dsService.getSharedFolders(companyId);
+      List<ShareFolderLink> sharedList = dsService.getSharedFolders(companyId, sharedCompanyId, folder);
 
       log.info("Shared Folders get succeeded");
       result.sharedFolders = sharedList;
