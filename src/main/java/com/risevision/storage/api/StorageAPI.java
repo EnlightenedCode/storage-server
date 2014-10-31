@@ -22,7 +22,7 @@ import com.risevision.storage.Globals;
 import com.risevision.storage.api.responses.GCSFilesResponse;
 import com.risevision.storage.api.responses.SimpleResponse;
 import com.risevision.storage.datastore.datastoreService;
-import com.risevision.storage.entities.ShareFolder;
+import com.risevision.storage.entities.ShareFolderLink;
 import com.risevision.storage.queue.tasks.BQUtils;
 import com.risevision.storage.gcs.StorageService;
 import com.google.api.services.storage.model.StorageObject;
@@ -152,8 +152,6 @@ public class StorageAPI extends AbstractAPI {
         try {
             datastoreService dsService = datastoreService.getInstance();
 
-            dsService.addShareFolder(companyId, sharedCompanyId, folder, view, edit, add);
-
             dsService.addShareFolderLink(companyId, sharedCompanyId, folder, view, edit, add);
 
             log.info("Add Folder "+ folder + " share from " + companyId + " to " + sharedCompanyId + " is successful");
@@ -184,7 +182,7 @@ public class StorageAPI extends AbstractAPI {
         try {
             datastoreService dsService = datastoreService.getInstance();
 
-            List<ShareFolder> sharedList = dsService.getSharedFolders(companyId);
+            List<ShareFolderLink> sharedList = dsService.getSharedFolders(companyId);
 
             log.info("Shared Folders get succeeded");
             result.sharedFolders = sharedList;
