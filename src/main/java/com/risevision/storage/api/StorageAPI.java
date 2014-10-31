@@ -153,7 +153,7 @@ public class StorageAPI extends AbstractAPI {
       dsService.addShareFolderLink(companyId, sharedCompanyId, folder, edit);
 
       log.info("Add Folder "+ folder + " share from " + companyId + " to " + sharedCompanyId + " is successful");
-
+      
       result.result = true;
       result.code = ServiceFailedException.OK;
     } catch (ServiceFailedException e) {
