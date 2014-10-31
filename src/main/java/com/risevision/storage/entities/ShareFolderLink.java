@@ -16,7 +16,7 @@ public class ShareFolderLink implements Serializable{
     @Id public Long id;
     @Index public String originCompanyId;
     @Index public String sharedCompanyId;
-    public String folderName;
+    @Index public String folderName;
     public boolean view;
     public boolean edit;
     public boolean add;
