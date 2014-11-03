@@ -5,9 +5,6 @@ import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.ObjectifyService;
 import com.risevision.storage.entities.ShareFolderLink;
 
-/**
- * Created by Andrew on 10/29/2014.
- */
 public class OfyService {
     static {
         factory().register(ShareFolderLink.class);

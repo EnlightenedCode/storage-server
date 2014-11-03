@@ -3,14 +3,10 @@ package com.risevision.storage.datastore;
 import com.googlecode.objectify.cmd.Query;
 import com.risevision.storage.entities.ShareFolderLink;
 import com.risevision.storage.info.ServiceFailedException;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import static com.risevision.storage.datastore.OfyService.ofy;
-/**
- * Created by Andrew on 10/30/2014.
- */
+
 public class datastoreService {
 
   private static datastoreService instance;
