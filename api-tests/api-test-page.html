@@ -22,6 +22,9 @@
 <button id="deleteFiles" type="button" >deleteFiles</button>
 <button id="deleteFolder" type="button" >deleteFolder</button>
 <button id="deleteBucket" type="button" >deleteBucket</button>
+<button id="addShareFolder" type="button">addShareFolder</button>
+<button id="getShareFolders" type="button">getShareFolders</button>
+<button id="removeShareFolder" type="button">removeShareFolder</button>
 
 <h3>Expect Failure</h3>
 <button id="createFolderMissingCompany" type="button" >
@@ -73,6 +76,12 @@ document.getElementById("removePublicReadOneFile")
         .addEventListener("click", removePublicReadOneFile);
 document.getElementById("addPublicReadOneFile")
         .addEventListener("click", addPublicReadOneFile);
+document.getElementById("addShareFolder")
+        .addEventListener("click", addShareFolder);
+document.getElementById("getShareFolders")
+        .addEventListener("click", getShareFolders);
+document.getElementById("removeShareFolder")
+        .addEventListener("click", removeShareFolder);
 </script>
 </body>
 </html>
