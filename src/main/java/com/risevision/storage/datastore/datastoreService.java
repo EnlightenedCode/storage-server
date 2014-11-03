@@ -25,6 +25,10 @@ public class datastoreService {
 
   public void addShareFolderLink(String companyId, String sharedCompanyId, String folder, boolean edit) throws ServiceFailedException{
     ShareFolderLink shared = new ShareFolderLink(companyId, sharedCompanyId, folder, edit);
+    //check to see if companyId is the same as sharedCompanyId.
+    if(companyId.equals(sharedCompanyId)){
+      throw new ServiceFailedException(500);
+    }
     //check if the sharedLink is already there with the same originCompanyId and folderName.
     ShareFolderLink sharedLinkCheck = ofy().load().type(ShareFolderLink.class).filter("originCompanyId", companyId).filter("folderName", folder).first().now();
     if(sharedLinkCheck == null) {
