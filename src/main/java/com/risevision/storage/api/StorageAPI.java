@@ -149,7 +149,6 @@ public class StorageAPI extends AbstractAPI {
 
     try {
       datastoreService dsService = datastoreService.getInstance();
-
       dsService.addShareFolderLink(companyId, sharedCompanyId, folder, edit);
 
       log.info("Add Folder "+ folder + " share from " + companyId + " to " + sharedCompanyId + " is successful");
@@ -182,7 +181,6 @@ public class StorageAPI extends AbstractAPI {
 
     try {
       datastoreService dsService = datastoreService.getInstance();
-
       dsService.removeShareFolderLink(companyId, sharedCompanyId, folder);
 
       log.info("Unlink Folder "+ folder + " share from " + companyId + " to " + sharedCompanyId + " is successful");
