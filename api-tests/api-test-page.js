@@ -60,6 +60,9 @@ function deleteBucket() {
 function createFolderMissingCompany() {
   storageApiCall("createFolder", {"folder": "test folder"});
 }
+function sameCompaniesAddShareFolder(){
+	storageApiCall("shareFolder.add", {"companyId": randomId, "folder": "test folder", "sharedCompanyId": randomId, "edit": true });
+}
 
 function createFolderMissingFolder() {
   storageApiCall("createFolder", {"companyId": randomId});

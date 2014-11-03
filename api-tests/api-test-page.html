@@ -42,6 +42,9 @@
 <button id="noTokenFolder" type="button" onclick="document.getElementById('createFolder').click()">
   createFolder
 </button>
+<button id="sameCompaniesAddShareFolder" type="button">
+  add Share Folder with origin and shared company id the same
+</button>
 
 <script>
 document.getElementById("createBucket")
@@ -82,6 +85,8 @@ document.getElementById("getShareFolders")
         .addEventListener("click", getShareFolders);
 document.getElementById("removeShareFolder")
         .addEventListener("click", removeShareFolder);
+document.getElementById("sameCompaniesShareFolder")
+        .addEventListener("click", sameCompaniesAddShareFolder);
 </script>
 </body>
 </html>
