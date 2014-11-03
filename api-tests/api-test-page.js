@@ -61,7 +61,7 @@ function createFolderMissingCompany() {
   storageApiCall("createFolder", {"folder": "test folder"});
 }
 function sameCompaniesAddShareFolder(){
-	storageApiCall("shareFolder.add", {"companyId": randomId, "folder": "test folder", "sharedCompanyId": randomId, "edit": true });
+	storageApiCall("shareFolder.add", {"companyId": "same-company-id", "folder": "test folder", "sharedCompanyId": "same-company-id", "edit": true });
 }
 
 function createFolderMissingFolder() {
