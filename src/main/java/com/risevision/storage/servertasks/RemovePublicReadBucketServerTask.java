@@ -1,50 +1,42 @@
 package com.risevision.storage.servertasks;
 
 import java.util.Map;
-import java.lang.IllegalArgumentException;
 import java.io.IOException;
-import java.lang.reflect.Method;
 
 import com.google.api.services.storage.model.*;
 import com.google.api.services.storage.Storage;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.util.GenericData;
 
-class RemovePublicReadBucketServerTask extends ServerTask {
+class RemovePublicReadBucketServerTask extends BatchServerTask {
+  String bucketName;
+
   RemovePublicReadBucketServerTask
-  (Storage gcsStorageClient, Map<String, String[]> params) {
-    super(gcsStorageClient, params);
-    verifyParams("bucket");
+  (Storage gcsClient, Map<String, String[]> params) throws IOException {
+    super(gcsClient, params);
+    confirmURLParams("bucket");
+    bucketName = requestParams.get("bucket")[0];
   }
 
   public void handleRequest() throws IOException {
-    log.info("Removing public read on: " + requestParams.get("bucket")[0]);
+    log.info("Removing public read on: " + bucketName);
 
-    try {
-      Storage.ObjectAccessControls.Delete deleteRequest = 
-      gcsStorageClient.objectAccessControls().delete
-      (requestParams.get("bucket")[0], "toBeIterated", "allUsers");
+    setupACLDeleteRequest();
 
-      Storage.Objects.List listRequest = gcsStorageClient.objects().list
-      (requestParams.get("bucket")[0])
-      .setPrefix(null).setDelimiter(null);
+    listRequest = new ListRequestGenerator(gcsClient, bucketName).getRequest();
+    listRequest.set("pageToken", pageToken);
+    listRequest.set("maxResults", maxResults);
+    listResult = (GenericData) listRequest.execute();
 
- 
-      Method iterationRequestUpdater = null;
-      try {
-        iterationRequestUpdater =
-        deleteRequest.getClass().getMethod("setObject", String.class);
+    prepareBatchRequest();
+    submitBatchRequest();
 
-      } catch (Exception e) {
-        throw new IOException("Method reflection error");
-      }
-      new BatchBucketObjectsUpdater<Storage.ObjectAccessControls.Delete>
-      (deleteRequest, iterationRequestUpdater, listRequest, requestParams)
-      .beginUpdate();
-    } catch (IOException e) {
-      log.severe(e.toString());
-      throw new IOException(e);
-    }
+    submitNextTask();
+  }
+
+  private void setupACLDeleteRequest() throws IOException {
+    iteratingRequest = 
+    gcsClient.objectAccessControls().delete
+    (bucketName, "toBeIterated", "allUsers");
   }
 }
-
 

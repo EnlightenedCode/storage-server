@@ -1,53 +1,45 @@
 package com.risevision.storage.servertasks;
 
 import java.util.Map;
-import java.lang.IllegalArgumentException;
 import java.io.IOException;
-import java.lang.reflect.Method;
 
 import com.google.api.services.storage.model.*;
 import com.google.api.services.storage.Storage;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.util.GenericData;
 
-class AddPublicReadBucketServerTask extends ServerTask {
+class AddPublicReadBucketServerTask extends BatchServerTask {
+  String bucketName;
+
   AddPublicReadBucketServerTask
-  (Storage gcsStorageClient, Map<String, String[]> params) {
-    super(gcsStorageClient, params);
-    verifyParams("bucket");
+  (Storage gcsClient, Map<String, String[]> params) throws IOException {
+    super(gcsClient, params);
+    confirmURLParams("bucket");
+    bucketName = requestParams.get("bucket")[0];
   }
 
   public void handleRequest() throws IOException {
-    log.info("Adding public read on: " + requestParams.get("bucket")[0]);
+    log.info("Adding public read on: " + bucketName);
 
-    try {
-      ObjectAccessControl acl = new ObjectAccessControl();
-      acl.setEntity("allUsers").setRole("READER");
+    setupACLInsertRequest();
 
-      Storage.ObjectAccessControls.Insert insertRequest = 
-      gcsStorageClient.objectAccessControls().insert
-      (requestParams.get("bucket")[0], "toBeIterated", acl);
+    listRequest = new ListRequestGenerator(gcsClient, bucketName).getRequest();
+    listRequest.set("pageToken", pageToken);
+    listRequest.set("maxResults", maxResults);
+    listResult = (GenericData) listRequest.execute();
 
-      Storage.Objects.List listRequest = gcsStorageClient.objects().list
-      (requestParams.get("bucket")[0])
-      .setPrefix(null).setDelimiter(null);
+    prepareBatchRequest();
+    submitBatchRequest();
 
- 
-      Method iterationRequestUpdater = null;
-      try {
-        iterationRequestUpdater =
-        insertRequest.getClass().getMethod("setObject", String.class);
+    submitNextTask();
+  }
 
-      } catch (Exception e) {
-        throw new IOException("Method reflection error");
-      }
+  private void setupACLInsertRequest() throws IOException {
+    ObjectAccessControl acl = new ObjectAccessControl();
+    acl.setEntity("allUsers").setRole("READER");
 
-      new BatchBucketObjectsUpdater<Storage.ObjectAccessControls.Insert>
-      (insertRequest, iterationRequestUpdater, listRequest, requestParams)
-      .beginUpdate();
-    } catch (IOException e) {
-      log.severe(e.toString());
-      throw new IOException(e);
-    }
+    iteratingRequest = 
+    gcsClient.objectAccessControls().insert
+    (requestParams.get("bucket")[0], "toBeIterated", acl);
   }
 }
 
