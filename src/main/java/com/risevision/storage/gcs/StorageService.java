@@ -1,16 +1,15 @@
 package com.risevision.storage.gcs;
 
 import java.io.InputStream;
-import java.util.List;
+import java.util.*;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 import com.google.common.collect.ImmutableList;
 import com.google.common.base.Strings;
 
-import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
+import com.risevision.storage.entities.BucketItems;
 import com.risevision.storage.info.MediaItemInfo;
 import com.risevision.storage.info.ServiceFailedException;
 import com.google.api.client.googleapis.extensions.appengine.auth.oauth2.AppIdentityCredential;
@@ -35,6 +34,7 @@ import com.google.api.client.googleapis.json.GoogleJsonError.ErrorInfo;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.ByteArrayContent;
 import com.risevision.storage.Globals;
+import org.apache.commons.lang.StringUtils;
 
 public final class StorageService {
   private static HttpRequestInitializer credential;
@@ -82,28 +82,43 @@ public final class StorageService {
                                             String prefix,
                                             String delimiter)
   throws ServiceFailedException {
-    Storage.Objects.List listRequest;
 
-    prefix = (!Strings.isNullOrEmpty(prefix) && !prefix.endsWith(delimiter)) ? 
-      prefix + delimiter : prefix;
+    BucketItems items = getFilesAndFolders(bucketName, prefix, delimiter);
+    return items.rootItems;
+  }
+
+  public List<StorageObject> getBucketFolders(String bucketName,
+                               String prefix,
+                               String delimiter)
+      throws ServiceFailedException {
+
+    BucketItems items = getFilesAndFolders(bucketName, prefix, delimiter);
+    return items.allFolders;
+  }
+
+  private BucketItems getFilesAndFolders(String bucketName, String prefix, String delimiter) throws ServiceFailedException{
+    Storage.Objects.List listRequest;
+    prefix = (!Strings.isNullOrEmpty(prefix) && !prefix.endsWith(delimiter)) ?
+        prefix + delimiter : prefix;
 
     log.info("Fetching object list from " +
-             "\nbucket: " + bucketName + 
-             "\nprefix: " + prefix +
-             "\ndelimiter: " + delimiter);
+        "\nbucket: " + bucketName +
+        "\nprefix: " + prefix +
+        "\ndelimiter: " + delimiter);
 
     try {
       listRequest = storage.objects().list(bucketName)
-                                     .setPrefix(prefix)
-                                     .setDelimiter(delimiter);
+          .setPrefix(prefix)
+          .setDelimiter(delimiter);
     } catch (IOException e) {
       log.warning(e.getMessage());
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
     }
 
     com.google.api.services.storage.model.Objects listResult;
-    List<StorageObject> items = new ArrayList<StorageObject>();
-    List<String> prefixes = new ArrayList<String>();
+    BucketItems items = new BucketItems();
+    List <StorageObject> fileItems = new ArrayList<StorageObject>();
+    List <StorageObject> combineItems;
 
     do {
       try {
@@ -126,24 +141,26 @@ public final class StorageService {
           long folderSize = 0;
           long latestDt = 0;
           long folderFileDt = 0;
-          List<StorageObject> folderFiles = getBucketItems(bucketName
-                                                          ,folderName
-                                                          ,"/");
-          for (StorageObject folderFile : folderFiles) {
+
+          BucketItems folderFiles = getFilesAndFolders(bucketName
+              , folderName
+              , "/");
+          for (StorageObject folderFile : folderFiles.rootItems) {
             folderSize += folderFile.getSize().longValue();
             folderFileDt = folderFile.getUpdated().getValue();
             latestDt = folderFileDt > latestDt ? folderFileDt : latestDt;
           }
           folderItem.setSize(BigInteger.valueOf(folderSize));
           folderItem.setUpdated(new DateTime(latestDt));
-          items.add(folderItem);
+          folderFiles.allFolders.add(folderItem);
+          items.allFolders.addAll(folderFiles.allFolders);
+          items.rootItems.add(folderItem);
         }
       } catch (NullPointerException e) {
         log.info("No folders to list");
       }
-
       try {
-        items.addAll(listResult.getItems());
+        items.rootItems.addAll(listResult.getItems());
       } catch (NullPointerException e) {
         log.info("No files to list");
       }
