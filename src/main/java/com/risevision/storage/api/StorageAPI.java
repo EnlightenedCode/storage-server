@@ -263,6 +263,39 @@ public class StorageAPI extends AbstractAPI {
     return result;
   }
 
+
+  @ApiMethod(
+      name = "folders.get",
+      path = "folders",
+      httpMethod = HttpMethod.GET)
+  public SimpleResponse getFolders(@Nullable @Named("companyId") String companyId,
+                                 @Nullable @Named("folder") String folder,
+                                 User user) {
+    GCSFilesResponse result;
+    try {
+      result = new GCSFilesResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+
+    try {
+      StorageService gcsService = StorageService.getInstance();
+      List<StorageObject> items = gcsService.getBucketFolders(
+          Globals.COMPANY_BUCKET_PREFIX + companyId,
+          folder, "/");
+      result.result = true;
+      result.code = ServiceFailedException.OK;
+      result.folders = items;
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.code = e.getReason();
+      result.message = "Could not retrieve Bucket Folders";
+      log.warning("Could not retrieve Bucket Folders - Status: " + e.getReason());
+    }
+
+    return result;
+  }
+
   @ApiMethod(
   name = "files.delete",
   path = "files",
