@@ -8,9 +8,10 @@ import com.risevision.storage.entities.ShareFolderLink;
 import org.json.JSONArray;
 
 public class GCSFilesResponse extends SimpleResponse {
-	
-	public List<StorageObject> files;
-    public List<ShareFolderLink> sharedFolders;
+
+  public List<StorageObject> files;
+  public List<StorageObject> folders;
+  public List<ShareFolderLink> sharedFolders;
 	
 	public GCSFilesResponse(User user){
 		
