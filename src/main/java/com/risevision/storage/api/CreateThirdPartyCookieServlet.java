@@ -10,11 +10,10 @@ import java.util.List;
 public class CreateThirdPartyCookieServlet extends HttpServlet {
     //List of allowed origins
     private final List<String> incomingUrls;
-
     private final Cookie cookie;
-
+  
     public CreateThirdPartyCookieServlet(){
-      this.incomingUrls = Arrays.asList("http://storage.risevision.com","http://localhost:8000");
+      this.incomingUrls = Arrays.asList("http://storage.risevision.com","http://localhost:8000, http://192.254.220.35");
       this.cookie = new Cookie("third_party_c_t","third_party_c_t");
     }
 
