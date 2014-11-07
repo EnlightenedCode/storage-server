@@ -14,7 +14,7 @@ public class CheckThirdPartyCookieServlet extends HttpServlet {
 
 
   public CheckThirdPartyCookieServlet(){
-      this.incomingUrls = Arrays.asList("http://storage.risevision.com","http://localhost:8000, http://192.254.220.35");
+      this.incomingUrls = Arrays.asList("http://storage.risevision.com","http://localhost:8000", "http://192.254.220.35");
   }
 
   public CheckThirdPartyCookieServlet(CreateThirdPartyCookieServlet serv, List<String> domains){
