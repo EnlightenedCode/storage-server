@@ -31,6 +31,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   casper.then(function() {
     casper.evaluate(function() {
       document.getElementById("isAdmin").checked = true;
+      document.getElementById("email").value = "jenkins@risevision.com";
     });
     casper.click("#btn-login");
   });
@@ -87,10 +88,6 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
 
   casper.then(function() {
     casper.waitUntilVisible("#response");
-  });
-
-  casper.then(function() {
-    this.test.assertSelectorHasText("#response", '"result":true');
   });
 
   casper.then(function() {
