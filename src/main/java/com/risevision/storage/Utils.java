@@ -26,8 +26,6 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.search.GeoPoint;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.risevision.core.api.Format;
-import com.risevision.core.api.attributes.CommonAttribute;
 
 public class Utils {
 	
@@ -59,16 +57,6 @@ public class Utils {
 	static public GeoPoint wrapNull(GeoPoint gp) {
 		
    		return gp != null ? gp : new GeoPoint(0, 0);
-	}
-	
-	static public String dateToRfc822(Date date) {
-		
-    	if (date != null) {
-    		SimpleDateFormat formatter = new SimpleDateFormat(Format.DATE_RFC822); // RFC-822 date-time with time zone 
-    		return formatter.format(date);
-    	} else {
-    		return "";
-    	}
 	}
 	
 	static public String dateToHMTime(Date date) {
@@ -117,25 +105,6 @@ public class Utils {
     	}
 	}
 	
-	static public Date jsonDateToDate(String jsonDate) {
-
-		Date result = null;
-		
-		if (jsonDate == null || jsonDate.isEmpty()) 
-			return result;
-
-		try {
-
-			result = new SimpleDateFormat(Format.DATE_JSON).parse(jsonDate);
-
-		} catch (Exception e) {
-
-			result = null;
-		}
-
-		return result;
-	}
-	
 	static public String dateToTimeStamp(Date date) {
 		
     	if (date != null) {
@@ -154,13 +123,6 @@ public class Utils {
     	} else {
     		return "";
     	}
-	}
-	
-	static public String formatAsEasternTime(Date date) {
-		
-		DateFormat tsf = new SimpleDateFormat(Format.DATE_JSON);
-		tsf.setTimeZone(TimeZone.getTimeZone(Globals.HQ_TIMEZONE));
-		return tsf.format(date) + " EST";
 	}
 	
 	static public String getDateTimeQuery(String fieldName, int days) {
@@ -330,29 +292,6 @@ public class Utils {
 		log.warning("Error: " + e.toString() + ", " +  e.getMessage());
 		Utils.logStackTrace(e, log);
 		
-	}
-
-	static public void deleteEntities(DatastoreService datastore, String entityKind, List<String> ids) {
-
-		for (String id : ids) {
-
-			Query q = new Query(entityKind).setKeysOnly().setFilter(new FilterPredicate(CommonAttribute.ID, Query.FilterOperator.EQUAL, id));
-			PreparedQuery pq = datastore.prepare(q);
-			Entity e = pq.asSingleEntity();
-
-			if (e != null) {
-
-				Logger.getAnonymousLogger().info("Deleting " + e.getKey().getName() + " (with all child entities).");
-
-				Query qq = new Query().setKeysOnly().setAncestor(e.getKey());
-				List<Entity> children = datastore.prepare(qq).asList(FetchOptions.Builder.withDefaults());
-				for (Entity ce : children) {
-					datastore.delete(ce.getKey());
-				}
-		
-				datastore.delete(e.getKey());
-			}
-		}
 	}
 
 	static public Key getEntityKey(Key companyKey, String entityKind, String entityId) {

@@ -18,10 +18,6 @@
 
   <repositories>
     <repository>
-      <id>risevision</id>
-      <url>file://${basedir}/lib</url>
-    </repository>
-    <repository>
       <id>maven-restlet</id>
       <name>Public online Restlet repository</name>
       <url>http://maven.restlet.org</url>
@@ -133,16 +129,6 @@
       <groupId>org.restlet.jee</groupId>
       <artifactId>org.restlet</artifactId>
       <version>${restlet.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.risevision</groupId>
-      <artifactId>directory</artifactId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.risevision.core</groupId>
-      <artifactId>api</artifactId>
-      <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>com.google.appengine</groupId>

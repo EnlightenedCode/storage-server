@@ -20,7 +20,6 @@ import com.google.appengine.api.search.SearchServiceFactory;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
 import com.google.common.base.Strings;
-import com.risevision.directory.documents.Company;
 import com.risevision.storage.Globals;
 import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.QueryParam;
@@ -43,6 +42,7 @@ public class EnableLogging extends AbstractTask {
 	
 	private static final String STORAGE_ANALYTICS_EMAIL = "cloud-storage-analytics@google.com";
 	private static final String SCOPE_WRITE = "WRITER";
+	private static final String INDEX_ALL_COMPANIES = "directory.companies";
 	
 	private static Storage storage;
 
@@ -173,7 +173,7 @@ public class EnableLogging extends AbstractTask {
 		List<String> result = new ArrayList<String>();
 		GetResponse<Document> response = null;
 		
-		String indexName = Company.INDEX_ALL;
+		String indexName = INDEX_ALL_COMPANIES;
 
 		IndexSpec indexSpec = IndexSpec.newBuilder().setName(indexName).build(); 
 		Index index = SearchServiceFactory.getSearchService().getIndex(indexSpec);
