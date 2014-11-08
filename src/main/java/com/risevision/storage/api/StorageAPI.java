@@ -32,7 +32,13 @@ import com.risevision.storage.api.responses.StringResponse;
 import com.risevision.storage.gcs.StorageService;
 import com.risevision.storage.info.ServiceFailedException;
 import com.risevision.storage.queue.tasks.BQUtils;
-import com.risevision.storage.security.AccessResource;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.io.BufferedReader;
+import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
 
 
 @Api(
@@ -42,6 +48,7 @@ clientIds = {com.google.api.server.spi.Constant.API_EXPLORER_CLIENT_ID, Globals.
 )
 
 public class StorageAPI extends AbstractAPI {
+  private static final String HTTP_CHARSET = "UTF-8";
 
   private static final String bandwidthQryBegin = 
           "select bytes_this_month from " + Globals.DATASET_ID +
@@ -66,10 +73,63 @@ public class StorageAPI extends AbstractAPI {
   }
 
   private void verifyUserCompany(String companyId, String email)
-    throws ServiceFailedException {
-    if (Globals.devserver) {return;}
-    AccessResource resource = new AccessResource(companyId, email);
-    resource.verify();
+  throws ServiceFailedException {
+    BufferedReader reader = null;
+    OutputStream output = null;
+
+    if (Globals.devserver) {
+      email = com.google.appengine.api.users.UserServiceFactory.
+              getUserService().getCurrentUser().getEmail();
+    }
+
+    log.info("Verifying company access for user " + email);
+    String result = "";
+    String line;
+
+    try {
+      String query = String.format("username=%s&companyId=%s", 
+                                   URLEncoder.encode(email, HTTP_CHARSET), 
+                                   URLEncoder.encode(companyId, HTTP_CHARSET));
+
+      URL url = new URL(Globals.USER_VERIFICATION_URL);
+                        
+      java.net.HttpURLConnection httpConn = 
+      (java.net.HttpURLConnection)url.openConnection();
+      httpConn.setConnectTimeout(9000);
+      httpConn.setReadTimeout(9000);
+      httpConn.setInstanceFollowRedirects(false);
+      httpConn.setDoOutput(true);
+
+      output = httpConn.getOutputStream();
+      output.write(query.getBytes(HTTP_CHARSET));
+      output.close();
+
+      reader = new BufferedReader(
+                              new InputStreamReader(httpConn.getInputStream()));
+
+      line = reader.readLine();
+      while (line != null) {
+        result += line;
+        line = reader.readLine();
+      }
+
+      reader.close();
+
+      log.info("User Verification:" + result);
+      if (!result.contains("\"allowedAccess\": true")) {
+        throw new ServiceFailedException(ServiceFailedException.FORBIDDEN);
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+    } finally {
+      try {
+        if (reader != null) {reader.close();}
+        if (output != null) {output.close();}
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
   }
 
   private void verifySubscription(String companyId)

@@ -54,11 +54,13 @@ public final class Globals {
   public static final String LOGS_BUCKET_NAME;
   public static final String DATASET_ID;
   public static final String STORE_BASE_URL;
+  public static final String USER_VERIFICATION_URL;
 
   private static String loggingParameter;
   private static String bucketParameter;
   private static String datasetParameter;
   private static String storeBaseURL;
+  private static String userVerificationURL;
 
   static {
     Properties buildProperties = new Properties();
@@ -72,6 +74,7 @@ public final class Globals {
       bucketParameter = buildProperties.getProperty("LOGS_BUCKET_NAME");
       datasetParameter = buildProperties.getProperty("DATASET_ID");
       storeBaseURL = buildProperties.getProperty("STORE_BASE_URL");
+      userVerificationURL = buildProperties.getProperty("USER_VERIFICATION_URL");
     } catch (IOException e) {
       e.printStackTrace();
       System.exit(1);
@@ -80,6 +83,7 @@ public final class Globals {
       LOGS_BUCKET_NAME = bucketParameter;
       DATASET_ID = datasetParameter;
       STORE_BASE_URL = storeBaseURL;
+      USER_VERIFICATION_URL = userVerificationURL;
 
       if (fileData != null) {
         try {
