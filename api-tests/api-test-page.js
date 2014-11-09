@@ -52,6 +52,10 @@ function deleteBucket() {
   storageApiCall("deleteBucket", {"companyId": jenkinsCompany});
 }
 
+function createBucketWrongCompany() {
+  storageApiCall("createBucket", {"companyId": "this-company-shant-exist"});
+}
+
 function createFolderMissingCompany() {
   storageApiCall("createFolder", {"folder": "test folder"});
 }

@@ -10,7 +10,7 @@ var url = "http://localhost:8888/_ah/login?" +
      "./run-tests --password=password\n\n" +
      "Also make sure appengine devserver is running";
 
-casper.options.waitTimeout = 10000;
+casper.options.waitTimeout = 20000;
 
 casper.options.onWaitTimeout = function() {
   casper.echo("Wait Timeout");
@@ -247,6 +247,19 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
 
   casper.then(function() {
     this.test.assertSelectorHasText("#response", '"result":true');
+  });
+
+  casper.then(function() {
+    casper.echo("Attempting to create bucket with incorrect company");
+    casper.click("#createBucketWrongCompany");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":false');
   });
 
   casper.then(function() {
