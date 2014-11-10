@@ -40,6 +40,7 @@ public class ServerTasksServlet extends HttpServlet {
       return;
     } catch (Exception e) {
       log.severe("Error starting task: " + e.toString());
+      e.printStackTrace();
       response.setStatus(NOT_IMPLEMENTED);
       return;
     }

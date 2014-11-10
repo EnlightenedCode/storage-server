@@ -10,9 +10,9 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 
 class AddPublicReadObjectServerTask extends ServerTask {
   AddPublicReadObjectServerTask
-  (Storage gcsStorageClient, Map<String, String[]> params) {
-    super(gcsStorageClient, params);
-    verifyParams("bucket", "object");
+  (Storage gcsClient, Map<String, String[]> params) throws IOException {
+    super(gcsClient, params);
+    confirmURLParams("bucket", "object");
   }
 
   public void handleRequest() throws IOException {
@@ -24,7 +24,7 @@ class AddPublicReadObjectServerTask extends ServerTask {
     acl.setEntity("allUsers").setRole("READER");
 
     try {
-      gcsStorageClient.objectAccessControls().insert
+      gcsClient.objectAccessControls().insert
       (requestParams.get("bucket")[0], requestParams.get("object")[0], acl)
       .execute();
     } catch (GoogleJsonResponseException e) {

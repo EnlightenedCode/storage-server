@@ -1,24 +1,26 @@
 package com.risevision.storage.servertasks;
 
 import java.util.Map;
+import java.util.List;
 import java.io.IOException;
 
 import java.util.logging.Logger;
 import com.google.common.base.Strings;
 
-import com.google.api.services.storage.Storage;
+import com.google.api.services.storage.*;
+import com.google.api.services.storage.model.*;
 
 abstract class ServerTask {
-  Storage gcsStorageClient;
+  Storage gcsClient;
   Map<String, String[]> requestParams;
   protected static final Logger log = Logger.getAnonymousLogger();
 
-  ServerTask(Storage client, Map<String, String[]> params) {
-    this.gcsStorageClient = client;
+  ServerTask(Storage client, Map<String, String[]> params) throws IOException {
+    this.gcsClient = client;
     this.requestParams = params;
   }
 
-  protected void verifyParams(String... expectedParams)
+  void confirmURLParams(String... expectedParams)
   throws IllegalArgumentException {
     for (String expectedParam : expectedParams) {
       if (requestParams.get(expectedParam) == null ||

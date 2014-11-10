@@ -18,14 +18,14 @@ public class AddPublicReadObjectServerTaskTest {
   Map<String, String[]> requestParams = new HashMap<>();
 
   @Test (expected = IllegalArgumentException.class)
-  public void itThrowsWhenNoBucketSpecified() {
+  public void itThrowsWhenNoBucketSpecified() throws IOException {
     requestParams.put("object", new String[] {"fileName"});
     AddPublicReadObjectServerTask task = new AddPublicReadObjectServerTask
     (mockGCSClient, requestParams);
   }
 
   @Test (expected = IllegalArgumentException.class)
-  public void itThrowsWhenNoObjectSpecified() {
+  public void itThrowsWhenNoObjectSpecified() throws IOException {
     requestParams.put("bucket", new String[] {"bucketName"});
     AddPublicReadObjectServerTask task = new AddPublicReadObjectServerTask
     (mockGCSClient, requestParams);

@@ -68,6 +68,17 @@
 
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.2</version>
+        <configuration>
+          <fork>true</fork>
+          <compilerArguments>
+            <Xmaxerrs>5</Xmaxerrs>
+          </compilerArguments>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>com.google.code.echo-maven-plugin</groupId>
         <artifactId>echo-maven-plugin</artifactId>
         <version>1.0.0</version>
