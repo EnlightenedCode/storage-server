@@ -81,10 +81,76 @@ public final class StorageService {
   public List<StorageObject> getBucketItems(String bucketName,
                                             String prefix,
                                             String delimiter)
-  throws ServiceFailedException {
+      throws ServiceFailedException {
+    Storage.Objects.List listRequest;
 
-    BucketItems items = getFilesAndFolders(bucketName, prefix, delimiter);
-    return items.rootItems;
+    prefix = (!Strings.isNullOrEmpty(prefix) && !prefix.endsWith(delimiter)) ?
+        prefix + delimiter : prefix;
+
+    log.info("Fetching object list from " +
+        "\nbucket: " + bucketName +
+        "\nprefix: " + prefix +
+        "\ndelimiter: " + delimiter);
+
+    try {
+      listRequest = storage.objects().list(bucketName)
+          .setPrefix(prefix)
+          .setDelimiter(delimiter);
+    } catch (IOException e) {
+      log.warning(e.getMessage());
+      throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+    }
+
+    com.google.api.services.storage.model.Objects listResult;
+    List<StorageObject> items = new ArrayList<StorageObject>();
+    List<String> prefixes = new ArrayList<String>();
+
+    do {
+      try {
+        listResult = listRequest.execute();
+      } catch (GoogleJsonResponseException e) {
+        if (e.getStatusCode() != ServiceFailedException.NOT_FOUND) {
+          log.warning(e.getStatusCode() + " - " + e.getMessage());
+        }
+        throw new ServiceFailedException(e.getStatusCode());
+      }  catch (IOException e) {
+        log.warning(e.getMessage());
+        throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+      }
+
+      try {
+        for (String folderName : listResult.getPrefixes()) {
+          StorageObject folderItem = new StorageObject();
+          folderItem.setName(folderName);
+          folderItem.setKind("folder");
+          long folderSize = 0;
+          long latestDt = 0;
+          long folderFileDt = 0;
+          List<StorageObject> folderFiles = getBucketItems(bucketName
+              ,folderName
+              ,"/");
+          for (StorageObject folderFile : folderFiles) {
+            folderSize += folderFile.getSize().longValue();
+            folderFileDt = folderFile.getUpdated().getValue();
+            latestDt = folderFileDt > latestDt ? folderFileDt : latestDt;
+          }
+          folderItem.setSize(BigInteger.valueOf(folderSize));
+          folderItem.setUpdated(new DateTime(latestDt));
+          items.add(folderItem);
+        }
+      } catch (NullPointerException e) {
+        log.info("No folders to list");
+      }
+
+      try {
+        items.addAll(listResult.getItems());
+      } catch (NullPointerException e) {
+        log.info("No files to list");
+      }
+      listRequest.setPageToken(listResult.getNextPageToken());
+    } while (null != listResult.getNextPageToken());
+
+    return items;
   }
 
   public List<StorageObject> getBucketFolders(String bucketName,
