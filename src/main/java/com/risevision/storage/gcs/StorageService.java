@@ -158,12 +158,8 @@ public final class StorageService {
                                String delimiter)
       throws ServiceFailedException {
 
-    BucketItems items = getFilesAndFolders(bucketName, prefix, delimiter);
-    return items.allFolders;
-  }
-
-  private BucketItems getFilesAndFolders(String bucketName, String prefix, String delimiter) throws ServiceFailedException{
     Storage.Objects.List listRequest;
+
     prefix = (!Strings.isNullOrEmpty(prefix) && !prefix.endsWith(delimiter)) ?
         prefix + delimiter : prefix;
 
@@ -174,17 +170,14 @@ public final class StorageService {
 
     try {
       listRequest = storage.objects().list(bucketName)
-          .setPrefix(prefix)
-          .setDelimiter(delimiter);
+          .setPrefix(prefix);
     } catch (IOException e) {
       log.warning(e.getMessage());
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
     }
 
     com.google.api.services.storage.model.Objects listResult;
-    BucketItems items = new BucketItems();
-    List <StorageObject> fileItems = new ArrayList<StorageObject>();
-    List <StorageObject> combineItems;
+    List<StorageObject> items = new ArrayList<StorageObject>();
 
     do {
       try {
@@ -200,36 +193,20 @@ public final class StorageService {
       }
 
       try {
-        for (String folderName : listResult.getPrefixes()) {
+        for (StorageObject item : listResult.getItems()) {
+          String charAtEndOfName = item.getName().substring(item.getName().length() -1);
           StorageObject folderItem = new StorageObject();
-          folderItem.setName(folderName);
-          folderItem.setKind("folder");
-          long folderSize = 0;
-          long latestDt = 0;
-          long folderFileDt = 0;
-
-          BucketItems folderFiles = getFilesAndFolders(bucketName
-              , folderName
-              , "/");
-          for (StorageObject folderFile : folderFiles.rootItems) {
-            folderSize += folderFile.getSize().longValue();
-            folderFileDt = folderFile.getUpdated().getValue();
-            latestDt = folderFileDt > latestDt ? folderFileDt : latestDt;
+          if(charAtEndOfName.equals("/")){
+            folderItem.setName(item.getName());
+            folderItem.setKind("folder");
+            folderItem.setSize(item.getSize());
+            items.add(folderItem);
           }
-          folderItem.setSize(BigInteger.valueOf(folderSize));
-          folderItem.setUpdated(new DateTime(latestDt));
-          folderFiles.allFolders.add(folderItem);
-          items.allFolders.addAll(folderFiles.allFolders);
-          items.rootItems.add(folderItem);
         }
       } catch (NullPointerException e) {
-        log.info("No folders to list");
+        log.info("No Items to list");
       }
-      try {
-        items.rootItems.addAll(listResult.getItems());
-      } catch (NullPointerException e) {
-        log.info("No files to list");
-      }
+
       listRequest.setPageToken(listResult.getNextPageToken());
     } while (null != listResult.getNextPageToken());
 
