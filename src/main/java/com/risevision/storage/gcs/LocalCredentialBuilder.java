@@ -18,13 +18,15 @@ import com.risevision.storage.Globals;
 
 public class LocalCredentialBuilder {
   protected static final Logger log = Logger.getAnonymousLogger();
-  private static HttpRequestInitializer credential;
+  private static GoogleCredential credential;
   private static HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
   private static final JsonFactory JSON_FACTORY =
     JacksonFactory.getDefaultInstance();
   private static File p12File;
 
-  public static HttpRequestInitializer getCredentialFromP12File() {
+  public static GoogleCredential getCredentialFromP12File() {
+    if (credential != null) {return credential;}
+
     GoogleCredential.Builder builder = 
       new GoogleCredential.Builder().setTransport(HTTP_TRANSPORT)
       .setJsonFactory(JSON_FACTORY)

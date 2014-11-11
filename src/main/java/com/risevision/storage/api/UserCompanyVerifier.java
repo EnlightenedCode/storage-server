@@ -1,37 +1,33 @@
 package com.risevision.storage.api;
 
 import com.risevision.storage.Globals;
+import com.risevision.storage.gcs.LocalCredentialBuilder;
 import com.risevision.storage.info.ServiceFailedException;
+
+import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
 
 import java.net.*;
 import java.io.*;
 import java.util.logging.Logger;
+import java.util.Arrays;
 
 class UserCompanyVerifier {
   private static final String HTTP_CHARSET = "UTF-8";
   private static final Logger log = Logger.getAnonymousLogger();
-  private static HttpURLConnection httpConn;
   private static URL url;
 
-  private UserCompanyVerifier() {}
+  BufferedReader reader;
+  OutputStream output;
 
   static {
     try {
-      URL url = new URL(Globals.USER_VERIFICATION_URL);
-      HttpURLConnection httpConn = (HttpURLConnection)url.openConnection();
-      httpConn.setConnectTimeout(9000);
-      httpConn.setReadTimeout(9000);
-      httpConn.setInstanceFollowRedirects(false);
-      httpConn.setDoOutput(true);
+      url = new URL(Globals.USER_VERIFICATION_URL);
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  static BufferedReader reader;
-  static OutputStream output;
-
-  static void verifyUserCompany(String companyId, String email)
+  void verifyUserCompany(String companyId, String email)
   throws ServiceFailedException {
     if (Globals.devserver) {
       email = com.google.appengine.api.users.UserServiceFactory.
@@ -43,10 +39,16 @@ class UserCompanyVerifier {
     String line;
 
     try {
+      HttpURLConnection httpConn = (HttpURLConnection)url.openConnection();
+      httpConn.setConnectTimeout(9000);
+      httpConn.setReadTimeout(9000);
+      httpConn.setInstanceFollowRedirects(false);
+      httpConn.setDoOutput(true);
       String query = String.format("username=%s&companyId=%s", 
                                    URLEncoder.encode(email, HTTP_CHARSET), 
                                    URLEncoder.encode(companyId, HTTP_CHARSET));
 
+      httpConn.setRequestProperty("Authentication", "Bearer " + getToken()); 
       output = httpConn.getOutputStream();
       output.write(query.getBytes(HTTP_CHARSET));
       output.close();
@@ -76,6 +78,17 @@ class UserCompanyVerifier {
       } catch (Exception e) {
         e.printStackTrace();
       }
+    }
+  }
+
+  private String getToken() throws IOException {
+    if (Globals.devserver) {
+      LocalCredentialBuilder.getCredentialFromP12File().refreshToken();
+      return LocalCredentialBuilder.getCredentialFromP12File().getAccessToken();
+    } else {
+      return AppIdentityServiceFactory.getAppIdentityService()
+             .getAccessToken(Arrays.asList(Globals.STORAGE_SCOPE))
+             .getAccessToken();
     }
   }
 }

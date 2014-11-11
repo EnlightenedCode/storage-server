@@ -176,7 +176,7 @@ public class StorageAPI extends AbstractAPI {
     }
 
     try {
-      UserCompanyVerifier.verifyUserCompany(companyId, user.getEmail());
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
 
       StorageService gcsService = StorageService.getInstance();
       gcsService.deleteMediaItems(Globals.COMPANY_BUCKET_PREFIX + companyId,
@@ -218,7 +218,7 @@ public class StorageAPI extends AbstractAPI {
     }
 
     try {
-      UserCompanyVerifier.verifyUserCompany(companyId, user.getEmail());
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
       StorageService gcsService = StorageService.getInstance();
       gcsService.createFolder(Globals.COMPANY_BUCKET_PREFIX + companyId
                              ,folder);
@@ -252,7 +252,7 @@ public class StorageAPI extends AbstractAPI {
     String bucketName; 
 
     try {
-      UserCompanyVerifier.verifyUserCompany(companyId, user.getEmail());
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
       initiateTrial(companyId);
 
       bucketName = Globals.COMPANY_BUCKET_PREFIX + companyId;
@@ -297,7 +297,7 @@ public class StorageAPI extends AbstractAPI {
     log.info("User: " + user.getEmail());
 
     try {
-      UserCompanyVerifier.verifyUserCompany(companyId, user.getEmail());
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
       String bandwidth = (String)syncCache.get(companyId);
       if (bandwidth == null) {
         log.info("Cache miss - Fetching value from bigquery.");
@@ -337,7 +337,7 @@ public class StorageAPI extends AbstractAPI {
     String bucketName; 
 
     try {
-      UserCompanyVerifier.verifyUserCompany(companyId, user.getEmail());
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
       bucketName = Globals.COMPANY_BUCKET_PREFIX + companyId;
 
       StorageService gcsService = StorageService.getInstance();
@@ -373,7 +373,7 @@ public class StorageAPI extends AbstractAPI {
 
     try {
       StorageService gcsService = StorageService.getInstance();
-      UserCompanyVerifier.verifyUserCompany(companyId, user.getEmail());
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
       verifySubscription(companyId);
       log.info("Requesting resumable upload for " + result.userEmail);
       result.message = gcsService.getResumableUploadURI(Globals.COMPANY_BUCKET_PREFIX +
