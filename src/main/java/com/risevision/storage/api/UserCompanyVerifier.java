@@ -50,7 +50,7 @@ class UserCompanyVerifier {
                                    URLEncoder.encode(email, HTTP_CHARSET), 
                                    URLEncoder.encode(companyId, HTTP_CHARSET));
 
-      httpConn.setRequestProperty("Authentication", "Bearer " + getToken()); 
+      httpConn.setRequestProperty("Authorization", "Bearer " + getToken()); 
       output = httpConn.getOutputStream();
       output.write(query.getBytes(HTTP_CHARSET));
       output.close();

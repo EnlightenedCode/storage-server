@@ -47,7 +47,6 @@ public class LocalCredentialBuilder {
       log.info("Current directory contents:");
       log.info(Arrays.toString(file.list()));
     }
-    log.info("got credential" + credential.toString());
     return credential;
   }
 }
