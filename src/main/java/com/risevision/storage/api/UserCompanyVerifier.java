@@ -5,6 +5,7 @@ import com.risevision.storage.gcs.LocalCredentialBuilder;
 import com.risevision.storage.info.ServiceFailedException;
 
 import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 
 import java.net.*;
 import java.io.*;
@@ -14,6 +15,7 @@ import java.util.Arrays;
 class UserCompanyVerifier {
   private static final String HTTP_CHARSET = "UTF-8";
   private static final Logger log = Logger.getAnonymousLogger();
+  private GoogleCredential credential;
   private static URL url;
 
   BufferedReader reader;
@@ -82,13 +84,13 @@ class UserCompanyVerifier {
   }
 
   private String getToken() throws IOException {
-    if (Globals.devserver) {
-      LocalCredentialBuilder.getCredentialFromP12File().refreshToken();
-      return LocalCredentialBuilder.getCredentialFromP12File().getAccessToken();
+    if (credential == null) {
+      credential = LocalCredentialBuilder.getCredentialFromP12File(Globals.RVCORE_P12_PATH);
+      credential.refreshToken();
     } else {
-      return AppIdentityServiceFactory.getAppIdentityService()
-             .getAccessToken(Arrays.asList(Globals.STORAGE_SCOPE))
-             .getAccessToken();
+      if (credential.getExpiresInSeconds() < 50) {credential.refreshToken();}
     }
+
+    return credential.getAccessToken();
   }
 }
