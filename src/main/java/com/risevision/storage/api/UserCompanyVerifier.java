@@ -85,12 +85,13 @@ class UserCompanyVerifier {
 
   private String getToken() throws IOException {
     if (credential == null) {
-      credential = LocalCredentialBuilder.getCredentialFromP12File(Globals.RVCORE_P12_PATH);
+      credential = LocalCredentialBuilder.getCredentialFromP12File
+      (Globals.RVCORE_P12_PATH, Globals.RVCORE_ID, Globals.EMAIL_SCOPE);
+
       credential.refreshToken();
     } else {
       if (credential.getExpiresInSeconds() < 50) {credential.refreshToken();}
     }
-
     return credential.getAccessToken();
   }
 }

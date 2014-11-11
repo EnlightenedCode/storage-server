@@ -24,12 +24,13 @@ public class LocalCredentialBuilder {
   private static File p12File;
   private static GoogleCredential credential;
 
-  public static GoogleCredential getCredentialFromP12File(String p12path) {
+  public static GoogleCredential getCredentialFromP12File
+  (String p12path, String id, String scope) {
     GoogleCredential.Builder builder = 
       new GoogleCredential.Builder().setTransport(HTTP_TRANSPORT)
       .setJsonFactory(JSON_FACTORY)
-      .setServiceAccountId(Globals.ACCESS_ID)
-      .setServiceAccountScopes(Arrays.asList(Globals.STORAGE_SCOPE));
+      .setServiceAccountId(id)
+      .setServiceAccountScopes(Arrays.asList(scope));
 
     try {
       File p12File = new File(p12path);

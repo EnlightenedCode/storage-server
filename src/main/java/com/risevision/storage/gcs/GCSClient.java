@@ -20,7 +20,8 @@ public class GCSClient {
 
   static {
     if (Globals.devserver) {
-      credential = LocalCredentialBuilder.getCredentialFromP12File(Globals.RVMEDIA_P12_PATH);
+      credential = LocalCredentialBuilder.getCredentialFromP12File
+      (Globals.RVMEDIA_P12_PATH, Globals.RVMEDIA_ID, Globals.STORAGE_SCOPE);
     } else {
       credential = new AppIdentityCredential(Arrays.asList(Globals.STORAGE_SCOPE));
     }

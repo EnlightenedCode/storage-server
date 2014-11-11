@@ -16,6 +16,8 @@ public final class Globals {
 
   public static final String STORAGE_SCOPE =
     "https://www.googleapis.com/auth/devstorage.full_control";
+  public static final String EMAIL_SCOPE =
+    "https://www.googleapis.com/auth/userinfo.email";
 
   public static final String EDITOR_GROUP =
     "group-00b4903a979339148b85b8e79b1639b92ab14bf82fe03b33c5aa2aedd0ac5172";
@@ -32,7 +34,7 @@ public final class Globals {
   public static final String STORE_PRODUCT_CODE =
     "b0cba08a4baa0c62b8cdc621b6f6a124f89a03db";
 
-  public static final String ACCESS_ID =
+  public static final String RVMEDIA_ID =
     "452091732215@developer.gserviceaccount.com";
 
   public static final String STORE_CLIENT_ID = 
@@ -56,6 +58,7 @@ public final class Globals {
   public static final String STORE_BASE_URL;
   public static final String USER_VERIFICATION_URL;
   public static final String RVCORE_P12_PATH;
+  public static final String RVCORE_ID;
 
   private static String loggingParameter;
   private static String bucketParameter;
@@ -63,6 +66,7 @@ public final class Globals {
   private static String storeBaseURL;
   private static String userVerificationURL;
   private static String rvcore_p12_path;
+  private static String rvcore_id;
 
   static {
     Properties buildProperties = new Properties();
@@ -78,6 +82,7 @@ public final class Globals {
       storeBaseURL = buildProperties.getProperty("STORE_BASE_URL");
       userVerificationURL = buildProperties.getProperty("USER_VERIFICATION_URL");
       rvcore_p12_path = buildProperties.getProperty("RVCORE_P12_PATH");
+      rvcore_id = buildProperties.getProperty("RVCORE_ID");
     } catch (IOException e) {
       e.printStackTrace();
       System.exit(1);
@@ -88,6 +93,7 @@ public final class Globals {
       STORE_BASE_URL = storeBaseURL;
       USER_VERIFICATION_URL = userVerificationURL;
       RVCORE_P12_PATH = rvcore_p12_path;
+      RVCORE_ID= rvcore_id;
 
       if (fileData != null) {
         try {
