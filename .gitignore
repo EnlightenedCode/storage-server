@@ -11,3 +11,6 @@ lib/com/
 src/private-keys/
 .settings/
 .classpath
+.project
+src/main/webapp/WEB-INF/storage-v0.01.api
+bin/
