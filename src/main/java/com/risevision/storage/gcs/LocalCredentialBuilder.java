@@ -1,9 +1,7 @@
 package com.risevision.storage.gcs;
 
-import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 
@@ -11,42 +9,37 @@ import java.util.logging.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.security.GeneralSecurityException;
-import java.security.AccessControlException;
 
 import com.risevision.storage.Globals;
 
 public class LocalCredentialBuilder {
-  protected static final Logger log = Logger.getAnonymousLogger();
-  private static HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
-  private static final JsonFactory JSON_FACTORY =
-    JacksonFactory.getDefaultInstance();
-  private static File p12File;
-  private static GoogleCredential credential;
+  private static final Logger log = Logger.getAnonymousLogger();
+  private static final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+  private static final UrlFetchTransport
+                       urlTransport = UrlFetchTransport.getDefaultInstance();
 
-  public static GoogleCredential getCredentialFromP12File
+  private GoogleCredential credential;
+  private GoogleCredential.Builder builder;
+
+  public LocalCredentialBuilder() {
+    builder = new GoogleCredential.Builder()
+    .setTransport(urlTransport)
+    .setJsonFactory(jsonFactory);
+  }
+
+  public GoogleCredential getCredentialFromP12File
   (String p12path, String id, String scope) {
-    GoogleCredential.Builder builder = 
-      new GoogleCredential.Builder().setTransport(HTTP_TRANSPORT)
-      .setJsonFactory(JSON_FACTORY)
-      .setServiceAccountId(id)
-      .setServiceAccountScopes(Arrays.asList(scope));
+    builder.setServiceAccountId(id).setServiceAccountScopes(Arrays.asList(scope));
 
     try {
       File p12File = new File(p12path);
-      credential = builder.setServiceAccountPrivateKeyFromP12File(p12File)
-                          .build();
-    } catch (NullPointerException e) {
-      log.warning("Could not access local p12 file - Null Pointer Exception");
-    } catch (GeneralSecurityException e) {
-      log.warning("Could not access local p12 file - Security violation");
-    } catch (IOException e) {
-      log.warning("Could not access local p12 file - IO error");
-      File file = new File("./");
-      log.info("Attempted path: " + p12path);
-      log.info("Current directory contents:");
-      log.info(Arrays.toString(file.list()));
+      credential = builder.setServiceAccountPrivateKeyFromP12File(p12File).build();
+      credential.refreshToken();
+    } catch (Exception e) {
+      log.warning("Error building credential");
+      e.printStackTrace();
     }
+
     return credential;
   }
 }

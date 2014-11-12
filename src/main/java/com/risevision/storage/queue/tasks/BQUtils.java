@@ -171,7 +171,7 @@ public class BQUtils {
                           Environment env = ApiProxy.getCurrentEnvironment();
                           String appId = env.getAppId();
                           if (Globals.devserver) {
-                              credential = LocalCredentialBuilder
+                              credential = new LocalCredentialBuilder()
                                           .getCredentialFromP12File(Globals.RVMEDIA_P12_PATH, Globals.RVMEDIA_ID, Globals.STORAGE_SCOPE);
                           } else {
                               credential = new AppIdentityCredential(Arrays.asList(BIGQUERY_SCOPE));
