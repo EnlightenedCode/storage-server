@@ -30,7 +30,7 @@ public class datastoreService {
       throw new ServiceFailedException(500);
     }
     //check if the sharedLink is already there with the same originCompanyId and folderName.
-    ShareFolderLink sharedLinkCheck = ofy().load().type(ShareFolderLink.class).filter("originCompanyId", companyId).filter("folderName", folder).first().now();
+    ShareFolderLink sharedLinkCheck = ofy().load().type(ShareFolderLink.class).filter("originCompanyId", companyId).filter("sharedCompanyId", sharedCompanyId).filter("folderName", folder).first().now();
     if(sharedLinkCheck == null) {
       // if not there, then add one.
       ofy().save().entity(shared).now();
