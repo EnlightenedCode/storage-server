@@ -404,7 +404,7 @@ public class StorageAPI extends AbstractAPI {
     }
 
     try {
-      verifyUserCompany(companyId, user.getEmail());
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
 
       StorageService gcsService = StorageService.getInstance();
       gcsService.moveToTrash(Globals.COMPANY_BUCKET_PREFIX + companyId, files);
@@ -438,7 +438,7 @@ public class StorageAPI extends AbstractAPI {
     }
 
     try {
-      verifyUserCompany(companyId, user.getEmail());
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
 
       StorageService gcsService = StorageService.getInstance();
       gcsService.restoreFromTrash(Globals.COMPANY_BUCKET_PREFIX + companyId, files);
