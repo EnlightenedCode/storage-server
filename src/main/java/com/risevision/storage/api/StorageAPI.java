@@ -135,10 +135,10 @@ public class StorageAPI extends AbstractAPI {
           name = "shareFolder.add",
           path = "shareFolder",
           httpMethod = HttpMethod.POST)
-  public SimpleResponse addShareFolder(@Named("companyId") String companyId,
-                                       @Named("sharedCompanyId") String sharedCompanyId,
-                                       @Named("folder") String folder,
-                                       @Named("edit") boolean edit,
+  public SimpleResponse addShareFolder(@Nullable @Named("companyId") String companyId,
+                                       @Nullable @Named("sharedCompanyId") String sharedCompanyId,
+                                       @Nullable @Named("folder") String folder,
+                                       @Nullable @Named("edit") boolean edit,
                                        User user) {
     GCSFilesResponse result;
     try {
@@ -169,9 +169,9 @@ public class StorageAPI extends AbstractAPI {
           name = "shareFolder.unlink",
           path = "shareFolder",
           httpMethod = HttpMethod.DELETE)
-  public SimpleResponse unlinkShareFolder(@Named("companyId") String companyId,
-                                       @Named("sharedCompanyId") String sharedCompanyId,
-                                       @Named("folder") String folder,
+  public SimpleResponse unlinkShareFolder(@Nullable @Named("companyId") String companyId,
+                                       @Nullable @Named("sharedCompanyId") String sharedCompanyId,
+                                       @Nullable @Named("folder") String folder,
                                        User user) {
     GCSFilesResponse result;
     try {
@@ -218,8 +218,6 @@ public class StorageAPI extends AbstractAPI {
       if(Strings.isNullOrEmpty(companyId) && Strings.isNullOrEmpty(sharedCompanyId)){
         throw new ServiceFailedException(ServiceFailedException.BAD_REQUEST);
       }
-      String verifyCompanyId = (Strings.isNullOrEmpty(companyId)) ? sharedCompanyId : companyId;
-      verifyUserCompany(verifyCompanyId, user.getEmail(), folder);
       datastoreService dsService = datastoreService.getInstance();
 
       List<ShareFolderLink> sharedList = dsService.getSharedFolders(companyId, sharedCompanyId, folder);
