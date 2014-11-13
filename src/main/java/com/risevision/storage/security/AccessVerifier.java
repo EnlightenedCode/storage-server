@@ -7,6 +7,9 @@ import com.risevision.core.api.types.UserRole;
 import com.risevision.core.api.types.UserStatus;
 import com.risevision.directory.documents.Company;
 import com.risevision.directory.documents.User;
+import com.risevision.storage.entities.ShareFolderLink;
+
+import static com.risevision.storage.datastore.OfyService.ofy;
 
 public class AccessVerifier {
 	
@@ -68,11 +71,16 @@ public class AccessVerifier {
 			log.warning("User is not allowed: no resource company.");
 			return false;
 		}
-    	
+    // edit in sharefolder is true for this user Company Id = PASS
+    ShareFolderLink sharedLinkCheck = ofy().load().type(ShareFolderLink.class).filter("originCompanyId", resourceCompany.id).filter("sharedCompanyId", user.companyId).filter("folderName", resource.getSharedFolder()).first().now();
+    if(sharedLinkCheck == null) {
+      log.warning("sharedLinkCheck not null.");
+      return sharedLinkCheck.edit;
+    }
     	// resource's company is user's company = PASS
 		if (user.companyId.equals(resourceCompany.id))
 			return true;
-		
+
 		String parentId = resourceCompany.parentId;
 		
 		// parent company is user's company = PASS
@@ -80,7 +88,8 @@ public class AccessVerifier {
 			return true;
 		
 		Company parentCompany;
-		
+
+
 		while (parentId != null && !parentId.isEmpty()) {
 		
 			parentCompany = Company.get(parentId);
@@ -103,6 +112,8 @@ public class AccessVerifier {
 		return false;
 
 	}
+
+
 
 	// special case
 //	static public boolean CanAccessCompany(CompanyResource resource) {

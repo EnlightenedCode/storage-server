@@ -16,6 +16,7 @@ public class AccessResource {
 	private String accessingUserId;
 	private Company accessingUserCompany;
 	private Company resourceCompany;
+  private String sharedFolder;
 	
 	private int status;
 	
@@ -29,7 +30,12 @@ public class AccessResource {
 		this.companyId = companyId;
 		this.accessingUserId = username;		
 	}
-	
+
+  public AccessResource(String companyId, String username, String sharedFolder) {
+    this.companyId = companyId;
+    this.accessingUserId = username;
+    this.sharedFolder = (sharedFolder.equals("")) ? "" : sharedFolder.substring(0,sharedFolder.lastIndexOf("/") + 1);
+  }
 	public void verify() throws ServiceFailedException {  
 		if (!Strings.isNullOrEmpty(authKey)) {
 			verifyByKey();
@@ -148,6 +154,10 @@ public class AccessResource {
 
 		return accessingUser;
 	}
+
+  public String getSharedFolder() {
+    return sharedFolder;
+  }
 	
 	public String getAccessingUserId() {
 
