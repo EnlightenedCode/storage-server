@@ -4,6 +4,9 @@ import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
+import com.risevision.directory.documents.Company;
+import com.risevision.storage.Globals;
+
 import java.io.Serializable;
 
 @Entity
@@ -13,6 +16,7 @@ public class ShareFolderLink implements Serializable{
     @Index public String originCompanyId;
     @Index public String sharedCompanyId;
     @Index public String folderName;
+    public String originCompanyName;
     public boolean edit;
 
     public ShareFolderLink() {
@@ -24,5 +28,6 @@ public class ShareFolderLink implements Serializable{
         this.sharedCompanyId = sharedCompanyId;
         this.folderName = folderName;
         this.edit = edit;
+        this.originCompanyName =  (Globals.devserver) ? originCompanyId : Company.get(originCompanyId).name;
     }
 }
