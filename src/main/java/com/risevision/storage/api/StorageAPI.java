@@ -148,6 +148,7 @@ public class StorageAPI extends AbstractAPI {
     }
 
     try {
+      verifyUserCompany(companyId, user.getEmail(), folder);
       datastoreService dsService = datastoreService.getInstance();
       dsService.addShareFolderLink(companyId, sharedCompanyId, folder, edit);
 
@@ -180,6 +181,7 @@ public class StorageAPI extends AbstractAPI {
     }
 
     try {
+      verifyUserCompany(companyId, user.getEmail(), folder);
       datastoreService dsService = datastoreService.getInstance();
       dsService.removeShareFolderLink(companyId, sharedCompanyId, folder);
 
@@ -213,6 +215,7 @@ public class StorageAPI extends AbstractAPI {
     }
 
     try {
+      verifyUserCompany(companyId, user.getEmail(), folder);
       datastoreService dsService = datastoreService.getInstance();
 
       List<ShareFolderLink> sharedList = dsService.getSharedFolders(companyId, sharedCompanyId, folder);
