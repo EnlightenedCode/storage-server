@@ -72,11 +72,14 @@ public class AccessVerifier {
 			return false;
 		}
     // edit in sharefolder is true for this user Company Id = PASS
-    ShareFolderLink sharedLinkCheck = ofy().load().type(ShareFolderLink.class).filter("originCompanyId", resourceCompany.id).filter("sharedCompanyId", user.companyId).filter("folderName", resource.getSharedFolder()).first().now();
-    if(sharedLinkCheck == null) {
-      log.warning("sharedLinkCheck not null.");
-      return sharedLinkCheck.edit;
-    }
+//    ShareFolderLink sharedLinkCheck = ofy().load().type(ShareFolderLink.class).filter("originCompanyId", resourceCompany.id).filter("sharedCompanyId", user.companyId).filter("folderName", resource.getSharedFolder()).first().now();
+//
+//    if(sharedLinkCheck != null) {
+//      log.warning("sharedLinkCheck not null.");
+//      return sharedLinkCheck.edit;
+//    } else {
+//      log.warning("sharedLinkCheck is null.");
+//    }
     	// resource's company is user's company = PASS
 		if (user.companyId.equals(resourceCompany.id))
 			return true;
