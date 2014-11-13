@@ -28,6 +28,6 @@ public class ShareFolderLink implements Serializable{
         this.sharedCompanyId = sharedCompanyId;
         this.folderName = folderName;
         this.edit = edit;
-        this.originCompanyName =  (Globals.devserver) ? originCompanyId : Company.get(originCompanyId).name;
+        this.originCompanyName =  (Globals.devserver || Company.get(originCompanyId).name == null) ? originCompanyId : Company.get(originCompanyId).name;
     }
 }
