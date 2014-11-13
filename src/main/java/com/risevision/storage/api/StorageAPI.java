@@ -215,7 +215,11 @@ public class StorageAPI extends AbstractAPI {
     }
 
     try {
-      verifyUserCompany(companyId, user.getEmail(), folder);
+      if(Strings.isNullOrEmpty(companyId) && Strings.isNullOrEmpty(sharedCompanyId)){
+        throw new ServiceFailedException(ServiceFailedException.BAD_REQUEST);
+      }
+      String verifyCompanyId = (Strings.isNullOrEmpty(companyId)) ? sharedCompanyId : companyId;
+      verifyUserCompany(verifyCompanyId, user.getEmail(), folder);
       datastoreService dsService = datastoreService.getInstance();
 
       List<ShareFolderLink> sharedList = dsService.getSharedFolders(companyId, sharedCompanyId, folder);

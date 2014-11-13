@@ -34,7 +34,7 @@ public class AccessResource {
   public AccessResource(String companyId, String username, String sharedFolder) {
     this.companyId = companyId;
     this.accessingUserId = username;
-    this.sharedFolder = (sharedFolder == null || sharedFolder.equals("")) ? "" : sharedFolder.substring(0,sharedFolder.lastIndexOf("/") + 1);
+    this.sharedFolder = (Strings.isNullOrEmpty(sharedFolder)) ? "" : sharedFolder.substring(0,sharedFolder.lastIndexOf("/") + 1);
   }
 	public void verify() throws ServiceFailedException {  
 		if (!Strings.isNullOrEmpty(authKey)) {
