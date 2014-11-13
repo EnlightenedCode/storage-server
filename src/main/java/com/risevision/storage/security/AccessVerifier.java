@@ -73,6 +73,7 @@ public class AccessVerifier {
 		}
     // edit in sharefolder is true for this user Company Id = PASS
     ShareFolderLink sharedLinkCheck = ofy().load().type(ShareFolderLink.class).filter("originCompanyId", resourceCompany.id).filter("sharedCompanyId", user.companyId).filter("folderName", resource.getSharedFolder()).first().now();
+    log.warning("Company.get = " +Company.get(resourceCompany.id).name);
     log.warning("originCompanyId: " + resourceCompany.id);
     log.warning("userCompanyId: " + user.companyId);
     if(sharedLinkCheck != null) {
