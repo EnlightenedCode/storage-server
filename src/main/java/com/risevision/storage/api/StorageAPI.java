@@ -67,7 +67,7 @@ public class StorageAPI extends AbstractAPI {
 
   private void verifyUserCompany(String companyId, String email, String folderPath)
     throws ServiceFailedException {
-    //if (Globals.devserver) {return;}
+    if (Globals.devserver) {return;}
     AccessResource resource = new AccessResource(companyId, email, folderPath);
     resource.verify();
   }
