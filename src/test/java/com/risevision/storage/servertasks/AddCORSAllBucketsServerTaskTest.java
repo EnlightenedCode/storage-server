@@ -23,14 +23,6 @@ public class AddCORSAllBucketsServerTaskTest {
 
   Map<String, String[]> requestParams = new HashMap<>();
 
-  @Test (expected = IllegalArgumentException.class)
-  public void itThrowsWhenNoBucketSpecified() throws IOException {
-    requestParams.put("object", new String[] {"fileName"});
-    requestParams.put("maxResults", new String[] {"50"});
-    AddCORSAllBucketsServerTask task = new AddCORSAllBucketsServerTask
-    (new GCSMockClientBuilder(200).build(), requestParams);
-  }
-
   @Test (expected = IOException.class)
   public void itThrowsOnServerError() throws IOException {
     requestParams.put("bucket", new String[] {"bucketName"});

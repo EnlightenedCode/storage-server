@@ -9,13 +9,10 @@ import com.google.api.client.util.GenericData;
 import com.google.common.collect.ImmutableList;
 
 class AddCORSAllBucketsServerTask extends BatchServerTask {
-  String bucketName;
 
   AddCORSAllBucketsServerTask
   (Storage gcsStorageClient, Map<String, String[]> params) throws IOException {
     super(gcsStorageClient, params);
-    confirmURLParams("bucket");
-    bucketName = requestParams.get("bucket")[0];
   }
 
   public void handleRequest() throws IOException {
