@@ -10,7 +10,7 @@ var url = "http://localhost:8888/_ah/login?" +
      "./run-tests --password=password\n\n" +
      "Also make sure appengine devserver is running";
 
-casper.options.waitTimeout = 20000;
+casper.options.waitTimeout = 40000;
 
 casper.options.onWaitTimeout = function() {
   casper.echo("Wait Timeout");
