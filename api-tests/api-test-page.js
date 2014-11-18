@@ -32,8 +32,6 @@ function init() {
   }
 }
 
-var jenkinsCompany = "ac57def2-834e-4ecd-8b91-44ca14524fd0";
-
 function createBucket() {
   storageApiCall("createBucket", {"companyId": jenkinsCompany});
 }
