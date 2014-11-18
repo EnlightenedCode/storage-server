@@ -30,6 +30,9 @@
 <button id="createFolderMissingFolder" type="button" >
   createFolder - MissingFolder
 </button>
+<button id="createBucketWrongCompany" type="button" >
+  createBucket - WrongCompany
+</button>
   <button id="invalidateToken" type="button" onclick="gapi.auth.setToken({})">
   invalidate auth token
 </button>
@@ -63,6 +66,8 @@ document.getElementById("deleteFolder")
         .addEventListener("click", deleteFolder);
 document.getElementById("createFolderMissingCompany")
         .addEventListener("click", createFolderMissingCompany);
+document.getElementById("createBucketWrongCompany")
+        .addEventListener("click", createBucketWrongCompany);
 document.getElementById("createFolderMissingFolder")
         .addEventListener("click", createFolderMissingFolder);
 document.getElementById("addPublicReadBucket")

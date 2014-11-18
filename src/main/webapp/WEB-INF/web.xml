@@ -9,14 +9,6 @@
         </listener>
 
 	<!-- Servlets -->
-	<servlet>
-		<servlet-name>GetFiles</servlet-name>
-		<servlet-class>com.risevision.storage.api.GetFilesServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>GetFiles</servlet-name>
-		<url-pattern>/getFiles</url-pattern>
-	</servlet-mapping>
     <servlet>
         <servlet-name>CheckThirdPartyCookie</servlet-name>
         <servlet-class>com.risevision.storage.api.CheckThirdPartyCookieServlet</servlet-class>

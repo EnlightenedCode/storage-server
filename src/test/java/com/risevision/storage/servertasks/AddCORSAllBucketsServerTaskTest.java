@@ -90,7 +90,6 @@ public class AddCORSAllBucketsServerTaskTest {
 
     task.setupCORSPatchRequest();
     task.setListResult();
-    System.out.println("HIHIHIHIH" + task.listResult.get("nextPageToken"));
     task.prepareBatchRequest();
     task.submitNextTask();
 

@@ -13,14 +13,10 @@
     <maven.compiler.target>1.7</maven.compiler.target>
     <restlet.version>2.1.1</restlet.version>
     <google.client.version>1.19.0</google.client.version>
-    <appengine.api.version>1.9.12</appengine.api.version>
+    <appengine.api.version>1.9.15</appengine.api.version>
   </properties>
 
   <repositories>
-    <repository>
-      <id>risevision</id>
-      <url>file://${basedir}/lib</url>
-    </repository>
     <repository>
       <id>maven-restlet</id>
       <name>Public online Restlet repository</name>
@@ -133,16 +129,6 @@
       <groupId>org.restlet.jee</groupId>
       <artifactId>org.restlet</artifactId>
       <version>${restlet.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.risevision</groupId>
-      <artifactId>directory</artifactId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.risevision.core</groupId>
-      <artifactId>api</artifactId>
-      <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>com.google.appengine</groupId>

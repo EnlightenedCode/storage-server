@@ -22,37 +22,38 @@ function init() {
   function authCallback(resp) {
     responseId = document.getElementById("response");
     document.getElementById("bucketPath").innerHTML = 
-    "https://www.googleapis.com/storage/v1/b/risemedialibrary-" + randomId;
+    "https://www.googleapis.com/storage/v1/b/risemedialibrary-" + jenkinsCompany;
 
     if (resp.error) {
-      responseId.innerHTML = "not authorized: "
-                                                      + resp.error;
+      responseId.innerHTML = "not authorized: " + resp.error;
     } else {
       responseId.innerHTML = "authorized";
     }
   }
 }
 
-var randomId = Math.floor(Math.random()*90000) + 10000;
-randomId = "api-test-" + randomId;
-
+var jenkinsCompany = "ac57def2-834e-4ecd-8b91-44ca14524fd0";
 
 function createBucket() {
-  storageApiCall("createBucket", {"companyId": randomId});
+  storageApiCall("createBucket", {"companyId": jenkinsCompany});
 }
 
 function createFolder() {
-  storageApiCall("createFolder", {"companyId": randomId,
+  storageApiCall("createFolder", {"companyId": jenkinsCompany,
                                   "folder": "test folder"});
 }
 
 function deleteFolder() {
-  storageApiCall("files.delete", {"companyId": randomId,
+  storageApiCall("files.delete", {"companyId": jenkinsCompany,
                                   "files": ["test folder/"]});
 }
 
 function deleteBucket() {
-  storageApiCall("deleteBucket", {"companyId": randomId});
+  storageApiCall("deleteBucket", {"companyId": jenkinsCompany});
+}
+
+function createBucketWrongCompany() {
+  storageApiCall("createBucket", {"companyId": "this-company-shant-exist"});
 }
 
 function createFolderMissingCompany() {
@@ -60,15 +61,15 @@ function createFolderMissingCompany() {
 }
 
 function createFolderMissingFolder() {
-  storageApiCall("createFolder", {"companyId": randomId});
+  storageApiCall("createFolder", {"companyId": jenkinsCompany});
 }
 
 function getUploadToken(fileName, cb) {
-  storageApiCall("getResumableUploadURI", {"companyId": randomId, "fileName": fileName}, cb, true);
+  storageApiCall("getResumableUploadURI", {"companyId": jenkinsCompany, "fileName": fileName}, cb, true);
 }
 
 function deleteFiles(fileNames) {
-  storageApiCall("files.delete", {"companyId": randomId, "files": fileNames});
+  storageApiCall("files.delete", {"companyId": jenkinsCompany, "files": fileNames});
 }
 
 function storageApiCall(commandString, paramObj, callback, doNotUpdateResponse) {
@@ -120,7 +121,7 @@ function createFiles(fileNames) {
     var xhr = new XMLHttpRequest();
     xhr.open("GET",
              "https://www.googleapis.com/storage/v1/b/risemedialibrary-" +
-             randomId + "/o/" + fileName, false);
+             jenkinsCompany + "/o/" + fileName, false);
     xhr.send();
     return !xhr.response.error && xhr.status === 200;
   }
@@ -152,20 +153,20 @@ function initiateServerTask(task, params, cb) {
 
 function addPublicReadOneFile() {
   initiateServerTask("AddPublicReadObject",
-  {bucket: "risemedialibrary-" + randomId, object: "test1"})
+  {bucket: "risemedialibrary-" + jenkinsCompany, object: "test1"})
 }
 
 function removePublicReadOneFile() {
   initiateServerTask("RemovePublicReadObject",
-  {bucket: "risemedialibrary-" + randomId, object: "test1"});
+  {bucket: "risemedialibrary-" + jenkinsCompany, object: "test1"});
 }
 
 function addPublicReadBucket() {
   initiateServerTask("AddPublicReadBucket",
-  {bucket: "risemedialibrary-" + randomId});
+  {bucket: "risemedialibrary-" + jenkinsCompany});
 }
 
 function removePublicReadBucket() {
   initiateServerTask("RemovePublicReadBucket",
-  {bucket: "risemedialibrary-" + randomId});
+  {bucket: "risemedialibrary-" + jenkinsCompany});
 }

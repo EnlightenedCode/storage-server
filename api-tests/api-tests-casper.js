@@ -10,7 +10,7 @@ var url = "http://localhost:8888/_ah/login?" +
      "./run-tests --password=password\n\n" +
      "Also make sure appengine devserver is running";
 
-casper.options.waitTimeout = 10000;
+casper.options.waitTimeout = 40000;
 
 casper.options.onWaitTimeout = function() {
   casper.echo("Wait Timeout");
@@ -31,6 +31,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   casper.then(function() {
     casper.evaluate(function() {
       document.getElementById("isAdmin").checked = true;
+      document.getElementById("email").value = "jenkins@risevision.com";
     });
     casper.click("#btn-login");
   });
@@ -68,15 +69,14 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
 
       if (!casper.cli.options.password) {
         casper.echo(noPasswordMessage, "ERROR");
-        casper.exit(1);
+      } else {
+        casper.echo("Signing in");
+        page.evaluate(function(pass) {
+          document.querySelector('#Email').value = "jenkins@risevision.com";
+          document.querySelector("#Passwd").value = pass;
+          document.querySelector("#signIn").click();
+        }, casper.cli.options.password);
       }
-
-      casper.echo("Signing in");
-      page.evaluate(function(pass) {
-        document.querySelector('#Email').value = "jenkins@risevision.com";
-        document.querySelector("#Passwd").value = pass;
-        document.querySelector("#signIn").click();
-      }, casper.cli.options.password);
     }
   );
 
@@ -87,10 +87,6 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
 
   casper.then(function() {
     casper.waitUntilVisible("#response");
-  });
-
-  casper.then(function() {
-    this.test.assertSelectorHasText("#response", '"result":true');
   });
 
   casper.then(function() {
@@ -250,6 +246,19 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
 
   casper.then(function() {
     this.test.assertSelectorHasText("#response", '"result":true');
+  });
+
+  casper.then(function() {
+    casper.echo("Attempting to create bucket with incorrect company");
+    casper.click("#createBucketWrongCompany");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":false');
   });
 
   casper.then(function() {

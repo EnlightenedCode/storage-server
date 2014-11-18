@@ -308,7 +308,7 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 		
 		String fileUrl = "http://" + bucketName + ".storage.googleapis.com/" 
 				+ key
-				+ "?GoogleAccessId=" + Globals.ACCESS_ID 
+				+ "?GoogleAccessId=" + Globals.RVMEDIA_ID 
 				+ "&Expires=" + expiry 
 				+ "&Signature=" + URLEncoder.encode(signedPolicy, "UTF-8")
 				+ "&response-content-disposition=attachment";
