@@ -14,3 +14,4 @@ src/private-keys/
 .project
 src/main/webapp/WEB-INF/storage-v0.01.api
 bin/
+api-tests/jenkins-company*
