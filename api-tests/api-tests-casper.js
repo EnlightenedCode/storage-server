@@ -69,15 +69,14 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
 
       if (!casper.cli.options.password) {
         casper.echo(noPasswordMessage, "ERROR");
-        casper.exit(1);
+      } else {
+        casper.echo("Signing in");
+        page.evaluate(function(pass) {
+          document.querySelector('#Email').value = "jenkins@risevision.com";
+          document.querySelector("#Passwd").value = pass;
+          document.querySelector("#signIn").click();
+        }, casper.cli.options.password);
       }
-
-      casper.echo("Signing in");
-      page.evaluate(function(pass) {
-        document.querySelector('#Email').value = "jenkins@risevision.com";
-        document.querySelector("#Passwd").value = pass;
-        document.querySelector("#signIn").click();
-      }, casper.cli.options.password);
     }
   );
 
