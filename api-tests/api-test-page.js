@@ -80,11 +80,11 @@ function deleteFiles(fileNames) {
 }
 
 function addShareFolder() {
-	storageApiCall("shareFolder.add", {"companyId": randomId, "folder": "test folder", "sharedCompanyId": randomId2, "edit": true });
+	storageApiCall("shareFolder.add", {"companyId": jenkinsCompany, "folder": "test folder", "sharedCompanyId": randomId2, "edit": true });
 }
 
 function removeShareFolder() {
-	storageApiCall("shareFolder.unlink", {"companyId": randomId, "folder": "test folder", "sharedCompanyId": randomId2});
+	storageApiCall("shareFolder.unlink", {"companyId": jenkinsCompany, "folder": "test folder", "jenkinsCompany": randomId2});
 }
 
 function getShareFolders() {

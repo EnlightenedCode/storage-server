@@ -179,6 +179,21 @@ public class StorageAPI extends AbstractAPI {
     } catch (IllegalArgumentException e) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
+    if (!Globals.devserver) {
+      try {
+
+        if (companyId.equals(sharedCompanyId)) {
+          throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+        }
+
+      } catch (ServiceFailedException e) {
+        result.result = false;
+        result.code = e.getReason();
+        result.message = "Folder unlink failed";
+        log.warning("Folder unlink failed - Status: " + e.getReason());
+        return result;
+      }
+    }
 
     try{
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
