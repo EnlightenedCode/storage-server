@@ -180,8 +180,21 @@ public class StorageAPI extends AbstractAPI {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
 
-    try {
+    try{
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
+    } catch (ServiceFailedException e){
+      try{
+        new UserCompanyVerifier().verifyUserCompany(sharedCompanyId, user.getEmail());
+      } catch (ServiceFailedException ee) {
+        result.result = false;
+        result.code = ee.getReason();
+        result.message = "Folder unlink failed";
+        log.warning("Folder unlink failed - Status: " + ee.getReason());
+        return result;
+      }
+    }
+
+    try{
       datastoreService dsService = datastoreService.getInstance();
       dsService.removeShareFolderLink(companyId, sharedCompanyId, folder);
 
@@ -189,13 +202,12 @@ public class StorageAPI extends AbstractAPI {
 
       result.result = true;
       result.code = ServiceFailedException.OK;
-    } catch (ServiceFailedException e) {
+    } catch(ServiceFailedException e){
       result.result = false;
       result.code = e.getReason();
       result.message = "Folder unlink failed";
       log.warning("Folder unlink failed - Status: " + e.getReason());
     }
-
     return result;
   }
 
