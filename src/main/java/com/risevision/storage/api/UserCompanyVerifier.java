@@ -13,6 +13,7 @@ import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
+import com.google.appengine.api.users.*;
 
 class UserCompanyVerifier {
   private static final String HTTP_CHARSET = "UTF-8";
@@ -26,8 +27,13 @@ class UserCompanyVerifier {
   void verifyUserCompany(String companyId, String email)
   throws ServiceFailedException {
     if (Globals.devserver) {
-      email = com.google.appengine.api.users.UserServiceFactory.
-              getUserService().getCurrentUser().getEmail();
+      User localUser = UserServiceFactory.getUserService().getCurrentUser();
+      if (localUser == null) {
+        String loginURL = "http://localhost:8888/_ah/login?continue=%2f";
+        log.warning("Local user not logged in. Log in at " + loginURL);
+        throw new ServiceFailedException(ServiceFailedException.BAD_REQUEST);
+      }
+      email = localUser.getEmail();
     }
 
     log.info("Verifying company access for user " + email);
