@@ -8,7 +8,12 @@ import com.google.appengine.api.users.User;
 public class GCSFilesResponse extends SimpleResponse {
 	
 	public List<StorageObject> files;
-	
+
+  public GCSFilesResponse(){
+    super();
+    this.files = null;
+  }
+
 	public GCSFilesResponse(User user){
 		
                   super(user);
