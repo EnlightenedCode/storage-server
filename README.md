@@ -32,19 +32,6 @@ git clone https://github.com/Rise-Vision/storage-server.git
 cd storage-server
 ```
 
-* The [core](https://github.com/Rise-Vision/core) dependencies must be added to a local maven repository *(lib/)* as follows, Create local maven repository in root project *directory/lib* via (once for each file):
-
-``` bash
-mvn install:install-file -DlocalRepositoryPath=lib/ \
-  -DcreateChecksum=true -Dpackaging=jar \
-  -Dfile=lib/jars/com.risevision.core.api -DgroupId=com.risevision.core \
-  -DartifactId=api -Dversion=1.0
-
-mvn install:install-file -DlocalRepositoryPath=lib/ \
-  -DcreateChecksum=true -Dpackaging=jar \
-  -Dfile=lib/jars/com.risevision.directory -DgroupId=com.risevision \
-  -DartifactId=directory -Dversion=1.0
-```
 
 * Run this command to start the server locally
 ``` bash
@@ -80,14 +67,6 @@ git clone https://github.com/Rise-Vision/storage-server.git
 
 * pull up a command prompt and navigate to the directory where you cloned the Storage-Client repo and cd into the root of the repository.
 
-* The [core](https://github.com/Rise-Vision/core) dependencies must be added to a local maven repository *(lib/)* as follows, Create local maven repository in root project *directory/lib* via (once for each file):
-
-``` bash
-mvn install:install-file -DlocalRepositoryPath=lib/ -DcreateChecksum=true -Dpackaging=jar -Dfile=lib/jars/com.risevision.core.api -DgroupId=com.risevision.core -DartifactId=api -Dversion=1.0
-
-mvn install:install-file -DlocalRepositoryPath=lib/ -DcreateChecksum=true -Dpackaging=jar -Dfile=lib/jars/com.risevision.directory -DgroupId=com.risevision -DartifactId=directory -Dversion=1.0
-```
-
 * Run this cmd to start the server locally
 ``` bash
 mvn clean install
@@ -115,26 +94,39 @@ The local repository is referenced in pom.xml:
 </repositories>
 ```
 
-Each jar file is specified as a dependency in pom.xml:
-``` xml
-<dependency>
-  <groupId>com.risevision</groupId>
-  <artifactId>directory</artifactId>
-  <version>1.0</version>
-</dependency>
-<dependency>
-  <groupId>com.risevision.core</groupId>
-  <artifactId>api</artifactId>
-  <version>1.0</version>
-</dependency>
-```
-
 ### External Registrations and Requirements
-* Private p12 and client_secret files should go into src/private-keys.  These allow server to server authentication for google cloud storage. (this must be provided on request from the facilitator and is not stored on github)
+* Private p12 and client_secret files should go into src/private-keys.  These allow server to server authentication for google cloud storage.
+* P12 file in the src/private-keys directory also allows you to run the api-tests by running ./run-tests.sh --password=(use your google account's password registered with risevision here)
 * To register your own p12 for google app engine please refer to Google's help page on this topic: 
 https://developers.google.com/storage/docs/authentication
 
 ### Build and Deployment Process
+
+#### Linux
+
+##### To Run Our Api-tests Locally
+
+You can run our api-tests by running this command from the api-tests folder
+```
+./run-tests.sh --password=(password for google account)
+```
+Our api-tests will not run without a company-id to test with. You can configure this by placing a file called "jenkins-company.js".
+
+The file consists of one line which defines a variable containing the companyId that will be used during the api tests.
+
+The file name is not important but it must be consistent with line 3 in the api-test-page.html file.
+
+The api-tests will run.  If you receive an error that says "file not found" then your P12 key is not setup correctly.
+
+#### Windows
+
+* open a cmd prompt and run this command
+
+```
+call run-tests.bat (google account password registered with risevision)
+```
+
+* after the command is run you can close the cmd windows that opened.
 
 Deploy via
 ``` bash
