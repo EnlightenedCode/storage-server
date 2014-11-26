@@ -133,14 +133,9 @@ public class StorageAPI extends AbstractAPI {
   path = "files",
   httpMethod = HttpMethod.GET)
   public SimpleResponse getFiles(@Nullable @Named("companyId") String companyId,
-                                 @Nullable @Named("folder") String folder,
-                                 User user) {
+                                 @Nullable @Named("folder") String folder) {
     GCSFilesResponse result;
-    try {
-      result = new GCSFilesResponse(user);
-    } catch (IllegalArgumentException e) {
-      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
-    }
+    result = new GCSFilesResponse();
 
     try {
       StorageService gcsService = StorageService.getInstance();
