@@ -132,7 +132,7 @@ public class StorageAPI extends AbstractAPI {
   name = "files.get",
   path = "files",
   httpMethod = HttpMethod.GET)
-  public SimpleResponse getFiles(@Nullable @Named("companyId") String companyId,
+  public SimpleResponse getFiles(@Named("companyId") String companyId,
                                  @Nullable @Named("folder") String folder) {
     GCSFilesResponse result;
     result = new GCSFilesResponse();
@@ -160,7 +160,7 @@ public class StorageAPI extends AbstractAPI {
   name = "files.delete",
   path = "files",
   httpMethod = HttpMethod.POST)
-  public SimpleResponse deleteFiles(@Nullable @Named("companyId") String companyId,
+  public SimpleResponse deleteFiles(@Named("companyId") String companyId,
                                     @Nullable @Named("files") List<String> files,
                                     User user) {
     GCSFilesResponse result;
@@ -235,7 +235,7 @@ public class StorageAPI extends AbstractAPI {
   name = "createBucket",
   path = "bucket",
   httpMethod = HttpMethod.POST)
-  public SimpleResponse createBucket(@Nullable @Named("companyId") String companyId,
+  public SimpleResponse createBucket(@Named("companyId") String companyId,
                                      User user) {
     SimpleResponse result;
     try {
@@ -274,7 +274,7 @@ public class StorageAPI extends AbstractAPI {
   path = "bucketBandwidth",
   httpMethod = HttpMethod.GET)
   public SimpleResponse getBucketBandwidth(
-                           @Nullable @Named("companyId") String companyId
+                           @Named("companyId") String companyId
                           ,User user) {
     SimpleResponse result;
 
@@ -320,7 +320,7 @@ public class StorageAPI extends AbstractAPI {
   name = "deleteBucket",
   path = "bucket",
   httpMethod = HttpMethod.DELETE)
-  public SimpleResponse deleteBucket(@Nullable @Named("companyId") String companyId,
+  public SimpleResponse deleteBucket(@Named("companyId") String companyId,
                                      User user) {
     SimpleResponse result;
     try {
@@ -388,7 +388,7 @@ public class StorageAPI extends AbstractAPI {
   name = "trash.move",
   path = "trash",
   httpMethod = HttpMethod.POST)
-  public SimpleResponse moveToTrash(@Nullable @Named("companyId") String companyId,
+  public SimpleResponse moveToTrash(@Named("companyId") String companyId,
                                     @Nullable @Named("files") List<String> files,
                                     User user) {
     GCSFilesResponse result;
@@ -422,7 +422,7 @@ public class StorageAPI extends AbstractAPI {
   name = "trash.restore",
   path = "trash",
   httpMethod = HttpMethod.PUT)
-  public SimpleResponse restoreFromTrash(@Nullable @Named("companyId") String companyId,
+  public SimpleResponse restoreFromTrash(@Named("companyId") String companyId,
                                          @Nullable @Named("files") List<String> files,
                                          User user) {
     GCSFilesResponse result;
