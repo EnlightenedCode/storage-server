@@ -18,6 +18,8 @@ public final class Globals {
     "https://www.googleapis.com/auth/devstorage.full_control";
   public static final String EMAIL_SCOPE =
     "https://www.googleapis.com/auth/userinfo.email";
+  public static final String BQ_SCOPE =
+    "https://www.googleapis.com/auth/bigquery";
 
   public static final String EDITOR_GROUP =
     "group-00b4903a979339148b85b8e79b1639b92ab14bf82fe03b33c5aa2aedd0ac5172";
