@@ -32,4 +32,8 @@ abstract class ServerTask {
   }
 
   abstract void handleRequest() throws IOException;
+  
+  protected Storage getGcsClient() {
+    return gcsClient;
+  }
 }
