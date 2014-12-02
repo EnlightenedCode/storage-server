@@ -77,19 +77,6 @@ public class StorageAPI extends AbstractAPI {
     
     SubscriptionStatus status = subscriptionStatusFetcher.getSubscriptionStatus(companyId);
     
-    if(!status.isSubscribed() && !status.isOnTrial()) {
-      throw new ServiceFailedException(ServiceFailedException.FORBIDDEN);
-    }
-  }
-  
-  protected void verifyActive(String companyId) throws ServiceFailedException {
-    if (Globals.devserver) {return;}
-    if (Strings.isNullOrEmpty(companyId)) {
-      throw new ServiceFailedException(ServiceFailedException.BAD_REQUEST);
-    }
-    
-    SubscriptionStatus status = subscriptionStatusFetcher.getSubscriptionStatus(companyId);
-    
     if(!status.isActive()) {
       throw new ServiceFailedException(ServiceFailedException.FORBIDDEN);
     }
@@ -377,7 +364,6 @@ public class StorageAPI extends AbstractAPI {
 
     try {
       StorageService gcsService = StorageService.getInstance();
-      
       log.info("Requesting resumable upload for " + result.userEmail);
       result.message = gcsService.getResumableUploadURI(Globals.COMPANY_BUCKET_PREFIX +
                                                         companyId,
@@ -409,7 +395,7 @@ public class StorageAPI extends AbstractAPI {
 
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
-      verifyActive(companyId);
+      verifyActiveSubscription(companyId);
 
       StorageService gcsService = StorageService.getInstance();
       gcsService.moveToTrash(Globals.COMPANY_BUCKET_PREFIX + companyId, files);
@@ -444,7 +430,7 @@ public class StorageAPI extends AbstractAPI {
 
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
-      verifyActive(companyId);
+      verifyActiveSubscription(companyId);
       
       StorageService gcsService = StorageService.getInstance();
       gcsService.restoreFromTrash(Globals.COMPANY_BUCKET_PREFIX + companyId, files);
