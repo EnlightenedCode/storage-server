@@ -103,4 +103,26 @@ public class SubscriptionStatus {
     
     return result;
   }
+  
+  public boolean isSubscribed() {
+    return getStatus() != null && getStatus().equals(Status.SUBSCRIBED.description);
+  }
+  
+  public boolean isOnTrial() {
+    return getStatus() != null && getStatus().equals(Status.ON_TRIAL.description);
+  }
+  
+  public boolean isSuspended() {
+    return getStatus() != null && getStatus().equals(Status.SUSPENDED.description);
+  }
+  
+  protected static List<String> buildList(Status... values) {
+    List<String> result = new ArrayList<String>();
+    
+    for(Status value : values) {
+      result.add(value.description);
+    }
+    
+    return result;
+  }
 }

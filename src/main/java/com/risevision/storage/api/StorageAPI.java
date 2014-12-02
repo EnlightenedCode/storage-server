@@ -43,6 +43,8 @@ public class StorageAPI extends AbstractAPI {
   private static final String bandwidthQryBegin = 
           "select bytes_this_month from " + Globals.DATASET_ID +
           ".BucketBandwidthMonthly where bucket = '";
+  
+  private SubscriptionStatusFetcher subscriptionStatusFetcher;
 
   private SubscriptionStatusFetcher subscriptionStatusFetcher;
 
@@ -68,6 +70,19 @@ public class StorageAPI extends AbstractAPI {
   }
   
   protected void verifyActiveSubscription(String companyId) throws ServiceFailedException {
+    if (Globals.devserver) {return;}
+    if (Strings.isNullOrEmpty(companyId)) {
+      throw new ServiceFailedException(ServiceFailedException.BAD_REQUEST);
+    }
+    
+    SubscriptionStatus status = subscriptionStatusFetcher.getSubscriptionStatus(companyId);
+    
+    if(!status.isSubscribed() && !status.isOnTrial()) {
+      throw new ServiceFailedException(ServiceFailedException.FORBIDDEN);
+    }
+  }
+  
+  protected void verifyActive(String companyId) throws ServiceFailedException {
     if (Globals.devserver) {return;}
     if (Strings.isNullOrEmpty(companyId)) {
       throw new ServiceFailedException(ServiceFailedException.BAD_REQUEST);
@@ -394,6 +409,7 @@ public class StorageAPI extends AbstractAPI {
 
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
+      verifyActive(companyId);
 
       StorageService gcsService = StorageService.getInstance();
       gcsService.moveToTrash(Globals.COMPANY_BUCKET_PREFIX + companyId, files);
@@ -428,7 +444,8 @@ public class StorageAPI extends AbstractAPI {
 
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
-
+      verifyActive(companyId);
+      
       StorageService gcsService = StorageService.getInstance();
       gcsService.restoreFromTrash(Globals.COMPANY_BUCKET_PREFIX + companyId, files);
 
