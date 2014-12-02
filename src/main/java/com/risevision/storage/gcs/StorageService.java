@@ -120,11 +120,6 @@ public final class StorageService {
             StorageObject folderItem = new StorageObject();
             folderItem.setName(folderName);
             folderItem.setKind("folder");
-            if(listResult.getItems().size() > 0){
-              String rootFolder = listResult.getItems().get(0).getSelfLink().substring(0,listResult.getItems().get(0).getSelfLink().lastIndexOf("/"));
-              String folderLink = rootFolder + "?prefix=" + folderName;
-              folderItem.setSelfLink(folderLink);
-            }
             long folderSize = 0;
             long latestDt = 0;
             long folderFileDt = 0;
