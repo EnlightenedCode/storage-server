@@ -1,6 +1,8 @@
 package com.risevision.storage.api;
 
-import javax.servlet.http.*;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletException;
@@ -47,8 +49,11 @@ public class CreateThirdPartyCookieLogServlet extends HttpServlet {
     if(myIndex != -1) {
       response.addCookie(cookie);
       response.setHeader("Access-Control-Allow-Origin", clientOrigin);
+      log.info("response contains Access-Control-Allow-Origin: " + response.containsHeader("Access-Control-Allow-Origin"));
       response.setHeader("Access-Control-Allow-Methods", "GET");
+      log.info("response contains Access-Control-Allow-Methods: " + response.containsHeader("Access-Control-Allow-Methods"));
       response.setHeader("Access-Control-Allow-Credentials", "true");
+      log.info("response contains Access-Control-Allow-Credentials: " + response.containsHeader("Access-Control-Allow-Credentials"));
     }
 
     PrintWriter out = response.getWriter();
