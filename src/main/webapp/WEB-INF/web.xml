@@ -25,6 +25,14 @@
         <servlet-name>CreateThirdPartyCookie</servlet-name>
         <url-pattern>/createThirdPartyCookie</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>CreateThirdPartyCookieLog</servlet-name>
+        <servlet-class>com.risevision.storage.api.CreateThirdPartyCookieLogServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CreateThirdPartyCookieLog</servlet-name>
+        <url-pattern>/createThirdPartyCookieLog</url-pattern>
+    </servlet-mapping>
 	<servlet>
 		<servlet-name>UploadComplete</servlet-name>
 		<servlet-class>com.risevision.storage.api.UploadCompleteServlet</servlet-class>
