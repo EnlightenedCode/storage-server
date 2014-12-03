@@ -82,10 +82,6 @@ public class SubscriptionStatus {
     return getStatus() != null && getStatus().equals(Status.NOT_SUBSCRIBED.description);
   }
   
-  public boolean isNotSubscribed() {
-    return getStatus() != null && getStatus().equals(Status.NOT_SUBSCRIBED.description);
-  }
-  
   public boolean isOnTrial() {
     return getStatus() != null && getStatus().equals(Status.ON_TRIAL.description);
   }
