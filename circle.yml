@@ -19,10 +19,10 @@ deployment:
   staging:
     branch: /(feature|fix|chore).*/
     commands:
-      - echo no-deploy-yet
+      - mvn appengine:update -Dappengine.version=$(echo -n $CIRCLE_BRANCH |awk 'BEGIN{FS="/"}{PRINT TOLOWER($nf)}') -Dappengine.appId=rvacore-test
       - tar czvf target.tar.gz target
   production:
     branch: master
     commands:
-      - echo no-deploy-yet
+      - mvn appengine:update -Dappengine.version=master-latest -Dappengine.appId=rvaserver2
       - tar czvf target.tar.gz target
