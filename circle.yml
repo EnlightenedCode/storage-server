@@ -1,6 +1,11 @@
 general:
   artifacts:
     - target.tar.gz
+dependencies:
+  post:
+    - mkdir -p src/private-keys
+    - lftp 192.254.220.36 -u $RISE_FTP_USER,$RISE_FTP_PASS -e "set ssl:verify-certificate false; set xfer:clobber yes; mget -O src/private-keys /private-keys/*; quit"
+    - lftp 192.254.220.36 -u $RISE_FTP_USER,$RISE_FTP_PASS -e "get /jenkins-companies/jenkins-company-test.js -o api-tests/jenkins-company.js; quit"
 test:
   override:
     - echo passing
