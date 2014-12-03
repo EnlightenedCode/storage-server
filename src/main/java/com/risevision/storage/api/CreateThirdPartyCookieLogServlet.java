@@ -29,7 +29,6 @@ public class CreateThirdPartyCookieLogServlet extends HttpServlet {
     response.setContentType("application/json");
     // Get client's origin
     String clientOrigin = request.getHeader("origin");
-    log.info("request: " + request.toString());
     log.info("clientOrigin: " + clientOrigin);
     int myIndex = incomingUrls.indexOf(clientOrigin);
     log.info("myIndex:" + myIndex);
