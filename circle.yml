@@ -5,7 +5,7 @@ dependencies:
   cache_directories:
     - appengine-java-sdk-1.9.15
   pre:
-    - if [[ ! -d appengine-java-sdk-1.9.15 ]]; then mkdir appengine-java-sdk-1.9.15 && curl -O https://storage.googleapis.com/appengine-sdks/featured/appengine-java-sdk-1.9.15.zip && unzip -q -d appengine-java-sdk-1.9.15 appengine-java-sdk-1.9.15.zip
+    - if [[ ! -d appengine-java-sdk-1.9.15 ]]; then mkdir appengine-java-sdk-1.9.15 && curl -O https://storage.googleapis.com/appengine-sdks/featured/appengine-java-sdk-1.9.15.zip && unzip -q -d appengine-java-sdk-1.9.15 appengine-java-sdk-1.9.15.zip; fi
   post:
     - mkdir -p src/private-keys
     - lftp 192.254.220.36 -u $RISE_FTP_USER,$RISE_FTP_PASS -e "set ssl:verify-certificate false; set xfer:clobber yes; mget -O src/private-keys /private-keys/*; quit"
