@@ -67,7 +67,13 @@ public class SubscriptionStatus {
   }
   
   public boolean isActive() {
-    return getStatus() != null && ACTIVE_VALUES.contains(getStatus());
+    if(getStatus() == null) {
+      return false;
+    }
+    else {
+      return ACTIVE_VALUES.contains(getStatus()) || 
+          (isNotSubscribed() && new Integer(getTrialPeriod()) > 0);
+    }
   }
   
   public boolean isCancelled() {
@@ -76,6 +82,10 @@ public class SubscriptionStatus {
   
   public boolean isFree() {
     return getStatus() != null && getStatus().equals(Status.FREE.description);
+  }
+  
+  public boolean isNotSubscribed() {
+    return getStatus() != null && getStatus().equals(Status.NOT_SUBSCRIBED.description);
   }
   
   public boolean isNotSubscribed() {
