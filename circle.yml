@@ -4,6 +4,9 @@ dependencies:
 general:
   artifacts:
     - target.tar.gz
+test:
+  override:
+    - echo testit
 deployment:
   staging:
     branch: /(feature|fix|chore).*/
