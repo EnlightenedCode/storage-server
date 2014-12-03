@@ -5,6 +5,7 @@ dependencies:
   cache_directories:
     - appengine-java-sdk-1.9.15
   pre:
+    - npm install -g casperjs
     - if [[ ! -d appengine-java-sdk-1.9.15 ]]; then mkdir appengine-java-sdk-1.9.15 && curl -O https://storage.googleapis.com/appengine-sdks/featured/appengine-java-sdk-1.9.15.zip && unzip -q -d appengine-java-sdk-1.9.15 appengine-java-sdk-1.9.15.zip; fi
   post:
     - mkdir -p src/private-keys
