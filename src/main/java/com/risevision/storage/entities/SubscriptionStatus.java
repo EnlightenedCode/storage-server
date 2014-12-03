@@ -67,13 +67,7 @@ public class SubscriptionStatus {
   }
   
   public boolean isActive() {
-    if(getStatus() == null) {
-      return false;
-    }
-    else {
-      return ACTIVE_VALUES.contains(getStatus()) || 
-          (isNotSubscribed() && new Integer(getTrialPeriod()) > 0);
-    }
+    return getStatus() != null && ACTIVE_VALUES.contains(getStatus());
   }
   
   public boolean isCancelled() {
