@@ -1,20 +1,17 @@
-dependencies:
-  post:
-    - die
 general:
   artifacts:
     - target.tar.gz
 test:
   override:
-    - echo testit
+    - echo passing
 deployment:
   staging:
     branch: /(feature|fix|chore).*/
     commands:
-      - echo hi
+      - echo no-deploy-yet
       - tar czvf target.tar.gz target
   production:
     branch: master
     commands:
-      - echo hi
+      - echo no-deploy-yet
       - tar czvf target.tar.gz target
