@@ -8,7 +8,7 @@ dependencies:
     - lftp 192.254.220.36 -u $RISE_FTP_USER,$RISE_FTP_PASS -e "set ssl:verify-certificate false; get /jenkins-companies/jenkins-company-test.js -o api-tests/jenkins-company.js; quit"
 test:
   override:
-    - echo passing
+    - cd api-tests && ./run-tests.sh --password=$JENKINS_PASS
 deployment:
   staging:
     branch: /(feature|fix|chore).*/
