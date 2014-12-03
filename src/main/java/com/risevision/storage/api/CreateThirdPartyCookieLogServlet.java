@@ -27,9 +27,16 @@ public class CreateThirdPartyCookieLogServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     response.setContentType("application/json");
-    // Get client's origin
-    String clientOrigin = request.getHeader("Origin");
+    String clientOrigin, corsMethod, corsHeaders;
+
+// Find out what the request is asking for
+    clientOrigin = request.getHeader("Origin");
+    corsMethod = request.getHeader("Access-Control-Request-Method");
+    corsHeaders = request.getHeader("Access-Control-Request-Headers");
+
     log.info("clientOrigin: " + clientOrigin);
+    log.info("corsMethod: " + corsMethod);
+    log.info("corsHeaders: " + corsHeaders);
     int myIndex = incomingUrls.indexOf(clientOrigin);
     log.info("myIndex:" + myIndex);
     if(myIndex != -1) {
