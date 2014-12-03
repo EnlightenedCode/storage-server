@@ -33,7 +33,12 @@ public class CreateThirdPartyCookieLogServlet extends HttpServlet {
     clientOrigin = request.getHeader("Origin");
     corsMethod = request.getHeader("Access-Control-Request-Method");
     corsHeaders = request.getHeader("Access-Control-Request-Headers");
-
+    // Get client's IP address
+    String ipAddress = request.getHeader("x-forwarded-for");
+    if (ipAddress == null) {
+      ipAddress = request.getRemoteAddr();
+    }
+    log.info("ipAddress: " + ipAddress);
     log.info("clientOrigin: " + clientOrigin);
     log.info("corsMethod: " + corsMethod);
     log.info("corsHeaders: " + corsHeaders);
