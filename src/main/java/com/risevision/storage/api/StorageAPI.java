@@ -155,7 +155,7 @@ public class StorageAPI extends AbstractAPI {
       verifyActiveSubscription(companyId);
     }
     catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "inactive-subscription", user.getEmail());
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "delete-inactive-subscription", user.getEmail());
     }
     
     try {
@@ -403,7 +403,7 @@ public class StorageAPI extends AbstractAPI {
       verifyActiveSubscription(companyId);
     }
     catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "inactive-subscription", user.getEmail());
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "trash-inactive-subscription", user.getEmail());
     }
 
     try {
@@ -443,7 +443,7 @@ public class StorageAPI extends AbstractAPI {
       verifyActiveSubscription(companyId);
     }
     catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "inactive-subscription", user.getEmail());
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "restore-inactive-subscription", user.getEmail());
     }
 
     try {
