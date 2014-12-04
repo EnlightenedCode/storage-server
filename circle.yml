@@ -24,5 +24,6 @@ deployment:
   production:
     branch: master
     commands:
+      - mvn clean install -Pprod
       - mvn appengine:update -Dappengine.version=master-latest -Dappengine.appId=rvaserver2 <<< $JENKINS_PASS
       - tar czvf target.tar.gz target
