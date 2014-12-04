@@ -1,0 +1,28 @@
+general:
+  artifacts:
+    - target.tar.gz
+dependencies:
+  cache_directories:
+    - appengine-java-sdk-1.9.15
+  pre:
+    - npm install -g casperjs
+    - if [[ ! -d appengine-java-sdk-1.9.15 ]]; then mkdir appengine-java-sdk-1.9.15 && curl -O https://storage.googleapis.com/appengine-sdks/featured/appengine-java-sdk-1.9.15.zip && unzip -q -d appengine-java-sdk-1.9.15 appengine-java-sdk-1.9.15.zip; fi
+  post:
+    - mkdir -p src/private-keys
+    - lftp 192.254.220.36 -u $RISE_FTP_USER,$RISE_FTP_PASS -e "set ssl:verify-certificate false; set xfer:clobber yes; mget -O src/private-keys /private-keys/*; quit"
+    - lftp 192.254.220.36 -u $RISE_FTP_USER,$RISE_FTP_PASS -e "set ssl:verify-certificate false; get /jenkins-companies/jenkins-company-test.js -o api-tests/jenkins-company.js; quit"
+test:
+  override:
+    - mvn install
+    - cd api-tests && ./run-tests.sh --password=$JENKINS_PASS
+deployment:
+  staging:
+    branch: /(feature|fix|chore).*/
+    commands:
+      - mvn appengine:update -Dappengine.version=$(echo -n $CIRCLE_BRANCH |awk 'BEGIN{FS="/"}{print tolower($NF)}') -Dappengine.appId=rvacore-test <<< $JENKINS_PASS
+      - tar czvf target.tar.gz target
+  production:
+    branch: master
+    commands:
+      - mvn appengine:update -Dappengine.version=master-latest -Dappengine.appId=rvaserver2 <<< $JENKINS_PASS
+      - tar czvf target.tar.gz target
