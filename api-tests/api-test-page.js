@@ -1,6 +1,10 @@
 "use strict";
 /* global gapi: true */
 var responseId;
+var storageAPIFilesCountId;
+var storageAPIFoldersCountId;
+var googleAPIFilesCountId;
+var googleAPIFoldersCountId;
 
 function init() {
   var ROOT = "http://localhost:8888/_ah/api"
@@ -21,6 +25,10 @@ function init() {
 
   function authCallback(resp) {
     responseId = document.getElementById("response");
+    storageAPIFilesCountId = document.getElementById("storageAPIFilesCount");
+    storageAPIFoldersCountId = document.getElementById("storageAPIFoldersCount");
+    googleAPIFilesCountId = document.getElementById("googleAPIFilesCount");
+    googleAPIFoldersCountId = document.getElementById("googleAPIFoldersCount");
     document.getElementById("bucketPath").innerHTML = 
     "https://www.googleapis.com/storage/v1/b/risemedialibrary-" + jenkinsCompany;
 
@@ -70,9 +78,41 @@ function deleteFiles(fileNames) {
   storageApiCall("files.delete", {"companyId": jenkinsCompany, "files": fileNames});
 }
 
+function refreshRootFolder() {
+  storageApiCall("files.get", {"companyId": jenkinsCompany});
+}
+
+function refreshSubFolder() {
+  storageApiCall("files.get", {"companyId": jenkinsCompany, "folder": "test folder"});
+}
+
+function refreshGoogleAPIFolder(folder) {
+  googleAPIFilesCountId.style.display="none";
+  googleAPIFoldersCountId.style.display="none";
+  var req = new XMLHttpRequest;
+  var url= "https://www.googleapis.com/storage/v1/b/risemedialibrary-" + encodeURIComponent(jenkinsCompany) + "/o?delimiter=%2F";
+  url = (folder) ? url + "&prefix=" + encodeURIComponent(folder) + "%2F": url;
+  req.open("GET", url, true);
+  req.send();
+  req.onreadystatechange=function(){
+    if(req.readyState === 4 && req.status === 200){
+      var json = JSON.parse(req.responseText);
+      var lengthOfFiles = (json.items) ? json.items.length : "0";
+      var lengthOfFolders = (json.prefixes) ? json.prefixes.length : "0";
+      googleAPIFilesCountId.innerHTML= lengthOfFiles;
+      googleAPIFilesCountId.style.display="inline";
+      googleAPIFoldersCountId.innerHTML= lengthOfFolders;
+      googleAPIFoldersCountId.style.display="inline"
+    }
+  }
+}
+
 function storageApiCall(commandString, paramObj, callback, doNotUpdateResponse) {
   var commandObject, commandArray;
   responseId.style.display="none";
+  storageAPIFilesCountId.style.display="none";
+  storageAPIFoldersCountId.style.display="none";
+
   commandArray = commandString.split(".");
 
   commandObject = gapi.client.storage;
@@ -82,7 +122,16 @@ function storageApiCall(commandString, paramObj, callback, doNotUpdateResponse) 
  
   commandObject(paramObj).execute(function(resp) {
         responseId.innerHTML=JSON.stringify(resp);
-        if (!doNotUpdateResponse) {responseId.style.display="inline";}
+        var lengthOfFiles = 0;
+        var lengthOfFolders = 0;
+        if(resp.files){
+          for(var i=0; i < resp.files.length; i++){
+            (resp.files[i].kind === "folder") ? lengthOfFolders++ : lengthOfFiles++;
+          }
+        }
+        storageAPIFilesCountId.innerHTML= lengthOfFiles;
+        storageAPIFoldersCountId.innerHTML= lengthOfFolders;
+        if (!doNotUpdateResponse) {responseId.style.display="inline"; storageAPIFilesCountId.style.display="inline"; storageAPIFoldersCountId.style.display="inline";}
         if (callback) {callback(resp);}
       });
 }
@@ -93,15 +142,14 @@ function createFiles(fileNames) {
   createFile(fileNames.shift());
 
   function createFile(fileName) {
-    getUploadToken(fileName, uploadFile);
+    getUploadToken(encodeURIComponent(fileName), uploadFile);
 
     function uploadFile(tokenResponse) {
-      console.log(tokenResponse);
 
       var xhr = new XMLHttpRequest();
       xhr.open("PUT", tokenResponse.message, true);
-      xhr.onload = function() {processNextFile(fileUploaded(fileName));};
-      xhr.onerror = function() {processNextFile(fileUploaded(fileName));};
+      xhr.onload = function() {processNextFile(fileUploaded(encodeURIComponent(fileName)));};
+      xhr.onerror = function() {processNextFile(fileUploaded(encodeURIComponent(fileName)));};
       xhr.send("test data");
     }
   }

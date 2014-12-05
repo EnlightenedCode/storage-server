@@ -80,6 +80,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
     }
   );
 
+
   casper.then(function() {
     casper.echo("Creating bucket.");
     casper.click("#createBucket");
@@ -163,6 +164,24 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
+    casper.echo("Checking Root Folder Refresh Folders Only.");
+    casper.click("#refreshRootFolder");
+    casper.click("#refreshGoogleAPIRootFolder");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", 'result":true');
+    this.test.assertSelectorHasText("#storageAPIFilesCount", "0");
+    this.test.assertSelectorHasText("#googleAPIFilesCount", "0");
+    this.test.assertSelectorHasText("#storageAPIFoldersCount", "1");
+    this.test.assertSelectorHasText("#googleAPIFoldersCount", "1");
+  });
+
+  casper.then(function() {
     casper.echo("Creating files.");
     casper.click("#createFiles");
   });
@@ -173,6 +192,43 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
 
   casper.then(function() {
     this.test.assertSelectorHasText("#response", 'Without error: true');
+  });
+
+  casper.then(function() {
+    casper.echo("Checking Root Folder Refresh Folders and Files.");
+    casper.click("#refreshRootFolder");
+    casper.click("#refreshGoogleAPIRootFolder");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", 'result":true');
+    this.test.assertSelectorHasText("#storageAPIFilesCount", "3");
+    this.test.assertSelectorHasText("#googleAPIFilesCount", "3");
+    this.test.assertSelectorHasText("#storageAPIFoldersCount", "1");
+    this.test.assertSelectorHasText("#googleAPIFoldersCount", "1");
+  });
+
+  casper.then(function() {
+    casper.echo("Checking File List refresh inside SubFolder.");
+    casper.click("#refreshSubFolder");
+    casper.click("#refreshGoogleAPISubFolder");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    //check for 2 files because of the previous folder file.
+    this.test.assertSelectorHasText("#response", 'result":true');
+    this.test.assertSelectorHasText("#storageAPIFilesCount", "2");
+    this.test.assertSelectorHasText("#googleAPIFilesCount", "2");
+    this.test.assertSelectorHasText("#storageAPIFoldersCount", "0");
+    this.test.assertSelectorHasText("#googleAPIFoldersCount", "0");
   });
 
   casper.then(function() {
@@ -208,6 +264,32 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   casper.then(function() {
     casper.waitUntilVisible("#response");
   });
+  casper.then(function() {
+    casper.echo("Deleting folder.");
+    casper.click("#deleteFolder");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    casper.echo("Checking Root Folder Refresh Files Only.");
+    casper.click("#refreshRootFolder");
+    casper.click("#refreshGoogleAPIRootFolder");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", 'result":true');
+    this.test.assertSelectorHasText("#storageAPIFilesCount", "3");
+    this.test.assertSelectorHasText("#googleAPIFilesCount", "3");
+    this.test.assertSelectorHasText("#storageAPIFoldersCount", "0");
+    this.test.assertSelectorHasText("#googleAPIFoldersCount", "0");
+  });
 
   casper.then(function() {
     casper.echo("Deleting files.");
@@ -221,16 +303,6 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   casper.then(function() {
     this.test.assertSelectorHasText("#response", '"result":true');
   });
-
-  casper.then(function() {
-    casper.echo("Deleting folder.");
-    casper.click("#deleteFolder");
-  });
-
-  casper.then(function() {
-    casper.waitUntilVisible("#response");
-  });
-
   casper.then(function() {
     this.test.assertSelectorHasText("#response", '"result":true');
   });
