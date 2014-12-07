@@ -7,35 +7,37 @@ public class SimpleResponse {
 	public Boolean result;
 	public Integer code;
 	public String message;
-        public String userEmail;
-	
-        private static final Logger log = Logger.getAnonymousLogger();
+  public String userEmail;
+
+  private static final Logger log = Logger.getAnonymousLogger();
 
 	public SimpleResponse(){
 		
 		this.result = false;
 		this.code = -1;
 		this.message = "";
-                this.userEmail = null;
+    this.userEmail = null;
 	}
 	
 	public SimpleResponse(Boolean result, Integer code, String message) {
-		
 		this.result = result;
 		this.code = code;
 		this.message = message;
 	}
+  
+  public SimpleResponse(Boolean result, Integer code, String message, String userEmail) {
+    this.result = result;
+    this.code = code;
+    this.message = message;
+    this.userEmail = userEmail;
+  }
 
-        public SimpleResponse(User user) {
-          if (user == null) {
-            throw new IllegalArgumentException("No user");
-          }
+  public SimpleResponse(User user) {
+    if (user == null) {
+      throw new IllegalArgumentException("No user");
+    }
 
-          this.userEmail = user.getEmail();
-          log.info("User: " + this.userEmail);
-        }
-
-
-
+    this.userEmail = user.getEmail();
+    log.info("User: " + this.userEmail);
+  }
 }
-
