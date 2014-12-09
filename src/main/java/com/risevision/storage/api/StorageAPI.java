@@ -10,10 +10,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.annotation.Nullable;
 import javax.inject.Named;
 
+import com.google.api.server.spi.ServiceException;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiMethod.HttpMethod;
@@ -24,10 +26,18 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.users.User;
 import com.google.common.base.Strings;
 import com.risevision.storage.Globals;
+import com.risevision.storage.api.accessors.FileTagEntryAccessor;
+import com.risevision.storage.api.accessors.TagDefinitionAccessor;
+import com.risevision.storage.api.exception.ValidationException;
 import com.risevision.storage.api.impl.SubscriptionStatusFetcherImpl;
 import com.risevision.storage.api.responses.GCSFilesResponse;
+import com.risevision.storage.api.responses.ItemResponse;
+import com.risevision.storage.api.responses.ListResponse;
 import com.risevision.storage.api.responses.SimpleResponse;
+import com.risevision.storage.datastore.DatastoreService.PagedResult;
+import com.risevision.storage.entities.FileTagEntry;
 import com.risevision.storage.entities.SubscriptionStatus;
+import com.risevision.storage.entities.TagDefinition;
 import com.risevision.storage.gcs.StorageService;
 import com.risevision.storage.info.ServiceFailedException;
 import com.risevision.storage.queue.tasks.BQUtils;
@@ -512,5 +522,272 @@ public class StorageAPI extends AbstractAPI {
     }
 
     return result;
+  }
+
+  @ApiMethod(
+  name = "tagdef.put",
+  path = "tagdef",
+  httpMethod = HttpMethod.PUT)
+  public SimpleResponse putTagDefinition(@Named("companyId") String companyId,
+                                         @Named("name") String name,
+                                         @Named("type") String type,
+                                         @Nullable @Named("values") List<String> values,
+                                         User user) throws ServiceException {
+    if(user == null) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+    
+    try {
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
+    }
+    
+    try {
+      TagDefinition tagDefinition = new TagDefinitionAccessor().put(companyId, name, type, values, user);
+      
+      return new ItemResponse<TagDefinition>(user.getEmail(), tagDefinition);
+    } catch (ValidationException e) {
+      return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
+    } catch (Exception e) {
+      log.log(Level.SEVERE, "Failed putTagDefinition", e);
+      return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
+    }
+  }
+
+  @ApiMethod(
+  name = "tagdef.get",
+  path = "tagdef",
+  httpMethod = HttpMethod.GET)
+  public SimpleResponse getTagDefinition(@Named("id") String id,
+                                         User user) throws ServiceException {
+    if(user == null) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+    
+    try {
+      TagDefinition tagDefinition = new TagDefinitionAccessor().get(id);
+      
+      if(tagDefinition == null) {
+        throw new ValidationException("Tag definition does not exist");
+      }
+      
+      try {
+        new UserCompanyVerifier().verifyUserCompany(tagDefinition.getCompanyId(), user.getEmail());
+      }
+      catch (ServiceFailedException e) {
+        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
+      }
+      
+      return new ItemResponse<TagDefinition>(user.getEmail(), tagDefinition);
+    } catch (ValidationException e) {
+      return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
+    } catch (Exception e) {
+      log.log(Level.SEVERE, "Failed getTagDefinition", e);
+      return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
+    }
+  }
+
+  @ApiMethod(
+  name = "tagdef.delete",
+  path = "tagdef",
+  httpMethod = HttpMethod.DELETE)
+  public SimpleResponse deleteTagDefinition(@Named("id") String id,
+                                            User user) throws ServiceException {
+    if(user == null) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+    
+    try {
+      TagDefinition tagDefinition = new TagDefinitionAccessor().get(id);
+      
+      if(tagDefinition == null) {
+        throw new ValidationException("Tag definition does not exist");
+      }
+      
+      try {
+        new UserCompanyVerifier().verifyUserCompany(tagDefinition.getCompanyId(), user.getEmail());
+      }
+      catch (ServiceFailedException e) {
+        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
+      }
+      
+      new TagDefinitionAccessor().delete(id);
+      
+      return new ItemResponse<TagDefinition>(user.getEmail(), tagDefinition);
+    } catch (ValidationException e) {
+      return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
+    } catch (Exception e) {
+      log.log(Level.SEVERE, "Failed deleteTagDefinition", e);
+      return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
+    }
+  }
+
+  @ApiMethod(
+  name = "tagdef.list",
+  path = "tagdeflist",
+  httpMethod = HttpMethod.GET)
+  public SimpleResponse listTagDefinitions(@Named("companyId") String companyId,
+                                           @Nullable @Named("search") String search,
+                                           @Nullable @Named("limit") Integer limit,
+                                           @Nullable @Named("sort") String sort,
+                                           @Nullable @Named("cursor") String cursor,
+                                           User user) throws ServiceException {
+    if(user == null) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+    
+    try {
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
+    }
+    
+    try {
+      PagedResult<TagDefinition> pagedResult = new TagDefinitionAccessor().list(companyId, search, limit, sort, cursor);
+      
+      return new ListResponse<TagDefinition>(user.getEmail(), pagedResult.getList(), pagedResult.getCursor());
+    } catch (ValidationException e) {
+      return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
+    } catch (Exception e) {
+      log.log(Level.SEVERE, "Failed deleteTagDefinition", e);
+      return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
+    }
+  }
+
+  @ApiMethod(
+  name = "filetag.put",
+  path = "filetag",
+  httpMethod = HttpMethod.PUT)
+  public SimpleResponse putFileTagEntry(@Named("companyId") String companyId,
+                                        @Named("objectId") String objectId,
+                                        @Named("name") String name,
+                                        @Named("type") String type,
+                                        @Nullable @Named("values") List<String> values,
+                                        User user) throws ServiceException {
+    if(user == null) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+    
+    try {
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
+    }
+    
+    try {
+      FileTagEntry fileTagEntry = new FileTagEntryAccessor().put(companyId, objectId, name, type, values, user);
+      
+      return new ItemResponse<FileTagEntry>(user.getEmail(), fileTagEntry);
+    } catch (ValidationException e) {
+      return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
+    } catch (Exception e) {
+      log.log(Level.SEVERE, "Failed deleteTagDefinition", e);
+      return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
+    }
+  }
+
+  @ApiMethod(
+  name = "filetag.get",
+  path = "filetag",
+  httpMethod = HttpMethod.GET)
+  public SimpleResponse getFileTagEntry(@Named("id") String id,
+                                        User user) throws ServiceException {
+    if(user == null) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+    
+    try {
+      FileTagEntry fileTagEntry = new FileTagEntryAccessor().get(id);
+      
+      if(fileTagEntry == null) {
+        throw new ValidationException("File tag entry does not exist");
+      }
+      
+      try {
+        new UserCompanyVerifier().verifyUserCompany(fileTagEntry.getCompanyId(), user.getEmail());
+      }
+      catch (ServiceFailedException e) {
+        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
+      }
+      
+      return new ItemResponse<FileTagEntry>(user.getEmail(), fileTagEntry);
+    } catch (ValidationException e) {
+      return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
+    } catch (Exception e) {
+      log.log(Level.SEVERE, "Failed getTagDefinition", e);
+      return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
+    }
+  }
+
+  @ApiMethod(
+  name = "filetag.delete",
+  path = "filetag",
+  httpMethod = HttpMethod.DELETE)
+  public SimpleResponse deleteFileTagEntry(@Named("id") String id,
+                                           User user) throws ServiceException {
+    if(user == null) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+    
+    try {
+      FileTagEntry fileTagEntry = new FileTagEntryAccessor().get(id);
+      
+      if(fileTagEntry == null) {
+        throw new ValidationException("File tag entry does not exist");
+      }
+     
+      try {
+        new UserCompanyVerifier().verifyUserCompany(fileTagEntry.getCompanyId(), user.getEmail());
+      }
+      catch (ServiceFailedException e) {
+        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
+      }
+      
+      new TagDefinitionAccessor().delete(id);
+      
+      return new ItemResponse<FileTagEntry>(user.getEmail(), fileTagEntry);
+    } catch (ValidationException e) {
+      return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
+    } catch (Exception e) {
+      log.log(Level.SEVERE, "Failed deleteTagDefinition", e);
+      return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
+    }
+  }
+
+  @ApiMethod(
+  name = "filetag.list",
+  path = "filetaglist",
+  httpMethod = HttpMethod.GET)
+  public SimpleResponse listFileTagEntry(@Named("companyId") String companyId,
+                                         @Nullable @Named("search") String search,
+                                         @Nullable @Named("limit") Integer limit,
+                                         @Nullable @Named("sort") String sort,
+                                         @Nullable @Named("cursor") String cursor,
+                                         User user) throws ServiceException {
+    if(user == null) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+    
+    try {
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
+    }
+    
+    try {
+      PagedResult<FileTagEntry> pagedResult = new FileTagEntryAccessor().list(companyId, search, limit, sort, cursor);
+      
+      return new ListResponse<FileTagEntry>(user.getEmail(), pagedResult.getList(), pagedResult.getCursor());
+    } catch (ValidationException e) {
+      return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
+    } catch (Exception e) {
+      log.log(Level.SEVERE, "Failed deleteTagDefinition", e);
+      return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
+    }
   }
 }

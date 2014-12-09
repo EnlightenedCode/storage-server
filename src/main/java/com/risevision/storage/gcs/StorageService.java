@@ -417,8 +417,10 @@ public final class StorageService {
                              .queue(batch, new DeleteBatchCallback(deleteItem));
           }
         }
-
-        batch.execute();
+        
+        if(batch.size() > 0) {
+          batch.execute();
+        }
       } catch (IOException e) {
         log.warning(e.getMessage());
         throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);

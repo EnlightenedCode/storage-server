@@ -3,26 +3,20 @@ package com.risevision.storage;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.MessageDigest;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.search.GeoPoint;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -434,4 +428,32 @@ public class Utils {
 		return result;
 		
 	}
+
+	public static String generateUUID(){
+    long ts = System.currentTimeMillis();
+
+    return ts + "-" + UUID.randomUUID().toString();
+  }
+
+  public static void changeValuesToLowerCase(List<String> values){
+    if (values == null) {return;}
+    for (int i = 0; i < values.size(); i++) {
+      String lowerCased = values.get(i).toLowerCase();
+      values.set(i,lowerCased);
+    }
+  }
+  
+  public static boolean isEmpty(String value) {
+    return value == null || value.trim().equals("");
+  }
+  
+  public static <T> boolean allItemsExist(List<T> items, List<T> master) {
+    for(T item : items) {
+      if(!master.contains(item)) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
 }

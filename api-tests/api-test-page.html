@@ -31,6 +31,19 @@
 <button id="refreshGoogleAPIRootFolder" type="button">refreshGoogleAPIRootFolder</button>
 <button id="refreshSubFolder" type="button">refreshSubFolder</button>
 <button id="refreshGoogleAPISubFolder" type="button">refreshGoogleAPIRootFolder</button>
+<button id="createTagDefinition" type="button">createTagDefinition</button>
+<button id="getTagDefinition" type="button">getTagDefinition</button>
+<button id="notExistingGetTagDefinition" type="button">notExistingGetTagDefinition</button>
+<button id="deleteTagDefinition" type="button">deleteTagDefinition</button>
+<button id="notExistingDeleteTagDefinition" type="button">notExistingDeleteTagDefinition</button>
+<button id="listTagDefinition" type="button">listTagDefinition</button>
+<button id="createFileTagEntry" type="button">createFileTagEntry</button>
+<button id="getFileTagEntry" type="button">getFileTagEntry</button>
+<button id="notExistingGetFileTagEntry" type="button">notExistingGetFileTagEntry</button>
+<button id="notExistingDeleteFileTagEntry" type="button">notExistingDeleteFileTagEntry</button>
+<button id="deleteFileTagEntry" type="button">deleteFileTagEntry</button>
+<button id="listFileTagEntry" type="button">listFileTagEntry</button>
+
 <h3>Expect Failure</h3>
 <button id="createFolderMissingCompany" type="button" >
   createFolder - MissingCompany
@@ -94,6 +107,33 @@ document.getElementById("refreshSubFolder")
         .addEventListener("click", refreshSubFolder);
 document.getElementById("refreshGoogleAPISubFolder")
         .addEventListener("click", function(){ refreshGoogleAPIFolder("test folder");});
+document.getElementById("addPublicReadOneFile")
+        .addEventListener("click", addPublicReadOneFile);
+document.getElementById("createTagDefinition")
+        .addEventListener("click", createTagDefinition);
+document.getElementById("getTagDefinition")
+        .addEventListener("click", getTagDefinition);
+document.getElementById("notExistingGetTagDefinition")
+        .addEventListener("click", notExistingGetTagDefinition);
+document.getElementById("deleteTagDefinition")
+        .addEventListener("click", deleteTagDefinition);
+document.getElementById("notExistingDeleteTagDefinition")
+        .addEventListener("click", notExistingDeleteTagDefinition);
+document.getElementById("listTagDefinition")
+        .addEventListener("click", listTagDefinition);
+document.getElementById("createFileTagEntry")
+        .addEventListener("click", createFileTagEntry);
+document.getElementById("getFileTagEntry")
+        .addEventListener("click", getFileTagEntry);
+document.getElementById("notExistingGetFileTagEntry")
+        .addEventListener("click", notExistingGetFileTagEntry);
+document.getElementById("deleteFileTagEntry")
+        .addEventListener("click", deleteFileTagEntry);
+document.getElementById("notExistingDeleteFileTagEntry")
+        .addEventListener("click", notExistingDeleteFileTagEntry);
+document.getElementById("listFileTagEntry")
+        .addEventListener("click", listFileTagEntry);
+
 </script>
 </body>
 </html>
