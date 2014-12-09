@@ -9,8 +9,9 @@ dependencies:
     - if [[ ! -d appengine-java-sdk-1.9.15 ]]; then mkdir appengine-java-sdk-1.9.15 && curl -O https://storage.googleapis.com/appengine-sdks/featured/appengine-java-sdk-1.9.15.zip && unzip -q -d appengine-java-sdk-1.9.15 appengine-java-sdk-1.9.15.zip; fi
   post:
     - mkdir -p src/private-keys
-    - lftp 192.254.220.36 -u $RISE_FTP_USER,$RISE_FTP_PASS -e "set ssl:verify-certificate false; set xfer:clobber yes; mget -O src/private-keys /private-keys/*; quit"
-    - lftp 192.254.220.36 -u $RISE_FTP_USER,$RISE_FTP_PASS -e "set ssl:verify-certificate false; get /jenkins-companies/jenkins-company-test.js -o api-tests/jenkins-company.js; quit"
+    - git clone git@github.com:Rise-Vision/private-keys.git
+    - cp private-keys/storage-server/* src/private-keys
+    - mv src/private-keys/jenkins-company-test.js api-tests/jenkins-company.js
     - if [[ ! -e src/private-keys/rvaserver2-7ab43ba8bac3.p12 ]]; then exit 1; fi
 test:
   override:
