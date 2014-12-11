@@ -384,6 +384,39 @@ public class StorageAPI extends AbstractAPI {
   }
 
   @ApiMethod(
+  name = "getSignedDownloadURI",
+  path = "getDownloadURI",
+  httpMethod = HttpMethod.POST)
+  public SimpleResponse getSignedDownloadURI(@Named("companyId") String companyId,
+                                             @Named("fileName") String fileName,
+                                             @Nullable @Named("fileType") String fileType,
+                                             User user) {
+    SimpleResponse result;
+    try {
+      result = new SimpleResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+
+    try {
+      StorageService gcsService = StorageService.getInstance();
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
+      verifySubscription(companyId);
+      log.info("Requesting resumable upload for " + result.userEmail);
+      result.message = gcsService.getSignedDownloadURI(Globals.COMPANY_BUCKET_PREFIX +
+                                                       companyId,
+                                                       fileName,
+                                                       fileType);
+      result.result = true;
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.message = "signed-download-uri-request-failed";
+      log.warning("Upload URI request failed - Status: " + e.getReason());
+    }
+    return result;
+  }
+
+  @ApiMethod(
   name = "trash.move",
   path = "trash",
   httpMethod = HttpMethod.POST)

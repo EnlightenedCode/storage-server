@@ -338,6 +338,21 @@ public final class StorageService {
     return response.getHeaders().getLocation();
   }
 
+  public String getSignedDownloadURI(String bucketId, String fileName, String fileType) throws ServiceFailedException {
+    String signedURI;
+    
+    try {
+      signedURI = SignedURIGenerator.getSigningURI("get", bucketId, fileName);
+    } catch (Exception e) {
+      log.warning(e.getMessage());
+      throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+    }
+    
+    log.info("Signed URL for " + fileName + ": " + signedURI);
+    
+    return signedURI;
+  }
+  
   class BatchDelete {
     List<String> errorList;
 
