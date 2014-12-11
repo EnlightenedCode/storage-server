@@ -400,13 +400,6 @@ public class StorageAPI extends AbstractAPI {
     }
 
     try {
-      verifyActiveSubscription(companyId);
-    }
-    catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "signed-url-inactive-subscription", user.getEmail());
-    }
-
-    try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
     }
     catch (ServiceFailedException e) {
