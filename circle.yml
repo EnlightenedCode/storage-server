@@ -8,6 +8,7 @@ dependencies:
   post:
     - if [[ ! -e src/private-keys/rvaserver2-7ab43ba8bac3.p12 ]]; then exit 1; fi
     - mvn install
+    - mvn appengine:devserver_stop #to make sure appengine plugin is downloaded and cached
 test:
   override:
     - cd api-tests && ./run-tests.sh --password=$JENKINS_PASS
@@ -22,4 +23,3 @@ deployment:
     commands:
       - mvn clean install -Pprod
       - mvn appengine:update -Dappengine.version=master-latest -Dappengine.appId=rvaserver2 <<< $JENKINS_PASS
-      - tar czvf target.tar.gz target
