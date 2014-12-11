@@ -38,6 +38,8 @@ class UserCompanyVerifier {
 
     log.info("Verifying company access for user " + email);
 
+    if (Globals.devserver) {return;}
+
     try {
       GenericUrl url = new GenericUrl
       (Globals.USER_VERIFICATION_URL
