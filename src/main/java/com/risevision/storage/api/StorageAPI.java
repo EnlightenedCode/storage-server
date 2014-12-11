@@ -383,7 +383,17 @@ public class StorageAPI extends AbstractAPI {
     }
     return result;
   }
-
+  
+  /**
+   * Generates a Signed URL for the given object
+   * 
+   * @param companyId The company id
+   * @param fileName The object to download
+   * @param fileType The file type
+   * @param user The currently logged in user
+   * 
+   * @return The signed url
+   */
   @ApiMethod(
   name = "getSignedDownloadURI",
   path = "getDownloadURI",
