@@ -24,20 +24,13 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.users.User;
 import com.google.common.base.Strings;
 import com.risevision.storage.Globals;
-import com.risevision.storage.MediaLibraryService;
-import com.risevision.storage.Utils;
+import com.risevision.storage.api.impl.SubscriptionStatusFetcherImpl;
 import com.risevision.storage.api.responses.GCSFilesResponse;
 import com.risevision.storage.api.responses.SimpleResponse;
-import com.risevision.storage.api.responses.StringResponse;
+import com.risevision.storage.entities.SubscriptionStatus;
 import com.risevision.storage.gcs.StorageService;
 import com.risevision.storage.info.ServiceFailedException;
 import com.risevision.storage.queue.tasks.BQUtils;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
 
 
 @Api(
@@ -51,6 +44,8 @@ public class StorageAPI extends AbstractAPI {
           "select bytes_this_month from " + Globals.DATASET_ID +
           ".BucketBandwidthMonthly where bucket = '";
 
+  private SubscriptionStatusFetcher subscriptionStatusFetcher;
+
   private static final MemcacheService syncCache = 
        MemcacheServiceFactory.getMemcacheService("month-bucket-bandwidth");
 
@@ -58,7 +53,10 @@ public class StorageAPI extends AbstractAPI {
     syncCache.setErrorHandler(ErrorHandlers
                              .getConsistentLogAndContinue(WARNING));
   }
-
+  
+  public StorageAPI() {
+    this.subscriptionStatusFetcher = new SubscriptionStatusFetcherImpl();
+  }
 
   private boolean hasNull(List<?> parameters) {
     for (Object param : parameters) {
@@ -68,36 +66,17 @@ public class StorageAPI extends AbstractAPI {
     }
     return false;
   }
-
-  private void verifySubscription(String companyId)
-  throws ServiceFailedException {
+  
+  protected void verifyActiveSubscription(String companyId) throws ServiceFailedException {
     if (Globals.devserver) {return;}
     if (Strings.isNullOrEmpty(companyId)) {
       throw new ServiceFailedException(ServiceFailedException.BAD_REQUEST);
     }
-
-    try {
-      URL url = new URL(Globals.SUBSCRIPTION_STATUS_URL
-                       .replace("companyId", companyId));
-      java.net.HttpURLConnection httpConn = 
-        (java.net.HttpURLConnection)url.openConnection();
-      httpConn.setInstanceFollowRedirects(false);
-
-      BufferedReader reader = new BufferedReader(
-                              new InputStreamReader(httpConn.getInputStream()));
-
-      String result = reader.readLine();
-      log.info("Store product status result: " + result);
-      reader.close();
-
-      if (!result.contains("\"status\":\"Subscribed\"") &&
-          !result.contains("\"status\":\"On Trial\"")) {
-        throw new ServiceFailedException(ServiceFailedException.FORBIDDEN);
-      }
-    } catch (MalformedURLException e) {
-      throw new ServiceFailedException(ServiceFailedException.BAD_REQUEST);
-    } catch (IOException e) {
-      throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+    
+    SubscriptionStatus status = subscriptionStatusFetcher.getSubscriptionStatus(companyId);
+    
+    if(!status.isActive()) {
+      throw new ServiceFailedException(ServiceFailedException.FORBIDDEN);
     }
   }
 
@@ -367,9 +346,22 @@ public class StorageAPI extends AbstractAPI {
     }
 
     try {
-      StorageService gcsService = StorageService.getInstance();
+      verifyActiveSubscription(companyId);
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "upload-inactive-subscription", user.getEmail());
+    }
+
+    try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
-      verifySubscription(companyId);
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "upload-verify-company", user.getEmail());
+    }
+
+    try {
+      StorageService gcsService = StorageService.getInstance();
+      
       log.info("Requesting resumable upload for " + result.userEmail);
       result.message = gcsService.getResumableUploadURI(Globals.COMPANY_BUCKET_PREFIX +
                                                         companyId,
