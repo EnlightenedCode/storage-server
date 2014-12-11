@@ -113,11 +113,16 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    checkPublicReadPermission("test1", "denied");
+    checkPublicReadPermission("test1");
   });
 
   casper.then(function() {
     casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    casper.test.assert
+    (jsonResponse.error && jsonResponse.error.code === 401 , "Public read denied.");
   });
 
   casper.then(function() {
@@ -130,11 +135,15 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    checkPublicReadPermission("test1", "granted")
+    checkPublicReadPermission("test1")
   });
 
   casper.then(function() {
     casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    casper.test.assert(jsonResponse.kind === "storage#object", "Public read granted.");
   });
 
   casper.then(function() {
@@ -241,11 +250,16 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    checkPublicReadPermission("test2", "denied");
+    checkPublicReadPermission("test2");
   });
 
   casper.then(function() {
     casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    casper.test.assert
+    (jsonResponse.error && jsonResponse.error.code === 401 , "Public read denied.");
   });
 
   casper.then(function() {
@@ -258,12 +272,17 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    checkPublicReadPermission("test2", "granted");
+    checkPublicReadPermission("test2");
   });
 
   casper.then(function() {
     casper.waitUntilVisible("#response");
   });
+
+  casper.then(function() {
+    casper.test.assert(jsonResponse.kind === "storage#object", "Public read granted.");
+  });
+
   casper.then(function() {
     casper.echo("Deleting folder.");
     casper.click("#deleteFolder");
@@ -394,7 +413,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
     test.done();
   });
 
-  function checkPublicReadPermission(filename, expectation) {
+  function checkPublicReadPermission(filename) {
     var uri = casper.getHTML("#bucketPath") + "/o/" + filename;
     var curl = require("child_process").spawn("curl", uri);
 
@@ -405,17 +424,9 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
     console.log("uri:" + uri);
     curl.stdout.on("data", function(data) {
       var jsonResponse = JSON.parse(data);
-
-      console.log("curl stdout: " + data);
-      if (expectation === "granted") {
-        casper.test.assert
-        (jsonResponse.kind === "storage#object", "Public read granted.");
-      } else {
-        casper.test.assert
-        (jsonResponse.error.code === 401, "Public read denied.");
-      }
-
+      console.log("public read result: " + data);
       casper.evaluate(function() {
+        document.getElementById("response").innerHTML = data;
         document.getElementById("response").style.display = "inline";
       });
     });
