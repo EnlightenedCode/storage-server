@@ -121,19 +121,23 @@ function storageApiCall(commandString, paramObj, callback, doNotUpdateResponse) 
   });
  
   commandObject(paramObj).execute(function(resp) {
-        responseId.innerHTML=JSON.stringify(resp);
-        var lengthOfFiles = 0;
-        var lengthOfFolders = 0;
-        if(resp.files){
-          for(var i=0; i < resp.files.length; i++){
-            (resp.files[i].kind === "folder") ? lengthOfFolders++ : lengthOfFiles++;
-          }
-        }
-        storageAPIFilesCountId.innerHTML= lengthOfFiles;
-        storageAPIFoldersCountId.innerHTML= lengthOfFolders;
-        if (!doNotUpdateResponse) {responseId.style.display="inline"; storageAPIFilesCountId.style.display="inline"; storageAPIFoldersCountId.style.display="inline";}
-        if (callback) {callback(resp);}
-      });
+    responseId.innerHTML=JSON.stringify(resp);
+    var lengthOfFiles = 0;
+    var lengthOfFolders = 0;
+    if(resp.files){
+      for(var i=0; i < resp.files.length; i++){
+        (resp.files[i].kind === "folder") ? lengthOfFolders++ : lengthOfFiles++;
+      }
+    }
+    storageAPIFilesCountId.innerHTML= lengthOfFiles;
+    storageAPIFoldersCountId.innerHTML= lengthOfFolders;
+    if (!doNotUpdateResponse) {
+      responseId.style.display="inline";
+      storageAPIFilesCountId.style.display="inline";
+      storageAPIFoldersCountId.style.display="inline";
+    }
+    if (callback) {callback(resp);}
+  });
 }
 
 function createFiles(fileNames) {
