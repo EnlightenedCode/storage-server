@@ -24,8 +24,14 @@ casper.on("remote.message", function(msg) {
 
 casper.test.begin('Connecting to ' + url, function suite(test) {
   casper.start(url);
+  casper.echo("Waiting for connection");
 
-  casper.waitForSelector("#btn-login");
+  casper.waitForSelector("#btn-login",null,function() {
+    casper.echo("Retrying connection");
+    casper.open(url).then(function() {
+      casper.waitForSelector("#btn-login", null, null, 8000);
+    });
+  }, 8000);
 
   casper.then(function() {
     casper.evaluate(function() {
