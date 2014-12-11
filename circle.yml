@@ -1,22 +1,20 @@
-general:
-  artifacts:
-    - target.tar.gz
 dependencies:
   cache_directories:
-    - appengine-java-sdk-1.9.15
+    - /home/ubuntu/nvm
   pre:
     - npm install -g casperjs
-    - if [[ ! -d appengine-java-sdk-1.9.15 ]]; then mkdir appengine-java-sdk-1.9.15 && curl -O https://storage.googleapis.com/appengine-sdks/featured/appengine-java-sdk-1.9.15.zip && unzip -q -d appengine-java-sdk-1.9.15 appengine-java-sdk-1.9.15.zip; fi
-  post:
     - mkdir -p src/private-keys
     - git clone git@github.com:Rise-Vision/private-keys.git
     - cp private-keys/storage-server/* src/private-keys
     - mv src/private-keys/jenkins-company-test.js api-tests/jenkins-company.js
+  post:
     - if [[ ! -e src/private-keys/rvaserver2-7ab43ba8bac3.p12 ]]; then exit 1; fi
+    - mvn install
+    - pwd && mvn appengine:devserver_start:
+        background: true 
 test:
   override:
-    - mvn install
-    - cd api-tests && ./run-tests.sh --password=$JENKINS_PASS
+    - cd api-tests && ./run-tests-ci.sh --password=$JENKINS_PASS
 deployment:
   staging:
     branch: /(feature|fix|chore).*/
@@ -28,4 +26,3 @@ deployment:
     commands:
       - mvn clean install -Pprod
       - mvn appengine:update -Dappengine.version=master-latest -Dappengine.appId=rvaserver2 <<< $JENKINS_PASS
-      - tar czvf target.tar.gz target
