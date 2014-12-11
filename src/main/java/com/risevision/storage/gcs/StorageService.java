@@ -381,11 +381,13 @@ public final class StorageService {
                                            .setDelimiter(null);
             do {
                 listResult = listRequest.execute();
-                for (StorageObject bucketItem : listResult.getItems()) {
-                  if (bucketItem.getName().startsWith(deleteItem)) {
-                    storage.objects().delete(bucketName,
-                                           bucketItem.getName())
-                       .queue(batch, new DeleteBatchCallback(bucketItem.getName()));
+                if (listResult.getItems() != null) {
+                  for (StorageObject bucketItem : listResult.getItems()) {
+                    if (bucketItem.getName().startsWith(deleteItem)) {
+                      storage.objects().delete(bucketName,
+                                             bucketItem.getName())
+                         .queue(batch, new DeleteBatchCallback(bucketItem.getName()));
+                    }
                   }
                 }
                 listRequest.setPageToken(listResult.getNextPageToken());

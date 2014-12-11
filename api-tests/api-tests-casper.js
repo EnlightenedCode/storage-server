@@ -389,7 +389,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   casper.then(function() {
     this.test.assertSelectorHasText("#response", '"result":true');
   });
-
+/*
   casper.then(function() {
     casper.echo("Attempting to create bucket with incorrect company");
     casper.click("#createBucketWrongCompany");
@@ -402,7 +402,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   casper.then(function() {
     this.test.assertSelectorHasText("#response", '"result":false');
   });
-
+*/
   casper.then(function() {
     casper.echo("Attempting to create folder with missing company.");
     casper.click("#createFolderMissingCompany");
