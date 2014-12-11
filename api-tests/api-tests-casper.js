@@ -23,10 +23,9 @@ casper.on("remote.message", function(msg) {
 });
 
 casper.test.begin('Connecting to ' + url, function suite(test) {
-  casper.start(url, function(resp) {
-    casper.echo('Response ' + resp.status + " " + resp.statusText +
-              ' from ' + resp.url);
-  });
+  casper.start(url);
+
+  casper.waitForSelector("#btn-login");
 
   casper.then(function() {
     casper.evaluate(function() {

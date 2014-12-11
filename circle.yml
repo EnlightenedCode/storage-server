@@ -1,4 +1,6 @@
 dependencies:
+  cache_directories:
+    - /home/ubuntu/nvm
   pre:
     - npm install -g casperjs
     - mkdir -p src/private-keys
@@ -8,7 +10,8 @@ dependencies:
   post:
     - if [[ ! -e src/private-keys/rvaserver2-7ab43ba8bac3.p12 ]]; then exit 1; fi
     - mvn install
-    - mvn appengine:devserver_start #running before test phase for default caching
+    - pwd && mvn appengine:devserver_start:
+        background: true 
 test:
   override:
     - cd api-tests && ./run-tests-ci.sh --password=$JENKINS_PASS
