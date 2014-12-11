@@ -342,7 +342,7 @@ public final class StorageService {
     String signedURI;
     
     try {
-      signedURI = SignedURIGenerator.getSigningURI("get", bucketId, fileName);
+      signedURI = SignedURIGenerator.getSigningURI("GET", bucketId, fileName);
     } catch (Exception e) {
       log.warning(e.getMessage());
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);

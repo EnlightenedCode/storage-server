@@ -378,6 +378,7 @@ public class StorageAPI extends AbstractAPI {
     } catch (ServiceFailedException e) {
       result.result = false;
       result.message = "upload-uri-request-failed";
+      result.userEmail = user.getEmail();
       log.warning("Upload URI request failed - Status: " + e.getReason());
     }
     return result;
@@ -399,10 +400,23 @@ public class StorageAPI extends AbstractAPI {
     }
 
     try {
-      StorageService gcsService = StorageService.getInstance();
+      verifyActiveSubscription(companyId);
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "signed-url-inactive-subscription", user.getEmail());
+    }
+
+    try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
-      verifySubscription(companyId);
-      log.info("Requesting resumable upload for " + result.userEmail);
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "signed-url-verify-company", user.getEmail());
+    }
+    
+    try {
+      StorageService gcsService = StorageService.getInstance();
+      
+      log.info("Requesting signed download uri for " + result.userEmail);
       result.message = gcsService.getSignedDownloadURI(Globals.COMPANY_BUCKET_PREFIX +
                                                        companyId,
                                                        fileName,
@@ -411,6 +425,7 @@ public class StorageAPI extends AbstractAPI {
     } catch (ServiceFailedException e) {
       result.result = false;
       result.message = "signed-download-uri-request-failed";
+      result.userEmail = user.getEmail();
       log.warning("Upload URI request failed - Status: " + e.getReason());
     }
     return result;
