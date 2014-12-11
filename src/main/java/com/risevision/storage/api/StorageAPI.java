@@ -337,6 +337,7 @@ public class StorageAPI extends AbstractAPI {
   public SimpleResponse getResumableUploadURI(@Named("companyId") String companyId,
                                               @Named("fileName") String fileName,
                                               @Nullable @Named("fileType") String fileType,
+                                              @Nullable @Named("origin") String origin,
                                               User user) {
     SimpleResponse result;
     try {
@@ -366,7 +367,8 @@ public class StorageAPI extends AbstractAPI {
       result.message = gcsService.getResumableUploadURI(Globals.COMPANY_BUCKET_PREFIX +
                                                         companyId,
                                                         fileName,
-                                                        fileType);
+                                                        fileType,
+                                                        origin);
       result.result = true;
     } catch (ServiceFailedException e) {
       result.result = false;

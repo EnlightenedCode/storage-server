@@ -71,7 +71,7 @@ function createFolderMissingFolder() {
 }
 
 function getUploadToken(fileName, cb) {
-  storageApiCall("getResumableUploadURI", {"companyId": jenkinsCompany, "fileName": fileName}, cb, true);
+  storageApiCall("getResumableUploadURI", {"companyId": jenkinsCompany, "fileName": fileName, "fileType": "", "origin": window.location.origin}, cb, true);
 }
 
 function deleteFiles(fileNames) {
