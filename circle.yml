@@ -20,9 +20,9 @@ deployment:
     branch: /(feature|fix|chore).*/
     commands:
       - mvn appengine:update -Dappengine.version=$(echo -n $CIRCLE_BRANCH |awk 'BEGIN{FS="/"}{print tolower($NF)}') -Dappengine.appId=rvacore-test <<< $JENKINS_PASS
-      - tar czvf target.tar.gz target
   production:
     branch: master
     commands:
       - mvn clean install -Pprod
-      - mvn appengine:update -Dappengine.version=master-latest -Dappengine.appId=rvaserver2 <<< $JENKINS_PASS
+      - mvn appengine:update -Dappengine.version=r$(echo -n $((CIRCLE_BUILD_NUM%15))) -Dappengine.appId=rvaserver2 <<< $JENKINS_PASS
+      - mvn appengine:set_default_version -Dappengine.version=r$(echo -n $((CIRCLE_BUILD_NUM%15))) -Dappengine.appId=rvaserver2 <<< $JENKINS_PASS
