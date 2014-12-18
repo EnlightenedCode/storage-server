@@ -43,7 +43,7 @@ public class LockDownUnpaidBucketsServerTask extends ServerTask {
       for(String company : companies) {
         SubscriptionStatus status = getStatusFetcher().getSubscriptionStatus(company);
         
-        if(status.isSuspended()) {
+        if(!status.isActive()) {
           Map<String, String[]> params = new HashMap<String, String[]>();
           
           params.put("bucket", new String[] { Globals.COMPANY_BUCKET_PREFIX + company });
