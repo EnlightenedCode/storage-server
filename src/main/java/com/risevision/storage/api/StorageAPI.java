@@ -46,8 +46,6 @@ public class StorageAPI extends AbstractAPI {
   
   private SubscriptionStatusFetcher subscriptionStatusFetcher;
 
-  private SubscriptionStatusFetcher subscriptionStatusFetcher;
-
   private static final MemcacheService syncCache = 
        MemcacheServiceFactory.getMemcacheService("month-bucket-bandwidth");
 
