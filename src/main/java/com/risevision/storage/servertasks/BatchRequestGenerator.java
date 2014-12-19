@@ -42,16 +42,18 @@ class BatchRequestGenerator {
         failures.add(e);
       }
     };
-
-    for (GenericData item : items) {
-      StorageRequest iterationRequest = requestUpdater
-      .provideUpdatedRequest((String) item.get(REQUEST_ITEM_NAME_KEY));
-
-      iterationRequest.queue
-      (batchRequest, GoogleJsonErrorContainer.class, batchCallback);
-
-      log.info("Added " + iterationRequest.get("bucket") + "/"
-               + item.get(REQUEST_ITEM_NAME_KEY) + " to batch");
+    
+    if(items != null) {
+      for (GenericData item : items) {
+        StorageRequest iterationRequest = requestUpdater
+        .provideUpdatedRequest((String) item.get(REQUEST_ITEM_NAME_KEY));
+  
+        iterationRequest.queue
+        (batchRequest, GoogleJsonErrorContainer.class, batchCallback);
+  
+        log.info("Added " + iterationRequest.get("bucket") + "/"
+                 + item.get(REQUEST_ITEM_NAME_KEY) + " to batch");
+      }
     }
 
     return batchRequest;

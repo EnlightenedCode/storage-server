@@ -165,6 +165,19 @@ public class BQUtils {
           if (tableRowList == null) { return null; }
           return tableRowList.get(0).getF().get(0).getV();
         }
+
+        public static List<TableRow> executeQuery(String query) throws ServiceFailedException {
+          Bigquery bigquery = getBigquery();
+          log.info(query);
+          try {
+            return bigquery.jobs().query(Globals.PROJECT_ID,
+                                  new QueryRequest().setQuery(query))
+                               .execute().getRows();
+          } catch(IOException e) {
+            log.warning(e.getMessage());
+            throw new ServiceFailedException(500);
+          }
+        }
           
           private static Bigquery getBigquery() {
                   if (bigquery == null) {

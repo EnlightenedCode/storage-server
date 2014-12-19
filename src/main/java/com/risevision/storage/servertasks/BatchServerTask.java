@@ -44,8 +44,10 @@ abstract class BatchServerTask extends ServerTask {
   }
 
   void submitBatchRequest() throws IOException {
-    batchRequest.execute();
-    log.info("Batch request complete");
+    if(batchRequest.size() > 0) {
+      batchRequest.execute();
+      log.info("Batch request complete");
+    }
   }
 
   void submitNextTask() throws IOException {
