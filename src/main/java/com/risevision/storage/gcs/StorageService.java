@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.google.api.client.googleapis.batch.BatchRequest;
@@ -27,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 import com.risevision.storage.Globals;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
 import com.risevision.storage.info.ServiceFailedException;
+import com.risevision.storage.servertasks.AddPublicReadBucketServerTask;
 
 public final class StorageService {
   public static final String TRASH = "--TRASH--/";
@@ -149,6 +152,20 @@ public final class StorageService {
     } while (null != listResult.getNextPageToken());
 
     return items;
+  }
+
+  public void enablePublicRead(String companyId)
+  throws ServiceFailedException {
+    log.info("Enabling public read for " + companyId);
+
+    try {
+      Map<String, String[]> params = new HashMap<>();
+      params.put("bucket", new String[] {Globals.COMPANY_BUCKET_PREFIX + companyId});
+      new AddPublicReadBucketServerTask(storage, params).handleRequest();
+    } catch (IOException e) {
+      log.warning(e.getMessage());
+      throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+    }
   }
 
   public void createBucket(String bucketName)

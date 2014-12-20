@@ -7,10 +7,10 @@ import com.google.api.services.storage.model.*;
 import com.google.api.services.storage.Storage;
 import com.google.api.client.util.GenericData;
 
-class AddPublicReadBucketServerTask extends BatchServerTask {
+public class AddPublicReadBucketServerTask extends BatchServerTask {
   String bucketName;
 
-  AddPublicReadBucketServerTask
+  public AddPublicReadBucketServerTask
   (Storage gcsClient, Map<String, String[]> params) throws IOException {
     super(gcsClient, params);
     confirmURLParams("bucket");

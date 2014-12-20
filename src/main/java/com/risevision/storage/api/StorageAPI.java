@@ -146,6 +146,40 @@ public class StorageAPI extends AbstractAPI {
   }
 
   @ApiMethod(
+  name = "enablePublicRead",
+  path = "enablePublicRead",
+  httpMethod = HttpMethod.POST)
+  public SimpleResponse enablePublicRead
+  (@Named("companyId") String companyId, User user) {
+    SimpleResponse result;
+    try {
+      result = new SimpleResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+
+    try {
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
+      verifyActiveSubscription(companyId);
+
+      StorageService gcsService = StorageService.getInstance();
+      gcsService.enablePublicRead(companyId);
+
+      log.info("Public read enabled");
+
+      result.result = true;
+      result.code = ServiceFailedException.OK;
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.code = e.getReason();
+      result.message = "Failed to ensure public read for company bucket";
+      log.warning("Failed to ensure public read for company bucket: " + e.getReason());
+    }
+
+    return result;
+  }
+
+  @ApiMethod(
   name = "files.delete",
   path = "files",
   httpMethod = HttpMethod.POST)
