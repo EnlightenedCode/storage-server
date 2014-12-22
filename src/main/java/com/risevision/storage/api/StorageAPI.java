@@ -43,7 +43,7 @@ public class StorageAPI extends AbstractAPI {
   private static final String bandwidthQryBegin = 
           "select bytes_this_month from " + Globals.DATASET_ID +
           ".BucketBandwidthMonthly where bucket = '";
-
+  
   private SubscriptionStatusFetcher subscriptionStatusFetcher;
 
   private static final MemcacheService syncCache = 
@@ -148,7 +148,14 @@ public class StorageAPI extends AbstractAPI {
     } catch (IllegalArgumentException e) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
-
+    
+    try {
+      verifyActiveSubscription(companyId);
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "delete-inactive-subscription", user.getEmail());
+    }
+    
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
 
@@ -161,10 +168,9 @@ public class StorageAPI extends AbstractAPI {
       result.result = true;
       result.code = ServiceFailedException.OK;
     } catch (ServiceFailedException e) {
-      result.result = false;
-      result.code = e.getReason();
-      result.message = "File Deletion Failed";
       log.warning("File Deletion Failed - Status: " + e.getReason());
+      
+      return new SimpleResponse(false, e.getReason(), "failed-delete", user.getEmail());
     }
 
     return result;
@@ -362,7 +368,6 @@ public class StorageAPI extends AbstractAPI {
 
     try {
       StorageService gcsService = StorageService.getInstance();
-      
       log.info("Requesting resumable upload for " + result.userEmail);
       result.message = gcsService.getResumableUploadURI(Globals.COMPANY_BUCKET_PREFIX +
                                                         companyId,
@@ -391,6 +396,13 @@ public class StorageAPI extends AbstractAPI {
     } catch (IllegalArgumentException e) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
+    
+    try {
+      verifyActiveSubscription(companyId);
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "trash-inactive-subscription", user.getEmail());
+    }
 
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
@@ -403,10 +415,9 @@ public class StorageAPI extends AbstractAPI {
       result.result = true;
       result.code = ServiceFailedException.OK;
     } catch (ServiceFailedException e) {
-      result.result = false;
-      result.code = e.getReason();
-      result.message = "File move to trash Failed";
       log.warning("File Move To Trash Failed - Status: " + e.getReason());
+      
+      return new SimpleResponse(false, e.getReason(), "failed-trash", user.getEmail());
     }
 
     return result;
@@ -425,10 +436,17 @@ public class StorageAPI extends AbstractAPI {
     } catch (IllegalArgumentException e) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
+    
+    try {
+      verifyActiveSubscription(companyId);
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "restore-inactive-subscription", user.getEmail());
+    }
 
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
-
+      
       StorageService gcsService = StorageService.getInstance();
       gcsService.restoreFromTrash(Globals.COMPANY_BUCKET_PREFIX + companyId, files);
 
@@ -437,10 +455,9 @@ public class StorageAPI extends AbstractAPI {
       result.result = true;
       result.code = ServiceFailedException.OK;
     } catch (ServiceFailedException e) {
-      result.result = false;
-      result.code = e.getReason();
-      result.message = "File restore from trash Failed";
       log.warning("File Restore From Trash Failed - Status: " + e.getReason());
+      
+      return new SimpleResponse(false, e.getReason(), "failed-restore", user.getEmail());
     }
 
     return result;
