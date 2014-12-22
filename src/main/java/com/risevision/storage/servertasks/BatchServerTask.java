@@ -61,6 +61,13 @@ abstract class BatchServerTask extends ServerTask {
     }
 
     options.param("pageToken", (String)listResult.get("nextPageToken"));
+
+    if (requestParams.get("task") == null) {
+      String className = this.getClass().getSimpleName();
+      String taskName = className.substring(0, className.lastIndexOf("ServerTask"));
+      options.param("task", taskName);
+    }
+
     options.method(queueMethod);
     QueueFactory.getDefaultQueue().add(options);
   }
