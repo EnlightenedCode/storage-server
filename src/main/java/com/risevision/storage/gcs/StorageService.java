@@ -1,7 +1,6 @@
 package com.risevision.storage.gcs;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -343,8 +342,13 @@ public final class StorageService {
     String signedURI;
     
     try {
-      signedURI = SignedURIGenerator.getSignedURI("GET", bucketId, fileName);
-    } catch (UnsupportedEncodingException e) {
+      if(Globals.devserver) {
+        signedURI = LocalSignedURIGenerator.getSignedURI("GET", bucketId, fileName);
+      }
+      else {
+        signedURI = SignedURIGenerator.getSignedURI("GET", bucketId, fileName);
+      }
+    } catch (Exception e) {
       log.warning(e.getMessage());
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
     }
