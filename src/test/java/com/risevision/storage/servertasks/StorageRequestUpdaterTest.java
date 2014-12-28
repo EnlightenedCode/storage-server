@@ -1,6 +1,7 @@
 package com.risevision.storage.servertasks;
 
 import org.junit.*;
+
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.io.IOException;
 
 import com.risevision.storage.gcs.GCSMockClientBuilder;
+import com.risevision.storage.servertasks.requestupdater.SimpleStorageRequestUpdater;
 import com.google.api.services.storage.*;
 import com.google.api.services.storage.model.*;
 
@@ -21,8 +23,8 @@ public class StorageRequestUpdaterTest {
     Storage.Buckets.Patch request;
     request = mockClient.buckets().patch("templateBucketName", null);
 
-    StorageRequestUpdater updater;
-    updater = new StorageRequestUpdater(request);
+    SimpleStorageRequestUpdater updater;
+    updater = new SimpleStorageRequestUpdater(request);
 
     StorageRequest newReq;
     newReq = updater.provideUpdatedRequest("updatedBucketName");
@@ -37,8 +39,8 @@ public class StorageRequestUpdaterTest {
     Storage.Objects.Patch request;
     request = mockClient.objects().patch("templateBucketName", "objName", null);
 
-    StorageRequestUpdater updater;
-    updater = new StorageRequestUpdater(request);
+    SimpleStorageRequestUpdater updater;
+    updater = new SimpleStorageRequestUpdater(request);
 
     StorageRequest newReq;
     newReq = updater.provideUpdatedRequest("updatedObjectName");

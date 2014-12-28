@@ -1,20 +1,17 @@
 package com.risevision.storage.servertasks;
 
-import java.util.Map;
-import java.util.List;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
-import java.util.logging.Logger;
-import com.google.common.base.Strings;
-
-import com.google.api.services.storage.*;
-import com.google.api.services.storage.model.*;
+import com.google.api.client.googleapis.batch.BatchRequest;
 import com.google.api.client.util.GenericData;
-import com.google.api.client.googleapis.batch.*;
-import com.google.appengine.api.taskqueue.TaskOptions;
+import com.google.api.services.storage.Storage;
+import com.google.api.services.storage.StorageRequest;
 import com.google.appengine.api.taskqueue.QueueFactory;
-
-import com.risevision.storage.Globals;
+import com.google.appengine.api.taskqueue.TaskOptions;
+import com.risevision.storage.servertasks.requestupdater.SimpleStorageRequestUpdater;
+import com.risevision.storage.servertasks.requestupdater.StorageRequestUpdater;
 
 abstract class BatchServerTask extends ServerTask {
   StorageRequest listRequest;
@@ -35,7 +32,7 @@ abstract class BatchServerTask extends ServerTask {
   void prepareBatchRequest() throws IOException {
     BatchRequestGenerator gen = new BatchRequestGenerator
     (gcsClient
-    , new StorageRequestUpdater(iteratingRequest)
+    , createStorageRequestUpdater(iteratingRequest)
     , (List<GenericData>)listResult.get("items"));
 
     batchRequest = gen.generateBatch();
@@ -68,5 +65,8 @@ abstract class BatchServerTask extends ServerTask {
     options.method(TaskOptions.Method.valueOf("GET"));
     QueueFactory.getQueue("storageBulkOperations").add(options);
   }
+  
+  protected StorageRequestUpdater createStorageRequestUpdater(StorageRequest<?> iteratingRequest) {
+    return new SimpleStorageRequestUpdater(iteratingRequest);
+  }
 }
-
