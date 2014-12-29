@@ -378,6 +378,57 @@ public class StorageAPI extends AbstractAPI {
     } catch (ServiceFailedException e) {
       result.result = false;
       result.message = "upload-uri-request-failed";
+      result.userEmail = user.getEmail();
+      log.warning("Upload URI request failed - Status: " + e.getReason());
+    }
+    return result;
+  }
+  
+  /**
+   * Generates a Signed URL for the given object
+   * 
+   * @param companyId The company id
+   * @param fileName The object to download
+   * @param fileType The file type
+   * @param user The currently logged in user
+   * 
+   * @return The signed url
+   */
+  @ApiMethod(
+  name = "getSignedDownloadURI",
+  path = "getDownloadURI",
+  httpMethod = HttpMethod.POST)
+  public SimpleResponse getSignedDownloadURI(@Named("companyId") String companyId,
+                                             @Named("fileName") String fileName,
+                                             @Nullable @Named("fileType") String fileType,
+                                             User user) {
+    SimpleResponse result;
+    try {
+      result = new SimpleResponse(user);
+    } catch (IllegalArgumentException e) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+
+    try {
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "signed-url-verify-company", user.getEmail());
+    }
+    
+    try {
+      StorageService gcsService = StorageService.getInstance();
+      
+      log.info("Requesting signed download uri for " + result.userEmail);
+      result.message = gcsService.getSignedDownloadURI(Globals.COMPANY_BUCKET_PREFIX +
+                                                       companyId,
+                                                       fileName,
+                                                       fileType);
+      result.result = true;
+    } catch (ServiceFailedException e) {
+      result.result = false;
+      result.message = "signed-download-uri-request-failed";
+      result.userEmail = user.getEmail();
       log.warning("Upload URI request failed - Status: " + e.getReason());
     }
     return result;
