@@ -1,10 +1,10 @@
 package com.risevision.storage;
 
-import com.google.appengine.api.utils.SystemProperty;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+
+import com.google.appengine.api.utils.SystemProperty;
 
 public final class Globals {
   public static final Boolean devserver = 
@@ -53,6 +53,8 @@ public final class Globals {
 
   public static final String HQ_TIMEZONE = 
     "America/Toronto";
+
+  public static final String TRASH = "--TRASH--/";
   
   public static final String LOGGING_ENABLED_XML; 
   public static final String LOGS_BUCKET_NAME;

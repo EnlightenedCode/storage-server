@@ -1,12 +1,14 @@
 package com.risevision.storage.servertasks;
 
-import java.util.Map;
-import java.lang.IllegalArgumentException;
 import java.io.IOException;
+import java.util.Map;
 
-import com.google.api.services.storage.model.ObjectAccessControl;
-import com.google.api.services.storage.Storage;
+import org.mortbay.log.Log;
+
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.storage.Storage;
+import com.google.api.services.storage.model.ObjectAccessControl;
+import com.risevision.storage.Globals;
 
 class AddPublicReadObjectServerTask extends ServerTask {
   AddPublicReadObjectServerTask
@@ -19,6 +21,11 @@ class AddPublicReadObjectServerTask extends ServerTask {
     log.info("Adding public read on: " +
     requestParams.get("bucket")[0] + "/" +
     requestParams.get("object")[0]);
+    
+    if(requestParams.get("object")[0].startsWith(Globals.TRASH)) {
+      Log.info("Item " + requestParams.get("object")[0] + " ignored. Trash items should not be public.");
+      return;
+    }
 
     ObjectAccessControl acl = new ObjectAccessControl();
     acl.setEntity("allUsers").setRole("READER");
