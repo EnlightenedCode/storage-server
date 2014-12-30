@@ -1,16 +1,18 @@
 "use strict";
-/* global gapi: true */
+/* jslint node: true */
+/* global gapi: true, jenkinsCompany, document, console, window, XMLHttpRequest */
 var responseId;
 var storageAPIFilesCountId;
 var storageAPIFoldersCountId;
 var googleAPIFilesCountId;
 var googleAPIFoldersCountId;
+var tagDefinitionId = "", fileTagEntryId = "";
 
 function init() {
-  var ROOT = "http://localhost:8888/_ah/api"
-     ,SCOPE = ["https://www.googleapis.com/auth/userinfo.email"
-              ,"https://www.googleapis.com/auth/devstorage.full_control"]
-     ,CLIENT = "614513768474.apps.googleusercontent.com";
+  var ROOT = "http://localhost:8888/_ah/api",
+      SCOPE = ["https://www.googleapis.com/auth/userinfo.email",
+               "https://www.googleapis.com/auth/devstorage.full_control"],
+      CLIENT = "614513768474.apps.googleusercontent.com";
 
   console.log("Initializing");
   gapi.client.load("storage", "v0.01", function() {
@@ -18,8 +20,7 @@ function init() {
     gapi.client.load("oauth2", "v2", function() {
       console.log("Authorizing");
       gapi.auth
-        .authorize({client_id: CLIENT, scope: SCOPE, immediate: false}
-                  ,authCallback);
+        .authorize({client_id: CLIENT, scope: SCOPE, immediate: false} ,authCallback);
     });
   }, ROOT);
 
@@ -102,9 +103,90 @@ function refreshGoogleAPIFolder(folder) {
       googleAPIFilesCountId.innerHTML= lengthOfFiles;
       googleAPIFilesCountId.style.display="inline";
       googleAPIFoldersCountId.innerHTML= lengthOfFolders;
-      googleAPIFoldersCountId.style.display="inline"
+      googleAPIFoldersCountId.style.display="inline";
     }
-  }
+  };
+}
+
+function createTagDefinition(name, type, values){
+    storageApiCall("tagdef.put", 
+      { "companyId": jenkinsCompany,
+        "name": "TagName",
+        "type": "Lookup",
+        "values": ["value1", "value2", "value3"] },
+      createTagDefinitionCallback);
+}
+
+function createTagDefinitionCallback(response){
+    var result = response.result;
+    if(result !== undefined){
+        tagDefinitionId = result.item.id;
+    }
+}
+
+//function updateTagDefinition(id, name, type, values){
+//  storageApiCall("tagdef.patch",{"id": id,"name": name, "type": type, "values": values});
+//}
+
+function deleteTagDefinition() {
+  storageApiCall("tagdef.delete", { "id": tagDefinitionId });
+}
+
+function notExistingDeleteTagDefinition() {
+  storageApiCall("tagdef.delete", { "id": "doesNotExist" });
+}
+
+function getTagDefinition() {
+  storageApiCall("tagdef.get", { "id": tagDefinitionId });
+}
+
+function notExistingGetTagDefinition() {
+  storageApiCall("tagdef.get", { "id": "doesNotExist" });
+}
+
+function listTagDefinition() {
+  storageApiCall("tagdef.list", { "companyId": jenkinsCompany });
+}
+
+function createFileTagEntry(name, type, values) {
+    storageApiCall("filetag.put", 
+      { "companyId": jenkinsCompany,
+        "name": "TagName",
+        "objectId": "filename",
+        "type": "Lookup",
+        "values": ["value1", "value2", "value3"] },
+      createFileTagEntryCallback);
+}
+
+function createFileTagEntryCallback(response) {
+    var result = response.result;
+    if(result !== undefined){
+        fileTagEntryId = result.item.id;
+    }
+}
+
+//function updateFileTagEntry(id, name, type, values){
+//  storageApiCall("filetag.patch",{"id": id,"name": name, "type": type, "values": values});
+//}
+
+function deleteFileTagEntry() {
+  storageApiCall("filetag.delete", { "id": fileTagEntryId });
+}
+
+function notExistingDeleteFileTagEntry() {
+  storageApiCall("filetag.delete", { "id": "doesNotExist" });
+}
+
+function getFileTagEntry() {
+  storageApiCall("filetag.get", { "id": fileTagEntryId });
+}
+
+function notExistingGetFileTagEntry() {
+  storageApiCall("filetag.get", { "id": "doesNotExist" });
+}
+
+function listFileTagEntry() {
+  storageApiCall("filetag.list", { "companyId": jenkinsCompany });
 }
 
 function storageApiCall(commandString, paramObj, callback, doNotUpdateResponse) {
@@ -125,7 +207,7 @@ function storageApiCall(commandString, paramObj, callback, doNotUpdateResponse) 
     var lengthOfFiles = 0;
     var lengthOfFolders = 0;
     if(resp.files){
-      for(var i=0; i < resp.files.length; i++){
+      for(var i=0; i < resp.files.length; i++) {
         (resp.files[i].kind === "folder") ? lengthOfFolders++ : lengthOfFiles++;
       }
     }
@@ -203,7 +285,7 @@ function initiateServerTask(task, params, cb) {
 
 function addPublicReadOneFile() {
   initiateServerTask("AddPublicReadObject",
-  {bucket: "risemedialibrary-" + jenkinsCompany, object: "test1"})
+  {bucket: "risemedialibrary-" + jenkinsCompany, object: "test1"});
 }
 
 function removePublicReadOneFile() {

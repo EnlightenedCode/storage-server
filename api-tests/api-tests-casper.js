@@ -1,8 +1,9 @@
 /* globals casper: false, document: false, console: false, require: false */
+/* jslint node: true */
 "use strict";
 var url = "http://localhost:8888/_ah/login?" +
-          "continue=http://localhost:8055/api-test-page.html"
-   ,noPasswordMessage="\n\nGoogle Sign-in requested.\n\n" +
+          "continue=http://localhost:8055/api-test-page.html",
+    noPasswordMessage="\n\nGoogle Sign-in requested.\n\n" +
      "For first run or expired cache use\ncasperjs " +
      "--cookies-file=$HOME/.api-test-cookies test api-tests-casper.js" +
      " --password=password\n" +
@@ -36,10 +37,10 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   casper.waitForSelector("#btn-login",null, retryConnection, 5000);
 
   casper.then(function() {
-    casper.evaluate(function() {
+    casper.evaluate(function(user) {
       document.getElementById("isAdmin").checked = true;
-      document.getElementById("email").value = "jenkins@risevision.com";
-    });
+      document.getElementById("email").value = user || "jenkins@risevision.com";
+    }, casper.cli.options.username);
     casper.click("#btn-login");
   });
 
@@ -70,7 +71,14 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   casper.on("popup.loaded", 
     function(page) {
       casper.echo("Pop up detected: " + page.title);
+      if (page.title === "Request for Permission") {
+        page.evaluate(function() {
+          document.querySelector("#submit approve access").click();
+        });
+      }
+
       if (page.title !== "Sign in - Google Accounts") {
+        casper.capture("unidentified-popup.png");
         return;
       }
 
@@ -78,11 +86,11 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
         casper.echo(noPasswordMessage, "ERROR");
       } else {
         casper.echo("Signing in");
-        page.evaluate(function(pass) {
-          document.querySelector('#Email').value = "jenkins@risevision.com";
+        page.evaluate(function(user, pass) {
+          document.querySelector('#Email').value = user || "jenkins@risevision.com";
           document.querySelector("#Passwd").value = pass;
           document.querySelector("#signIn").click();
-        }, casper.cli.options.password);
+        }, casper.cli.options.username, casper.cli.options.password);
       }
     }
   );
@@ -163,7 +171,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    checkPublicReadPermission("test1", true)
+    checkPublicReadPermission("test1", true);
   });
 
   casper.then(function() {
@@ -391,7 +399,167 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   casper.then(function() {
     this.test.assertSelectorHasText("#response", '"result":true');
   });
-/*
+
+  casper.then(function() {
+    casper.echo("Create Tag Definition.");
+    casper.click("#createTagDefinition");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":true');
+  });
+
+  casper.then(function() {
+    casper.echo("Get Tag Definition.");
+    casper.click("#getTagDefinition");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":true');
+  });
+
+  casper.then(function() {
+    casper.echo("Not Existing Get Tag Definition.");
+    casper.click("#notExistingGetTagDefinition");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":false');
+  });
+
+  casper.then(function() {
+    casper.echo("List Tag Definition.");
+    casper.click("#listTagDefinition");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":true');
+  });
+
+  casper.then(function() {
+    casper.echo("Create File Tag Entry.");
+    casper.click("#createFileTagEntry");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":true');
+  });
+
+  casper.then(function() {
+    casper.echo("Get File Tag Entry.");
+    casper.click("#getFileTagEntry");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":true');
+  });
+
+  casper.then(function() {
+    casper.echo("Not Existing Get File Tag Entry.");
+    casper.click("#notExistingGetFileTagEntry");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":false');
+  });
+
+  casper.then(function() {
+    casper.echo("List File Tag Entry.");
+    casper.click("#listFileTagEntry");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    this.test.assertSelectorHasText("#response", '"result":true');
+  });
+
+  casper.then(function() {
+    casper.echo("Delete File Tag Entry.");
+    casper.click("#deleteFileTagEntry");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    // Checks if delete returns the deleted object
+    this.test.assertSelectorHasText("#response", '"result":true');
+  });
+
+  casper.then(function() {
+    casper.echo("Not Existing Delete File Tag Entry.");
+    casper.click("#notExistingDeleteFileTagEntry");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    // Checks if delete returns the deleted object
+    this.test.assertSelectorHasText("#response", '"result":false');
+  });
+
+  casper.then(function() {
+    casper.echo("Delete Tag Definition.");
+    casper.click("#deleteTagDefinition");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    // Checks if delete returns the deleted object
+    this.test.assertSelectorHasText("#response", '"result":true');
+  });
+
+  casper.then(function() {
+    casper.echo("Not Existing Delete Tag Definition.");
+    casper.click("#notExistingDeleteTagDefinition");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    // Checks if delete returns the deleted object
+    this.test.assertSelectorHasText("#response", '"result":false');
+  });
+
   casper.then(function() {
     casper.echo("Attempting to create bucket with incorrect company");
     casper.click("#createBucketWrongCompany");
@@ -404,7 +572,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   casper.then(function() {
     this.test.assertSelectorHasText("#response", '"result":false');
   });
-*/
+
   casper.then(function() {
     casper.echo("Attempting to create folder with missing company.");
     casper.click("#createFolderMissingCompany");
@@ -494,5 +662,3 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
     });
   }
 });
-
-
