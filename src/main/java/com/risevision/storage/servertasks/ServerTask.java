@@ -28,6 +28,9 @@ abstract class ServerTask {
         log.severe("Missing parameter " + expectedParam);
         throw new IllegalArgumentException("Missing parameter " + expectedParam);
       }
+
+      log.info("Server task called with parameter " +
+      expectedParam + ": " + requestParams.get(expectedParam)[0]);
     }
   }
 
