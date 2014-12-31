@@ -16,7 +16,7 @@ public class SimpleResponse {
 		this.result = false;
 		this.code = -1;
 		this.message = "";
-    this.userEmail = null;
+                this.userEmail = null;
 	}
 	
 	public SimpleResponse(Boolean result, Integer code, String message) {
