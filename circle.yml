@@ -1,6 +1,4 @@
 dependencies:
-  cache_directories:
-    - /home/ubuntu/nvm
   pre:
     - npm install -g casperjs
     - mkdir -p src/private-keys
