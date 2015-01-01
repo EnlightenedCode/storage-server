@@ -15,9 +15,7 @@ public class ServletContextListener implements javax.servlet.ServletContextListe
     } else {
       log.info("Running on hosted GAE");
     }
-    log.info("Using the following logging globals:");
-    log.info(Globals.LOGGING_ENABLED_XML);
-    log.info(Globals.LOGS_BUCKET_NAME);
+    log.info("Using storage project id " + Globals.PROJECT_ID);
   }
 
   @Override

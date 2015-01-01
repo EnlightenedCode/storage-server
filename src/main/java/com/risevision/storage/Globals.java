@@ -36,6 +36,11 @@ public final class Globals {
   public static final String STORE_CLIENT_ID = 
     "614513768474.apps.googleusercontent.com";
 
+  public static final String LOGGING_ENABLED_XML = "<Logging>"
+                      + "<LogBucket>%logBucket%</LogBucket>"
+                      + "<LogObjectPrefix>%bucketName%</LogObjectPrefix>"
+                      + "</Logging>";
+
   public static final String RESUMABLE_UPLOAD_REQUEST_URI =
     "https://www.googleapis.com/upload/storage/v1/b/myBucket/o?uploadType=resumable&predefinedAcl=publicRead&name=";
 
@@ -50,7 +55,6 @@ public final class Globals {
 
   public static final String TRASH = "--TRASH--/";
   
-  public static final String LOGGING_ENABLED_XML; 
   public static final String LOGS_BUCKET_NAME;
   public static final String DATASET_ID;
   public static final String STORE_BASE_URL;
@@ -59,7 +63,6 @@ public final class Globals {
   public static final String RVCORE_ID;
   public static final String PROJECT_ID;
 
-  private static String loggingParameter;
   private static String bucketParameter;
   private static String datasetParameter;
   private static String storeBaseURL;
@@ -76,7 +79,6 @@ public final class Globals {
       fileData = Globals.class.getResourceAsStream("/build.properties");
       buildProperties.load(fileData);
 
-      loggingParameter = buildProperties.getProperty("LOGGING_ENABLED_XML");
       bucketParameter = buildProperties.getProperty("LOGS_BUCKET_NAME");
       datasetParameter = buildProperties.getProperty("DATASET_ID");
       storeBaseURL = buildProperties.getProperty("STORE_BASE_URL");
@@ -88,7 +90,6 @@ public final class Globals {
       e.printStackTrace();
       System.exit(1);
     } finally {
-      LOGGING_ENABLED_XML = loggingParameter;
       LOGS_BUCKET_NAME = bucketParameter;
       DATASET_ID = datasetParameter;
       STORE_BASE_URL = storeBaseURL;
