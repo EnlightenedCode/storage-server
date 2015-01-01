@@ -23,8 +23,6 @@ abstract class BatchServerTask extends ServerTask {
   BatchRequest batchRequest;
   String pageToken;
   Long maxResults;
-  private final com.google.appengine.api.taskqueue.TaskOptions.Method queueMethod = 
-  com.google.appengine.api.taskqueue.TaskOptions.Method.GET;
 
   BatchServerTask(Storage client, Map<String, String[]> params) throws IOException {
     super(client, params);
@@ -67,7 +65,7 @@ abstract class BatchServerTask extends ServerTask {
       options.param("task", taskName);
     }
 
-    options.method(queueMethod);
+    options.method(TaskOptions.Method.valueOf("GET"));
     QueueFactory.getDefaultQueue().add(options);
   }
 }
