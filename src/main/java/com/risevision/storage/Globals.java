@@ -21,18 +21,12 @@ public final class Globals {
   public static final String BQ_SCOPE =
     "https://www.googleapis.com/auth/bigquery";
 
-  public static final String EDITOR_GROUP =
-    "group-00b4903a979339148b85b8e79b1639b92ab14bf82fe03b33c5aa2aedd0ac5172";
-
   public static final String RVMEDIA_P12_PATH =
     "./WEB-INF/classes/65bd1c5e62dadd4852c8b04bf5124749985e8ff8-privatekey.p12";
 
   public static final String COMPANY_BUCKET_PREFIX =
     "risemedialibrary-";
           
-  public static final String PROJECT_ID =
-    "452091732215";
-
   public static final String STORE_PRODUCT_CODE =
     "b0cba08a4baa0c62b8cdc621b6f6a124f89a03db";
 
@@ -63,6 +57,7 @@ public final class Globals {
   public static final String USER_VERIFICATION_URL;
   public static final String RVCORE_P12_PATH;
   public static final String RVCORE_ID;
+  public static final String PROJECT_ID;
 
   private static String loggingParameter;
   private static String bucketParameter;
@@ -71,6 +66,7 @@ public final class Globals {
   private static String userVerificationURL;
   private static String rvcore_p12_path;
   private static String rvcore_id;
+  private static String project_id;
 
   static {
     Properties buildProperties = new Properties();
@@ -87,6 +83,7 @@ public final class Globals {
       userVerificationURL = buildProperties.getProperty("USER_VERIFICATION_URL");
       rvcore_p12_path = buildProperties.getProperty("RVCORE_P12_PATH");
       rvcore_id = buildProperties.getProperty("RVCORE_ID");
+      project_id = buildProperties.getProperty("PROJECT_ID");
     } catch (IOException e) {
       e.printStackTrace();
       System.exit(1);
@@ -98,6 +95,7 @@ public final class Globals {
       USER_VERIFICATION_URL = userVerificationURL;
       RVCORE_P12_PATH = rvcore_p12_path;
       RVCORE_ID= rvcore_id;
+      PROJECT_ID = project_id;
 
       if (fileData != null) {
         try {
