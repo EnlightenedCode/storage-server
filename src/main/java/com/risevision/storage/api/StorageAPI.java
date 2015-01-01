@@ -167,8 +167,6 @@ public class StorageAPI extends AbstractAPI {
 
       gcsService.enablePublicRead(companyId);
 
-      log.info("Public read enabled");
-
       result.result = true;
       result.code = ServiceFailedException.OK;
     } catch (ServiceFailedException e) {
