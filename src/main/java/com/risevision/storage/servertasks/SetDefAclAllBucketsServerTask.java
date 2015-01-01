@@ -32,10 +32,6 @@ class SetDefAclAllBucketsServerTask extends BatchServerTask {
     listRequest.set("pageToken", pageToken);
     listRequest.set("maxResults", maxResults);
     listResult = (GenericData) listRequest.execute();
-    listResult = new GenericData()
-                .set("kind", "storage#buckets")
-                .set("items", ImmutableList.of(new GenericData().set("kind", "storage#bucket")
-                                                                .set("name", "risemedialibrary-915411be-5529-44b6-926f-d2bab9af66f0")));
   }
 
   void setupDefaultAcl() throws IOException {
