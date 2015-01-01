@@ -1,4 +1,4 @@
-package com.risevision.storage.servertasks;
+package com.risevision.storage;
 
 import java.util.List;
 
@@ -7,10 +7,10 @@ import com.risevision.storage.Globals;
 import com.google.common.collect.ImmutableList;
 import com.google.api.services.storage.model.*;
 
-final class ObjectAclFactory {
+public final class ObjectAclFactory {
   private ObjectAclFactory() {}
 
-  static List<ObjectAccessControl> getDefaultAcl() {
+  public static List<ObjectAccessControl> getDefaultAcl() {
     return ImmutableList.of(
       newEntry("allUsers", "READER"),
       newEntry("project-viewers-" + Globals.PROJECT_ID, "READER"),
@@ -19,7 +19,7 @@ final class ObjectAclFactory {
     );
   }
 
-  static List<ObjectAccessControl> getPublicReadEntry() {
+  public static List<ObjectAccessControl> getPublicReadEntry() {
     return ImmutableList.of(
       newEntry("allUsers", "READER")
     );

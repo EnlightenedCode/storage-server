@@ -23,6 +23,7 @@ import com.risevision.storage.Globals;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
 import com.risevision.storage.info.ServiceFailedException;
 import com.risevision.storage.servertasks.AddPublicReadBucketServerTask;
+import com.risevision.storage.ObjectAclFactory;
 
 public final class StorageService {
   static Storage storage;
@@ -156,15 +157,7 @@ public final class StorageService {
                                .setRole("READER"),
       new BucketAccessControl().setEntity("project-editors-" + Globals.PROJECT_ID)
                                .setRole("OWNER")))
-                      .setDefaultObjectAcl(ImmutableList.of(
-      new ObjectAccessControl().setEntity("allUsers")
-                               .setRole("READER"),
-      new ObjectAccessControl().setEntity("project-viewers-" + Globals.PROJECT_ID)
-                               .setRole("READER"),
-      new ObjectAccessControl().setEntity("project-owners-" + Globals.PROJECT_ID)
-                               .setRole("OWNER"),
-      new ObjectAccessControl().setEntity("project-editors-" + Globals.PROJECT_ID)
-                               .setRole("OWNER")))
+                      .setDefaultObjectAcl(ObjectAclFactory.getDefaultAcl())
                       .setCors(ImmutableList.of(
       new Bucket.Cors().setMaxAgeSeconds(3600)
                          .setMethod(ImmutableList.of("GET", "PUT", "POST"))
