@@ -35,18 +35,10 @@ class SetDefAclAllBucketsServerTask extends BatchServerTask {
   }
 
   void setupDefaultAcl() throws IOException {
-    Bucket patchBucket = new Bucket()
-                      .setDefaultObjectAcl(ImmutableList.of(
-      new ObjectAccessControl().setEntity("allUsers")
-                               .setRole("READER"),
-      new ObjectAccessControl().setEntity("project-viewers-" + Globals.PROJECT_ID)
-                               .setRole("READER"),
-      new ObjectAccessControl().setEntity("project-owners-" + Globals.PROJECT_ID)
-                               .setRole("OWNER"),
-      new ObjectAccessControl().setEntity("project-editors-" + Globals.PROJECT_ID)
-                               .setRole("OWNER")));
-    iteratingRequest = 
-    gcsClient.buckets().patch("toBeIterated", patchBucket);
+    Bucket patchBucket = new Bucket();
+    patchBucket.setDefaultObjectAcl(ObjectAclFactory.getDefaultAcl());
+
+    iteratingRequest =  gcsClient.buckets().patch("toBeIterated", patchBucket);
   }
 }
 
