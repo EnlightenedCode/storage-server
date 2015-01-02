@@ -32,7 +32,6 @@ import com.risevision.storage.info.ServiceFailedException;
 import com.risevision.storage.servertasks.AddPublicReadBucketServerTask;
 
 public final class StorageService {
-  public static final String TRASH = "--TRASH--/";
   private static Storage storage;
   private static StorageService instance;
   protected static final Logger log = Logger.getAnonymousLogger();
@@ -119,7 +118,7 @@ public final class StorageService {
             continue;
           }
 
-          if(!folderName.equals(TRASH)) {
+          if(!folderName.equals(Globals.TRASH)) {
             StorageObject folderItem = new StorageObject();
             folderItem.setName(folderName);
             folderItem.setKind("folder");
@@ -278,12 +277,12 @@ public final class StorageService {
    * @throws ServiceFailedException In case an unexpected error occurs
    */
   public List<String> moveToTrash(String bucketName, List<String> items) throws ServiceFailedException {
-    if(!objectExists(bucketName, TRASH)) {
+    if(!objectExists(bucketName, Globals.TRASH)) {
       // Create the Trash folder
-      createFolder(bucketName, TRASH);
+      createFolder(bucketName, Globals.TRASH);
     }
     
-    return new BatchMove(storage).execute(bucketName, items, TRASH);
+    return new BatchMove(storage).execute(bucketName, items, Globals.TRASH);
   }
   
   /**
