@@ -645,20 +645,25 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
       document.getElementById("response").style.display = "none";
     });
 
-    console.log("uri:" + uri);
-    curl.stdout.on("data", function(data) {
-      var jsonResponse = JSON.parse(data);
-      console.log("public read result: " + JSON.stringify(jsonResponse));
-      if ((passfail === true && jsonResponse.kind !== undefined) ||
-          (passfail === false && jsonResponse.error !== undefined) ||
-          (attemptNumber > 5)) {
-        casper.evaluate(function(resp) {
-          document.getElementById("response").innerHTML = JSON.stringify(resp);
-          document.getElementById("response").style.display = "inline";
-        }, jsonResponse);
-      } else {
-        checkPublicReadPermission(filename, passfail, attemptNumber);
-      }
-    });
+    repetitivePermissionCheck(attemptNumber);
+
+    function repetitivePermissionCheck(attemptNumber) {
+      console.log("permission check number " + attemptNumber);
+      console.log("uri:" + uri);
+      curl.stdout.on("data", function(data) {
+        var jsonResponse = JSON.parse(data);
+        console.log("public read result: " + JSON.stringify(jsonResponse));
+        if ((passfail === true && jsonResponse.kind !== undefined) ||
+            (passfail === false && jsonResponse.error !== undefined) ||
+            (attemptNumber > 50)) {
+          casper.evaluate(function(resp) {
+            document.getElementById("response").innerHTML = JSON.stringify(resp);
+            document.getElementById("response").style.display = "inline";
+          }, jsonResponse);
+        } else {
+          setTimeout(function() {repetitivePermissionCheck(attemptNumber + 1);}, 6000);
+        }
+      });
+    }
   }
 });
