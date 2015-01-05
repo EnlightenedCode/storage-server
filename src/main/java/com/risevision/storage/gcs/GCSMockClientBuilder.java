@@ -14,26 +14,41 @@ import com.google.api.services.storage.model.*;
 
 public class GCSMockClientBuilder {
   HttpTransport transport;
+
   final JsonFactory jsonFactory = new JacksonFactory();
 
   public GCSMockClientBuilder
   (final String mockResponse, final int mockStatusCode) {
     transport = new MockHttpTransport() {
+      MockedRequest mockedRequest;
+
       public LowLevelHttpRequest buildRequest(String name, String url) {
-        return new MockLowLevelHttpRequest() {
-          public LowLevelHttpResponse execute() throws IOException {
-            MockLowLevelHttpResponse result = new MockLowLevelHttpResponse();
-            result.setStatusCode(mockStatusCode);
-            result.setContentType(Json.MEDIA_TYPE);
-            result.setContent(mockResponse);
-            if (mockStatusCode > 299) {
-              String jsonErrorMessage = "Mocked server side error";
-              throw GoogleJsonResponseExceptionFactoryTesting.newMock
-              (jsonFactory, mockStatusCode, jsonErrorMessage);
-            }
-            return result;
+        mockedRequest = new MockedRequest(mockResponse, mockStatusCode);
+        return mockedRequest;
+      }
+
+      class MockedRequest extends MockLowLevelHttpRequest {
+        final String mockResponse;
+        final int mockStatusCode;
+
+        MockedRequest(String mockResponse, int mockStatusCode) {
+          super();
+          this.mockResponse = mockResponse;
+          this.mockStatusCode = mockStatusCode;
+        }
+
+        public LowLevelHttpResponse execute() throws IOException {
+          MockLowLevelHttpResponse result = new MockLowLevelHttpResponse();
+          result.setStatusCode(mockStatusCode);
+          result.setContentType(Json.MEDIA_TYPE);
+          result.setContent(mockResponse);
+          if (mockStatusCode > 299) {
+            String jsonErrorMessage = "Mocked server side error";
+            throw GoogleJsonResponseExceptionFactoryTesting.newMock
+            (jsonFactory, mockStatusCode, jsonErrorMessage);
           }
-        };
+          return result;
+        }
       }
     };
   }
@@ -52,8 +67,8 @@ public class GCSMockClientBuilder {
 
   public Storage build() {
     return new Storage.Builder
-    (transport, jsonFactory, null)
-    .setApplicationName("Test Applicatoin").build();
+      (transport, jsonFactory, null)
+      .setApplicationName("Test Applicatoin").build();
   }
 }
 

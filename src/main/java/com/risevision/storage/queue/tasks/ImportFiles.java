@@ -12,6 +12,7 @@ import com.google.api.services.bigquery.model.TableSchema;
 import com.google.common.base.Strings;
 import com.google.common.base.Joiner;
 import com.risevision.storage.Globals;
+import com.risevision.storage.gcs.GCSClient;
 import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.MediaLibraryServiceImpl;
 import com.risevision.storage.gcs.StorageService;
@@ -118,7 +119,7 @@ public class ImportFiles extends AbstractTask {
 		
 		if (files.size() > 0) {
 			MediaLibraryService service = MediaLibraryService.getInstance();
-			StorageService gcsService = StorageService.getInstance();
+			StorageService gcsService = new StorageService(GCSClient.getStorageClient());
 			
 			log.info("Removing Files (" + files.size() + ") first: " + files.get(0) + " last: " + files.get(files.size() - 1));
 			

@@ -26,6 +26,7 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.users.User;
 import com.google.common.base.Strings;
 import com.risevision.storage.Globals;
+import com.risevision.storage.gcs.GCSClient;
 import com.risevision.storage.api.accessors.FileTagEntryAccessor;
 import com.risevision.storage.api.accessors.TagDefinitionAccessor;
 import com.risevision.storage.api.exception.ValidationException;
@@ -58,6 +59,9 @@ public class StorageAPI extends AbstractAPI {
 
   private static final MemcacheService syncCache = 
        MemcacheServiceFactory.getMemcacheService("month-bucket-bandwidth");
+
+  private static final StorageService gcsService =
+  new StorageService(GCSClient.getStorageClient());
 
   {
     syncCache.setErrorHandler(ErrorHandlers
@@ -127,7 +131,6 @@ public class StorageAPI extends AbstractAPI {
     result = new GCSFilesResponse();
 
     try {
-      StorageService gcsService = StorageService.getInstance();
       List<StorageObject> items = gcsService.getBucketItems(
         Globals.COMPANY_BUCKET_PREFIX + companyId,
         folder, "/");
@@ -162,7 +165,6 @@ public class StorageAPI extends AbstractAPI {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
       verifyActiveSubscription(companyId);
 
-      StorageService gcsService = StorageService.getInstance();
       gcsService.enablePublicRead(companyId);
 
       log.info("Public read enabled");
@@ -203,7 +205,6 @@ public class StorageAPI extends AbstractAPI {
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
 
-      StorageService gcsService = StorageService.getInstance();
       gcsService.deleteMediaItems(Globals.COMPANY_BUCKET_PREFIX + companyId,
                                   files);
 
@@ -243,7 +244,6 @@ public class StorageAPI extends AbstractAPI {
 
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
-      StorageService gcsService = StorageService.getInstance();
       gcsService.createFolder(Globals.COMPANY_BUCKET_PREFIX + companyId
                              ,folder);
       log.info("Folder created for company " + companyId);
@@ -281,7 +281,6 @@ public class StorageAPI extends AbstractAPI {
 
       bucketName = Globals.COMPANY_BUCKET_PREFIX + companyId;
 
-      StorageService gcsService = StorageService.getInstance();
       gcsService.createBucket(bucketName);
 
       result.result = true;
@@ -364,7 +363,6 @@ public class StorageAPI extends AbstractAPI {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
       bucketName = Globals.COMPANY_BUCKET_PREFIX + companyId;
 
-      StorageService gcsService = StorageService.getInstance();
       gcsService.deleteBucket(bucketName);
 
       result.result = true;
@@ -411,7 +409,6 @@ public class StorageAPI extends AbstractAPI {
     }
 
     try {
-      StorageService gcsService = StorageService.getInstance();
       log.info("Requesting resumable upload for " + result.userEmail);
       result.message = gcsService.getResumableUploadURI(Globals.COMPANY_BUCKET_PREFIX +
                                                         companyId,
@@ -461,8 +458,6 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      StorageService gcsService = StorageService.getInstance();
-      
       log.info("Requesting signed download uri for " + result.userEmail);
       result.message = gcsService.getSignedDownloadURI(Globals.COMPANY_BUCKET_PREFIX +
                                                        companyId,
@@ -502,7 +497,6 @@ public class StorageAPI extends AbstractAPI {
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
 
-      StorageService gcsService = StorageService.getInstance();
       gcsService.moveToTrash(Globals.COMPANY_BUCKET_PREFIX + companyId, files);
 
       log.info("Move to trash complete");
@@ -542,7 +536,6 @@ public class StorageAPI extends AbstractAPI {
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
       
-      StorageService gcsService = StorageService.getInstance();
       gcsService.restoreFromTrash(Globals.COMPANY_BUCKET_PREFIX + companyId, files);
 
       log.info("Restore from trash complete");
