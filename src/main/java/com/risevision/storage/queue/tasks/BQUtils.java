@@ -18,7 +18,7 @@ import com.google.api.services.bigquery.model.*;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
 import com.risevision.storage.Globals;
-import com.risevision.storage.gcs.LocalCredentialBuilder;
+import com.risevision.storage.gcs.P12CredentialBuilder;
 import com.risevision.storage.info.ServiceFailedException;
 
 
@@ -184,8 +184,8 @@ public class BQUtils {
                           Environment env = ApiProxy.getCurrentEnvironment();
                           String appId = env.getAppId();
                           if (Globals.devserver) {
-                              credential = new LocalCredentialBuilder()
-                                          .getCredentialFromP12File(Globals.RVMEDIA_P12_PATH, Globals.RVMEDIA_ID, Globals.BQ_SCOPE);
+                              credential = new P12CredentialBuilder()
+                                          .getCredentialFromP12File(Globals.RVCORE_P12_PATH, Globals.RVCORE_ID, Globals.BQ_SCOPE);
                           } else {
                               credential = new AppIdentityCredential(Arrays.asList(BIGQUERY_SCOPE));
                           }
