@@ -35,9 +35,11 @@ public class GCSMockClientBuilder {
           super();
           this.mockResponse = mockResponse;
           this.mockStatusCode = mockStatusCode;
+          System.out.println("HELLO " + getUrl());
         }
 
         public LowLevelHttpResponse execute() throws IOException {
+          System.out.println("HELLO " + getUrl());
           MockLowLevelHttpResponse result = new MockLowLevelHttpResponse();
           result.setStatusCode(mockStatusCode);
           result.setContentType(Json.MEDIA_TYPE);
@@ -47,6 +49,7 @@ public class GCSMockClientBuilder {
             throw GoogleJsonResponseExceptionFactoryTesting.newMock
             (jsonFactory, mockStatusCode, jsonErrorMessage);
           }
+          System.out.println("HELLO " + getUrl());
           return result;
         }
       }
