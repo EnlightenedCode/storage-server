@@ -23,7 +23,7 @@ public class GCSClient {
     (Globals.RVMEDIA_P12_PATH, Globals.RVMEDIA_ID, Globals.STORAGE_SCOPE);
 
     try {
-      Storage storageClient = 
+      storageClient = 
       new Storage.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
       .setApplicationName(Globals.STORAGE_APP_NAME)
       .build();
