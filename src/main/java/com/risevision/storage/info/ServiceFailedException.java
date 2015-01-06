@@ -3,7 +3,7 @@ package com.risevision.storage.info;
 import java.io.Serializable;
 
 @SuppressWarnings("serial")
-public final class ServiceFailedException  extends Exception implements Serializable {
+public final class ServiceFailedException extends Exception implements Serializable {
 //	private int errorCode;
 	
 	// [AD] Not the best place to store status codes
@@ -32,6 +32,12 @@ public final class ServiceFailedException  extends Exception implements Serializ
 	public ServiceFailedException(int reason) {
 		this.reason = reason;
 	}
+  
+  public ServiceFailedException(int reason, String message) {
+    super(message);
+    
+    this.reason = reason;
+  }
 	
 	public int getReason() {
 		return reason;

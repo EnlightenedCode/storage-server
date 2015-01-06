@@ -26,7 +26,6 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.users.User;
 import com.google.common.base.Strings;
 import com.risevision.storage.Globals;
-import com.risevision.storage.gcs.GCSClient;
 import com.risevision.storage.api.accessors.FileTagEntryAccessor;
 import com.risevision.storage.api.accessors.TagDefinitionAccessor;
 import com.risevision.storage.api.exception.ValidationException;
@@ -39,6 +38,7 @@ import com.risevision.storage.datastore.DatastoreService.PagedResult;
 import com.risevision.storage.entities.FileTagEntry;
 import com.risevision.storage.entities.SubscriptionStatus;
 import com.risevision.storage.entities.TagDefinition;
+import com.risevision.storage.gcs.GCSClient;
 import com.risevision.storage.gcs.StorageService;
 import com.risevision.storage.info.ServiceFailedException;
 import com.risevision.storage.queue.tasks.BQUtils;
@@ -120,6 +120,35 @@ public class StorageAPI extends AbstractAPI {
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
     }
   }
+  
+  /**
+   * Verifies if the company's bucket has been created. In case it isn't, a new bucket with the correct name is created
+   * 
+   * @param companyId The company id
+   * @param user The current logged in user
+   * @param errorPrefix The prefix to use for translation messages
+   * 
+   * @throws ServiceFailedException In case any of the validation fails, or a server error occurs
+   */
+  protected void verifyAndCreateBucket(String companyId, User user, String errorPrefix) throws ServiceFailedException {
+    SubscriptionStatus status = null;
+    String bucketName = Globals.COMPANY_BUCKET_PREFIX + companyId;
+    
+    if(gcsService.bucketExists(bucketName))
+      return;
+    
+    status = subscriptionStatusFetcher.getSubscriptionStatus(companyId);
+    
+    if(!status.isActive() && !status.isTrialAvailable()) {
+      throw new ServiceFailedException(ServiceFailedException.FORBIDDEN, errorPrefix + "-inactive-subscription");
+    }
+    
+    if(status.isTrialAvailable()) {
+      initiateTrial(companyId);
+    }
+    
+    gcsService.createBucket(bucketName);
+  }
 
   @ApiMethod(
   name = "files.get",
@@ -139,10 +168,17 @@ public class StorageAPI extends AbstractAPI {
       result.code = ServiceFailedException.OK;
       result.files = items;
     } catch (ServiceFailedException e) {
-      result.result = false;
-      result.code = e.getReason();
-      result.message = "Could not retrieve Bucket Items";
-      log.warning("Could not retrieve Bucket Items - Status: " + e.getReason());
+      if(e.getReason() == ServiceFailedException.NOT_FOUND) {
+        result.result = true;
+        result.code = ServiceFailedException.OK;
+        result.files = new ArrayList<StorageObject>();
+      }
+      else {
+        result.result = false;
+        result.code = e.getReason();
+        result.message = "Could not retrieve Bucket Items";
+        log.warning("Could not retrieve Bucket Items - Status: " + e.getReason());
+      }
     }
 
     return result;
@@ -226,33 +262,41 @@ public class StorageAPI extends AbstractAPI {
   public SimpleResponse createFolder(@Named("companyId") String companyId,
                                      @Named("folder") String folder,
                                      User user) {
-    GCSFilesResponse result;
+    SimpleResponse result;
+    
     try {
       result = new GCSFilesResponse(user);
     } catch (IllegalArgumentException e) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
-
-    if (Strings.isNullOrEmpty(companyId) ||
-        Strings.isNullOrEmpty(folder)) {
-      result.message = "Unspecified folder or company";
-      result.result = false;
-      return result;
+    
+    if (Strings.isNullOrEmpty(companyId) || Strings.isNullOrEmpty(folder)) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "folder-company-unspecified", user.getEmail());
     }
-
+    
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
-      gcsService.createFolder(Globals.COMPANY_BUCKET_PREFIX + companyId
-                             ,folder);
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "folder-verify-company", user.getEmail());
+    }
+    
+    try {
+      verifyAndCreateBucket(companyId, user, "folder");
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, e.getReason(), e.getMessage(), user.getEmail());
+    }
+    
+    try {
+      gcsService.createFolder(Globals.COMPANY_BUCKET_PREFIX + companyId, folder);
       log.info("Folder created for company " + companyId);
 
       result.result = true;
       result.code = ServiceFailedException.OK;
     } catch (ServiceFailedException e) {
-      result.result = false;
-      result.code = e.getReason();
-      result.message = "Folder creation failed";
       log.warning("Folder creation failed - Status: " + e.getReason());
+      return new SimpleResponse(false, e.getReason(), "create-folder-failed", user.getEmail());
     }
 
     return result;
@@ -386,24 +430,25 @@ public class StorageAPI extends AbstractAPI {
                                               @Nullable @Named("origin") String origin,
                                               User user) {
     SimpleResponse result;
+    
     try {
       result = new SimpleResponse(user);
     } catch (IllegalArgumentException e) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
-
-    try {
-      verifyActiveSubscription(companyId);
-    }
-    catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "upload-inactive-subscription", user.getEmail());
-    }
-
+    
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
     }
     catch (ServiceFailedException e) {
       return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "upload-verify-company", user.getEmail());
+    }
+    
+    try {
+      verifyAndCreateBucket(companyId, user, "upload");
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, e.getReason(), e.getMessage(), user.getEmail());
     }
 
     try {
@@ -415,11 +460,10 @@ public class StorageAPI extends AbstractAPI {
                                                         origin);
       result.result = true;
     } catch (ServiceFailedException e) {
-      result.result = false;
-      result.message = "upload-uri-request-failed";
-      result.userEmail = user.getEmail();
       log.warning("Upload URI request failed - Status: " + e.getReason());
+      return new SimpleResponse(false, e.getReason(), "upload-uri-request-failed", user.getEmail());
     }
+    
     return result;
   }
   

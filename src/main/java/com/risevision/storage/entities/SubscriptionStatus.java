@@ -97,6 +97,10 @@ public class SubscriptionStatus {
   public boolean isCompanyNotFound() {
     return getStatus() != null && getStatus().equals(Status.COMPANY_NOT_FOUND.description);
   }
+
+  public boolean isTrialAvailable() {
+    return getStatus() != null && (getStatus().equals(Status.NOT_SUBSCRIBED.description) && new Integer(getTrialPeriod()) > 0);
+  }
   
   protected static List<String> buildList(Status... values) {
     List<String> result = new ArrayList<String>();
