@@ -23,7 +23,7 @@ public class ServiceAccountAPIRequestor {
       this.p12_path = p12_path;
 
       this.credential = new P12CredentialBuilder().getCredentialFromP12File
-      (p12_path, id, Globals.EMAIL_SCOPE);
+      (p12_path, id);
 
       this.requestInitializer = new HttpRequestInitializer() {
         public void initialize(HttpRequest request) throws IOException {

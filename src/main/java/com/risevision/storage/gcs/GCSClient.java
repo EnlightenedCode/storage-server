@@ -20,7 +20,7 @@ public class GCSClient {
 
   static {
     credential = new P12CredentialBuilder().getCredentialFromP12File
-    (Globals.RVMEDIA_P12_PATH, Globals.RVMEDIA_ID, Globals.STORAGE_SCOPE);
+    (Globals.RVMEDIA_P12_PATH, Globals.RVMEDIA_ID);
 
     try {
       storageClient = 

@@ -28,8 +28,10 @@ public class P12CredentialBuilder {
   }
 
   public GoogleCredential getCredentialFromP12File
-  (String p12path, String id, String scope) {
-    builder.setServiceAccountId(id).setServiceAccountScopes(Arrays.asList(scope));
+  (String p12path, String id) {
+    builder.setServiceAccountId(id)
+    .setServiceAccountScopes
+    (Arrays.asList(Globals.EMAIL_SCOPE, Globals.STORAGE_SCOPE, Globals.BQ_SCOPE));
 
     try {
       File p12File = new File(p12path);
