@@ -181,11 +181,9 @@ public class BQUtils {
           
           private static Bigquery getBigquery() {
                   if (bigquery == null) {
-                          Environment env = ApiProxy.getCurrentEnvironment();
-                          String appId = env.getAppId();
                               credential = new P12CredentialBuilder()
-                                          .getCredentialFromP12File(Globals.RVCORE_P12_PATH, Globals.RVCORE_ID);
-                          bigquery = new Bigquery.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(appId).build();
+                                          .getCredentialFromP12File(Globals.RVMEDIA_P12_PATH, Globals.RVMEDIA_ID);
+                          bigquery = new Bigquery.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(Globals.STORAGE_APP_NAME).build();
                   }
                   
                   return bigquery;
