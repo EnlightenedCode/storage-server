@@ -183,12 +183,8 @@ public class BQUtils {
                   if (bigquery == null) {
                           Environment env = ApiProxy.getCurrentEnvironment();
                           String appId = env.getAppId();
-                          if (Globals.devserver) {
                               credential = new P12CredentialBuilder()
                                           .getCredentialFromP12File(Globals.RVCORE_P12_PATH, Globals.RVCORE_ID, Globals.BQ_SCOPE);
-                          } else {
-                              credential = new AppIdentityCredential(Arrays.asList(BIGQUERY_SCOPE));
-                          }
                           bigquery = new Bigquery.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(appId).build();
                   }
                   
