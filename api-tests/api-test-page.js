@@ -12,7 +12,7 @@ function init() {
   var ROOT = "http://localhost:8888/_ah/api",
       SCOPE = ["https://www.googleapis.com/auth/userinfo.email",
                "https://www.googleapis.com/auth/devstorage.full_control"],
-      CLIENT = "197029789114-lv0gbgm961ii6eoe0ur4oeifes0mfc8h@developer.gserviceaccount.com";
+      CLIENT = "614513768474.apps.googleusercontent.com";
 
   console.log("Initializing");
   gapi.client.load("storage", "v0.01", function() {
