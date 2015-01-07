@@ -32,29 +32,11 @@ import com.risevision.storage.info.ServiceFailedException;
 import com.risevision.storage.servertasks.AddPublicReadBucketServerTask;
 
 public final class StorageService {
-  private static Storage storage;
-  private static StorageService instance;
+  static Storage storage;
   protected static final Logger log = Logger.getAnonymousLogger();
 
-  static {
-    storage = GCSClient.getStorageClient();
-  }
-
-  private StorageService() {}
-
-  public static StorageService getInstance() {
-    try {
-      if (instance == null) {
-        instance = new StorageService();
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return instance;
-  }
-
-  public void setClient(Storage client) {
-    StorageService.storage = client;
+  public StorageService(Storage storage) {
+    this.storage = storage;
   }
 
   public ListAllMyBucketsResponse getAllMyBuckets()

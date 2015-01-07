@@ -11,13 +11,11 @@ import com.risevision.storage.api.SubscriptionStatusFetcher;
 import com.risevision.storage.api.impl.SubscriptionStatusFetcherImpl;
 import com.risevision.storage.entities.SubscriptionStatus;
 import com.risevision.storage.gcs.ActiveBucketFetcher;
-import com.risevision.storage.gcs.StorageService;
 import com.risevision.storage.gcs.impl.ActiveBucketFetcherImpl;
 
 public class LockDownUnpaidBucketsServerTask extends ServerTask {
   private ActiveBucketFetcher activeBucketFetcher;
   private SubscriptionStatusFetcher statusFetcher;
-  private StorageService storageService;
   private int days;
   
   public LockDownUnpaidBucketsServerTask(Storage client, Map<String, String[]> params) throws IOException {
@@ -31,7 +29,6 @@ public class LockDownUnpaidBucketsServerTask extends ServerTask {
     
     setActiveBucketFetcher(activeBucketFetcher);
     setStatusFetcher(statusFetcher);
-    setStorageService(StorageService.getInstance());
     setDays(new Integer(params.get("days")[0]));
   }
 
@@ -70,14 +67,6 @@ public class LockDownUnpaidBucketsServerTask extends ServerTask {
 
   public void setStatusFetcher(SubscriptionStatusFetcher statusFetcher) {
     this.statusFetcher = statusFetcher;
-  }
-
-  public StorageService getStorageService() {
-    return storageService;
-  }
-
-  public void setStorageService(StorageService storageService) {
-    this.storageService = storageService;
   }
 
   public int getDays() {
