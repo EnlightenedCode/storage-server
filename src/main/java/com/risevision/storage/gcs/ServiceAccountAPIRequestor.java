@@ -27,7 +27,7 @@ public class ServiceAccountAPIRequestor {
 
       this.requestInitializer = new HttpRequestInitializer() {
         public void initialize(HttpRequest request) throws IOException {
-          request.getHeaders().setAuthorization(credential.getAccessToken());
+          request.setInterceptor(credential);
         }
       };
 
