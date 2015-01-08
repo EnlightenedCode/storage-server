@@ -2,7 +2,6 @@ package com.risevision.storage.servertasks;
 
 import com.google.api.services.storage.*;
 import com.google.api.services.storage.model.*;
-import com.google.api.client.googleapis.services.AbstractGoogleClient;
 
 class StorageRequestUpdater {
   private StorageRequest templateRequest;
