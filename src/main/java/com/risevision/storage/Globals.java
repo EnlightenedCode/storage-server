@@ -33,7 +33,7 @@ public final class Globals {
                       + "</Logging>";
 
   public static final String RESUMABLE_UPLOAD_REQUEST_URI =
-    "https://www.googleapis.com/upload/storage/v1/b/myBucket/o?uploadType=resumable&predefinedAcl=publicRead&name=";
+    "https://www.googleapis.com/upload/storage/v1/b/myBucket/o?uploadType=resumable&name=";
 
   public static final String DELETED_NAMESPACE =
     "-deleted-";
