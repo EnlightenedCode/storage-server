@@ -636,7 +636,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
 
   function checkPublicReadPermission(filename, passfail, attemptNumber) {
     var uri = casper.getHTML("#bucketPath") + "/o/" + filename;
-    var curl = require("child_process").spawn("curl", uri);
+    var curl;
 
     if (attemptNumber === undefined) {attemptNumber = 0;}
     attemptNumber += 1;
@@ -650,6 +650,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
     function repetitivePermissionCheck(attemptNumber) {
       console.log("permission check number " + attemptNumber);
       console.log("uri:" + uri);
+      curl = require("child_process").spawn("curl", uri);
       curl.stdout.on("data", function(data) {
         var jsonResponse = JSON.parse(data);
         console.log("public read result: " + JSON.stringify(jsonResponse));
