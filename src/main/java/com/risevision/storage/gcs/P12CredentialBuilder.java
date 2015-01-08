@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 import com.risevision.storage.Globals;
 
-public class LocalCredentialBuilder {
+public class P12CredentialBuilder {
   private static final Logger log = Logger.getAnonymousLogger();
   private static final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
   private static final UrlFetchTransport
@@ -21,15 +21,17 @@ public class LocalCredentialBuilder {
   private GoogleCredential credential;
   private GoogleCredential.Builder builder;
 
-  public LocalCredentialBuilder() {
+  public P12CredentialBuilder() {
     builder = new GoogleCredential.Builder()
     .setTransport(urlTransport)
     .setJsonFactory(jsonFactory);
   }
 
   public GoogleCredential getCredentialFromP12File
-  (String p12path, String id, String scope) {
-    builder.setServiceAccountId(id).setServiceAccountScopes(Arrays.asList(scope));
+  (String p12path, String id) {
+    builder.setServiceAccountId(id)
+    .setServiceAccountScopes
+    (Arrays.asList(Globals.EMAIL_SCOPE, Globals.STORAGE_SCOPE, Globals.BQ_SCOPE));
 
     try {
       File p12File = new File(p12path);

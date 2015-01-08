@@ -28,6 +28,7 @@ import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
 import com.risevision.storage.amazonImpl.ListBucketResponse;
 import com.risevision.storage.info.MediaItemInfo;
 import com.risevision.storage.info.ServiceFailedException;
+import com.risevision.storage.gcs.ServiceAccountAPIRequestor;
 
 public class MediaLibraryServiceImpl extends MediaLibraryService {
 	
@@ -127,8 +128,6 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 	
 	public List<MediaItemInfo> getBucketItems(String bucketName, String prefix, String marker) throws ServiceFailedException {
 		try {
-			AppIdentityCredential credential = new AppIdentityCredential(Arrays.asList(STORAGE_SCOPE));
-
 			String URI = MediaItemInfo.MEDIA_LIBRARY_URL + bucketName;
 			if (!Strings.isNullOrEmpty(prefix)) {
 				URI += "?prefix=" + prefix;
@@ -141,16 +140,12 @@ public class MediaLibraryServiceImpl extends MediaLibraryService {
 			URI += URI.contains("?") ? "&" : "?";
 			URI += "max-keys=" + MAX_KEYS;
 			
-			HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory(credential);
-			
 			GenericUrl url = new GenericUrl(URI);
-			HttpRequest request = requestFactory.buildGetRequest(url);
-			
-//			HttpHeaders headers = new HttpHeaders();
-//			headers.set("x-goog-project-id", Globals.PROJECT_ID);
+
+			HttpResponse response = ServiceAccountAPIRequestor.makeRequest
+                        (ServiceAccountAPIRequestor.SERVICE_ACCOUNT.MEDIA_LIBRARY, "GET", url, null);
 //			
 //			request.setHeaders(headers);
-			HttpResponse response = request.execute();
 
 //			log.warning(response.parseAsString());
 

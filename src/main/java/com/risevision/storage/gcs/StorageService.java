@@ -13,23 +13,17 @@ import com.google.api.client.googleapis.batch.BatchRequest;
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.http.ByteArrayContent;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpHeaders;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpResponseException;
+import com.google.api.client.http.*;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.storage.Storage;
-import com.google.api.services.storage.model.Bucket;
-import com.google.api.services.storage.model.BucketAccessControl;
-import com.google.api.services.storage.model.StorageObject;
+import com.google.api.services.storage.model.*;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.risevision.storage.Globals;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
 import com.risevision.storage.info.ServiceFailedException;
 import com.risevision.storage.servertasks.AddPublicReadBucketServerTask;
+import com.risevision.storage.ObjectAclFactory;
 
 public final class StorageService {
   static Storage storage;
@@ -161,8 +155,9 @@ public final class StorageService {
                       .setAcl(ImmutableList.of(
       new BucketAccessControl().setEntity("allUsers")
                                .setRole("READER"),
-      new BucketAccessControl().setEntity(Globals.EDITOR_GROUP)
+      new BucketAccessControl().setEntity("project-editors-" + Globals.PROJECT_ID)
                                .setRole("OWNER")))
+                      .setDefaultObjectAcl(ObjectAclFactory.getDefaultAcl())
                       .setCors(ImmutableList.of(
       new Bucket.Cors().setMaxAgeSeconds(3600)
                          .setMethod(ImmutableList.of("GET", "PUT", "POST"))
