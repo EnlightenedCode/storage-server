@@ -5,8 +5,6 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import com.google.api.client.googleapis.batch.BatchRequest;
@@ -22,8 +20,9 @@ import com.google.common.collect.ImmutableList;
 import com.risevision.storage.Globals;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
 import com.risevision.storage.info.ServiceFailedException;
-import com.risevision.storage.servertasks.AddPublicReadBucketServerTask;
 import com.risevision.storage.ObjectAclFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
+import com.google.appengine.api.taskqueue.QueueFactory;
 
 public final class StorageService {
   static Storage storage;
@@ -133,14 +132,10 @@ public final class StorageService {
   throws ServiceFailedException {
     log.info("Enabling public read for " + companyId);
 
-    try {
-      Map<String, String[]> params = new HashMap<>();
-      params.put("bucket", new String[] {Globals.COMPANY_BUCKET_PREFIX + companyId});
-      new AddPublicReadBucketServerTask(storage, params).handleRequest();
-    } catch (IOException e) {
-      log.warning(e.getMessage());
-      throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
-    }
+    QueueFactory.getDefaultQueue().add(TaskOptions.Builder.withUrl("/servertask")
+    .param("task", "AddPublicReadBucket")
+    .param("bucket", Globals.COMPANY_BUCKET_PREFIX + companyId)
+    .method(TaskOptions.Method.valueOf("GET")));
   }
 
   public void createBucket(String bucketName)

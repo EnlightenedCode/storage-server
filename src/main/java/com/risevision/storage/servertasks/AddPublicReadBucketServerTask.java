@@ -10,17 +10,17 @@ import com.google.api.services.storage.Storage;
 import com.google.api.client.util.GenericData;
 import com.risevision.storage.Globals;
 
-public class AddPublicReadBucketServerTask extends BatchServerTask {
+class AddPublicReadBucketServerTask extends BatchServerTask {
   String bucketName;
 
-  public AddPublicReadBucketServerTask
+  AddPublicReadBucketServerTask
   (Storage gcsClient, Map<String, String[]> params) throws IOException {
     super(gcsClient, params);
     confirmURLParams("bucket");
     bucketName = requestParams.get("bucket")[0];
   }
 
-  public void handleRequest() throws IOException {
+  void handleRequest() throws IOException {
     log.info("Adding public read on: " + bucketName);
 
     setupACLInsertRequest();
@@ -38,19 +38,23 @@ public class AddPublicReadBucketServerTask extends BatchServerTask {
   }
   
   private GenericData filterTrashItems(GenericData listResult) {
+    if (listResult.get("items") == null) {return listResult;}
+
     GenericData returnResult = new GenericData();
+    List<GenericData> returnItems = new ArrayList<>();
+
     returnResult.set("kind", listResult.get("kind"));
     returnResult.set("nextPageToken", listResult.get("nextPageToken"));
     returnResult.set("prefixes", listResult.get("prefixes"));
 
-    List<GenericData> returnItems = new ArrayList<>();
     for (GenericData item : (List<GenericData>) listResult.get("items")) {
       String name = (String) item.get("name");
       if (name != null && !name.startsWith(Globals.TRASH)) {
         returnItems.add(item);
       }
     }
-    returnResult.set("items", returnItems);
+
+    returnResult.set("items", returnItems.size() > 0 ? returnItems : null);
     return returnResult;
   }
 
