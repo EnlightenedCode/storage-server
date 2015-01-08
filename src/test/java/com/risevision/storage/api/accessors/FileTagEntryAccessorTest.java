@@ -3,6 +3,7 @@ package com.risevision.storage.api.accessors;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -22,7 +23,9 @@ import com.risevision.storage.api.UserCompanyVerifier;
 import com.risevision.storage.api.exception.ValidationException;
 import com.risevision.storage.datastore.DatastoreService.PagedResult;
 import com.risevision.storage.datastore.ObjectifyTest;
+import com.risevision.storage.entities.AutoTrashTag;
 import com.risevision.storage.entities.FileTagEntry;
+import com.risevision.storage.entities.StorageEntity;
 
 /**
  * Created by rodrigopavezi on 12/9/14.
@@ -30,6 +33,7 @@ import com.risevision.storage.entities.FileTagEntry;
 public class FileTagEntryAccessorTest extends ObjectifyTest {
   private TagDefinitionAccessor tagDefinitionAccessor;
   private FileTagEntryAccessor fileTagEntryAccessor;
+  private AutoTrashTagAccessor autoTrashTagAccessor;
 
   private String companyId;
   private String companyId2;
@@ -58,9 +62,12 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
 
     tagDefinitionAccessor = new TagDefinitionAccessor();
     fileTagEntryAccessor = new FileTagEntryAccessor();
+    autoTrashTagAccessor = new AutoTrashTagAccessor();
     
     try {
       tagDefinitionAccessor.put(companyId, type, name, getList("value1", "value2"), user);
+      tagDefinitionAccessor.put(companyId, type, "brand", getList("levis", "gap", "armani", "hugo"), user);
+      tagDefinitionAccessor.put(companyId, type, "style", getList("urban", "casual", "business"), user);
       tagDefinitionAccessor.put(companyId2, type, name, getList("value1", "value2", "value3"), user);
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -74,14 +81,14 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
 
 
   @Test
-  public void itShouldAddATagDefinition() throws Exception {
+  public void itShouldAddAFileTagEntry() throws Exception {
     FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, type, name, values, user);
 
     assertThat(response, is(instanceOf(FileTagEntry.class)));
   }
 
   @Test
-  public void itShouldAddATagDefinitionWithAnUUID() throws Exception {
+  public void itShouldAddAFileTagEntryWithId() throws Exception {
     FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, type, name, values, user);
 
     assertThat(response.getId(), is(notNullValue()));
@@ -89,7 +96,7 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
   }
 
   @Test
-  public void itShouldAddATagDefinitionWithStatusParameters() throws Exception {
+  public void itShouldAddAFileTagEntryWithStatusParameters() throws Exception {
     FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, type, name, values, user);
 
     assertThat(response.getId(), is(notNullValue()));
@@ -100,7 +107,7 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
   }
 
   @Test
-  public void itShouldAddATagDefinitionWithLowerCaseNameAndValues() throws Exception {
+  public void itShouldAddAFileTagEntryWithLowerCaseNameAndValues() throws Exception {
     name = "TEST";
     values.clear();
     values.add("VALUE1");
@@ -114,31 +121,31 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
   }
 
   @Test(expected = ValidationException.class)
-  public void itShouldNotAddATagDefinitionWithoutCompanyId() throws Exception {
+  public void itShouldNotAddAFileTagEntryWithoutCompanyId() throws Exception {
     @SuppressWarnings("unused")
     FileTagEntry response = fileTagEntryAccessor.put("", filename, type, name, values, user);
   }
 
   @Test(expected = ValidationException.class)
-  public void itShouldNotAddATagDefinitionWithoutObjectId() throws Exception {
+  public void itShouldNotAddAFileTagEntryWithoutObjectId() throws Exception {
     @SuppressWarnings("unused")
     FileTagEntry response = fileTagEntryAccessor.put(companyId, "", type, name, values, user);
   }
 
   @Test(expected = ValidationException.class)
-  public void itShouldNotAddATagDefinitionWithoutName() throws Exception {
+  public void itShouldNotAddAFileTagEntryWithoutName() throws Exception {
     @SuppressWarnings("unused")
     FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, type, "", values, user);
   }
 
   @Test(expected = ValidationException.class)
-  public void itShouldNotAddATagDefinitionWithoutType() throws Exception {
+  public void itShouldNotAddAFileTagEntryWithoutType() throws Exception {
     @SuppressWarnings("unused")
     FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, "", name, values, user);
   }
 
   @Test(expected = ValidationException.class)
-  public void itShouldNotAddATagDefinitionIfValueDoesNotExistInParent() throws Exception {
+  public void itShouldNotAddAFileTagEntryIfValueDoesNotExistInParent() throws Exception {
     values.clear();
     values.add("value5");
     
@@ -147,7 +154,7 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
   }
 
   @Test(expected = ValidationException.class)
-  public void itShouldNotAddAFreeformTagDefinitionWithNoValues() throws Exception {
+  public void itShouldNotAddAFreeformFileTagEntryWithNoValues() throws Exception {
     values.clear();
     
     @SuppressWarnings("unused")
@@ -155,7 +162,7 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
   }
 
   @Test(expected = Exception.class)
-  public void itShouldNotAddAFreeformTagDefinitionWithMoreThanOneValue() throws Exception {
+  public void itShouldNotAddAFreeformFileTagEntryWithMoreThanOneValue() throws Exception {
     values.clear();
     values.add("value1");
     values.add("value2");
@@ -165,7 +172,7 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
   }
   
   @Test
-  public void itShouldRetrieveATagDefinitionById() throws Exception {
+  public void itShouldRetrieveAFileTagEntryById() throws Exception {
     FileTagEntry responseFromAdd = fileTagEntryAccessor.put(companyId, filename, type, name, values, user);
 
     String id = responseFromAdd.getId();
@@ -176,7 +183,7 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
   }
 
   @Test
-  public void itShouldDeleteATagDefinitionById() throws Exception {
+  public void itShouldDeleteAFileTagEntryById() throws Exception {
     FileTagEntry responseFromAdd = fileTagEntryAccessor.put(companyId, filename, type, name, values, user);
 
     String id = responseFromAdd.getId();
@@ -186,6 +193,56 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
     FileTagEntry responseFromGet = fileTagEntryAccessor.get(id);
 
     assertThat((FileTagEntry) responseFromGet, is((FileTagEntry) null));
+  }
+
+  @Test
+  public void itShouldDeleteATimelineEntryById() throws Exception {
+    String timeline = "{\"type\":\"TIMELINE\","
+        + "\"timeDefined\":true,\"duration\":60,\"pud\":\"false\","
+        + "\"trash\":\"false\",\"carryon\":\"false\","
+        + "\"startDate\":\"02/02/15 12:00 AM\",\"endDate\":\"02/03/15 12:00 AM\","
+        + "\"startTime\":null,\"endTime\":null,\"recurrenceOptions\":null}"; 
+    FileTagEntry responseFromAdd = fileTagEntryAccessor.put(companyId, filename, "TIMELINE", name, getList(timeline), user);
+
+    String id = responseFromAdd.getId();
+    
+    // Checks not AutoTrashTag was created
+    AutoTrashTag autoTrashTagFromAdd = autoTrashTagAccessor.get(new AutoTrashTag(companyId, filename, null, null).getId());
+    
+    assertThat(autoTrashTagFromAdd, is((AutoTrashTag) null));
+    
+    fileTagEntryAccessor.delete(id);
+    
+    FileTagEntry responseFromGet = fileTagEntryAccessor.get(id);
+
+    assertThat((FileTagEntry) responseFromGet, is((FileTagEntry) null));
+  }
+
+  @Test
+  public void itShouldDeleteATrashTimelineEntryById() throws Exception {
+    String timeline = "{\"type\":\"TIMELINE\","
+        + "\"timeDefined\":true,\"duration\":60,\"pud\":\"false\","
+        + "\"trash\":\"true\",\"carryon\":\"false\","
+        + "\"startDate\":\"02/02/15 12:00 AM\",\"endDate\":\"02/03/15 12:00 AM\","
+        + "\"startTime\":null,\"endTime\":null,\"recurrenceOptions\":null}"; 
+    FileTagEntry responseFromAdd = fileTagEntryAccessor.put(companyId, filename, "TIMELINE", name, getList(timeline), user);
+
+    String id = responseFromAdd.getId();
+    
+    // Checks AutoTrashTag was created
+    AutoTrashTag autoTrashTagFromAdd = autoTrashTagAccessor.get(new AutoTrashTag(companyId, filename, null, null).getId());
+    
+    assertThat(autoTrashTagFromAdd, not(is((AutoTrashTag) null)));
+    
+    fileTagEntryAccessor.delete(id);
+    
+    FileTagEntry responseFromGet = fileTagEntryAccessor.get(id);
+
+    assertThat((FileTagEntry) responseFromGet, is((FileTagEntry) null));
+    
+    AutoTrashTag autoTrashTagAfterDelete = autoTrashTagAccessor.get(new AutoTrashTag(companyId, filename, null, null).getId());
+    
+    assertThat(autoTrashTagAfterDelete, is((AutoTrashTag) null));
   }
 
   @Test
@@ -234,6 +291,58 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
     
     responseFromList = fileTagEntryAccessor.list(companyId, "objectId: file3", 100, null, null);
     assertThat(responseFromList.getList().size(), is(1));
+  }
+
+  public void itShouldFindOneFileByTagSearch() throws Exception {
+    List<StorageEntity> responseFromList;
+    
+    fileTagEntryAccessor.put(companyId, "file1", type, "brand", getList("levis"), user);
+    fileTagEntryAccessor.put(companyId, "file2", type, "brand", getList("gap", "hugo"), user);
+    fileTagEntryAccessor.put(companyId, "file2", type, "style", getList("urban"), user);
+    
+    // Should only return file1
+    responseFromList = fileTagEntryAccessor.listFilesByTags(companyId, getList("brand:levis"), false);
+    
+    assertThat(responseFromList.size(), is(1));
+    
+    // Should only return file2
+    responseFromList = fileTagEntryAccessor.listFilesByTags(companyId, getList("style:urban"), true);
+    
+    assertThat(responseFromList.get(0).getTags().size(), is(2));
+  }
+
+  @Test
+  public void itShouldFindFilesByTagSearch() throws Exception {
+    List<StorageEntity> responseFromList;
+    
+    fileTagEntryAccessor.put(companyId, "file1", type, "brand", getList("armani"), user);
+    fileTagEntryAccessor.put(companyId, "file1", type, "style", getList("business"), user);
+    fileTagEntryAccessor.put(companyId, "file2", type, "brand", getList("gap", "hugo"), user);
+    fileTagEntryAccessor.put(companyId, "file2", type, "style", getList("urban"), user);
+    fileTagEntryAccessor.put(companyId, "file3", type, "brand", getList("hugo", "levis"), user);
+    fileTagEntryAccessor.put(companyId, "file3", type, "style", getList("casual"), user);
+    fileTagEntryAccessor.put(companyId, "file3", type, "test", getList("value1"), user);
+    
+    // Should return file1, file2 and file3
+    responseFromList = fileTagEntryAccessor.listFilesByTags(companyId, getList("brand"), true);
+    
+    assertThat(responseFromList.size(), is(3));
+    
+    // Should return file3
+    responseFromList = fileTagEntryAccessor.listFilesByTags(companyId, getList("test"), true);
+    
+    assertThat(responseFromList.size(), is(1));
+    assertThat(responseFromList.get(0).getName(), is("file3"));
+    
+    // Should return file1 and file3
+    responseFromList = fileTagEntryAccessor.listFilesByTags(companyId, getList("brand:armani", "style:casual"), false);
+    
+    assertThat(responseFromList.size(), is(2));
+    
+    // Should only return file3
+    responseFromList = fileTagEntryAccessor.listFilesByTags(companyId, getList("brand:levis", "style:casual"), true);
+    
+    assertThat(responseFromList.get(0).getTags().size(), is(3));
   }
   
   @SuppressWarnings("unchecked")

@@ -491,6 +491,48 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
+    casper.echo("Find files by tag.");
+    casper.click("#listFilesByTag");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    // Checks if the endpoint returned one file
+    this.test.assertSelectorHasText("#storageAPIFilesCount", "1");
+  });
+
+  casper.then(function() {
+    casper.echo("Find empty files by tag.");
+    casper.click("#listEmptyFilesByTag");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    // Checks if the endpoint returned one file
+    this.test.assertSelectorHasText("#storageAPIFilesCount", "0");
+  });
+
+  casper.then(function() {
+    casper.echo("Find files by tag returning tags.");
+    casper.click("#listFilesByTagReturningTags");
+  });
+
+  casper.then(function() {
+    casper.waitUntilVisible("#response");
+  });
+
+  casper.then(function() {
+    // Checks if the endpoint returned the tags
+    this.test.assertSelectorHasText("#response", '"values":["value1","value2","value3"]');
+  });
+
+  casper.then(function() {
     casper.echo("Delete File Tag Entry.");
     casper.click("#deleteFileTagEntry");
   });

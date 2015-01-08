@@ -7,6 +7,7 @@ package com.risevision.storage.datastore;
 import static com.risevision.storage.datastore.OfyService.ofy;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.google.appengine.api.datastore.Cursor;
@@ -93,7 +94,12 @@ public class DatastoreService {
     }
     
     for(int i = 0; i < conditions.length - 1; i += 2) {
-      query = query.filter((String) conditions[i], conditions[i + 1]);
+      if(conditions[i + 1] instanceof Collection<?>) {
+        query = query.filter((String) conditions[i] + " in", conditions[i + 1]);
+      }
+      else {
+        query = query.filter((String) conditions[i], conditions[i + 1]);
+      }
     }
     
     QueryResultIterator<T> iterator = query.iterator();

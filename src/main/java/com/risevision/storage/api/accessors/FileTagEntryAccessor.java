@@ -6,9 +6,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.appengine.api.users.User;
 import com.google.gson.Gson;
@@ -19,6 +23,7 @@ import com.risevision.storage.datastore.DatastoreService;
 import com.risevision.storage.datastore.DatastoreService.PagedResult;
 import com.risevision.storage.entities.AutoTrashTag;
 import com.risevision.storage.entities.FileTagEntry;
+import com.risevision.storage.entities.StorageEntity;
 import com.risevision.storage.entities.TagDefinition;
 import com.risevision.storage.entities.Timeline;
 
@@ -58,6 +63,12 @@ public class FileTagEntryAccessor extends AbstractAccessor {
     type = type.toUpperCase();
     // Also make sure name is lower case.
     name = name.toLowerCase();
+    
+    try {
+      TagType.valueOf(type);
+    } catch (IllegalArgumentException e) {
+      throw new ValidationException("Tag type is invalid");
+    }
     
     // If values is null, remove the FileTagEntry
     if(values == null) {
@@ -181,5 +192,103 @@ public class FileTagEntryAccessor extends AbstractAccessor {
 
   public PagedResult<FileTagEntry> list(String companyId, String search, Integer limit, String sort, String cursor) throws Exception {
     return datastoreService.list(FileTagEntry.class, limit, sort, cursor, mergeFilters(parseQuery(search), "companyId", companyId));
+  }
+  
+  public List<StorageEntity> listFilesByTags(String companyId, List<String> tags, boolean returnTags) throws Exception {
+    // Finds all TagEntries with any of the given tag names (values are processed in the next stage)
+    PagedResult<FileTagEntry> entries;
+    Map<String, List<String>> tagsMap = buildTagsMap(tags);
+    Map<String, StorageEntity> filesMap = new HashMap<String, StorageEntity>();
+    Map<String, String> matchedFilesMap = new HashMap<String, String>();
+    List<StorageEntity> result = new ArrayList<StorageEntity>();
+    
+    // If tags are not being returned, filter the result set by matched tagname using Datastore API
+    if(!returnTags) {
+      entries = datastoreService.list(FileTagEntry.class, null, null, null, mergeFilters("companyId", companyId, "name", buildTagNamesList(tags)));
+    }
+    else {
+      entries = datastoreService.list(FileTagEntry.class, null, null, null, "companyId", companyId);
+    }
+
+    for(FileTagEntry entry : entries.getList()) {
+      // Since we don't know in advance which files will match one of the given criteria tags in a following iteration, 
+      // all files are added and later filtered based on the matchedFiles map. 
+      StorageEntity stgEnt = filesMap.get(entry.getObjectId());
+      
+      if(stgEnt == null) {
+        filesMap.put(entry.getObjectId(), stgEnt = new StorageEntity(entry.getObjectId()));
+      }
+      
+      if(returnTags) {
+        stgEnt.getTags().add(entry);
+      }
+      
+      // Gets the accepted values for the matching tag name
+      List<String> filteredValues = tagsMap.get(entry.getName());
+      
+      if(filteredValues != null) {
+        // If only tag name was provided, any objectId with that tag name is considered a match
+        if(filteredValues.size() == 0) {
+          matchedFilesMap.put(entry.getObjectId(), entry.getObjectId());
+        }
+        else {
+          for(String value : entry.getValues()) {
+            // If any of the values is found, the file is considered a match
+            if(filteredValues.contains(value)) {
+              matchedFilesMap.put(entry.getObjectId(), entry.getObjectId());
+            }
+          }
+        }
+      }
+    }
+    
+    // Only return files matching the given criteria
+    for(String objectId : matchedFilesMap.keySet()) {
+      result.add(filesMap.get(objectId));
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Builds a list of unique tag names
+   * 
+   * @param tags The list of tag:value pairs to process
+   * @return The resulting list
+   */
+  protected List<String> buildTagNamesList(List<String> tags) {
+    Set<String> names = new HashSet<String>();
+    
+    // Tag filters have the form tagName:expectedValue
+    for(String tag : tags) {
+      names.add(getFilterName(tag));
+    }
+    
+    return new ArrayList<String>(names);
+  }
+
+  /**
+   * Transforms a list of filters of the form [ tag1:val1, tag1:val2, tag2:val3 ] into a map of the form { tag1: [val1, val2], tag2: [val3] }
+   * 
+   * @param tags The list of tag:value pairs to process
+   * @return The resulting map
+   */
+  protected Map<String, List<String>> buildTagsMap(List<String> tags) {
+    Map<String, List<String>> map = new HashMap<String, List<String>>();
+    
+    for(String tag : tags) {
+      String name = getFilterName(tag);
+      String value = getFilterValue(tag);
+      
+      if(!map.containsKey(name)) {
+        map.put(name, new ArrayList<String>());
+      }
+      
+      if(!value.trim().equals("")) {
+        map.get(name).add(value);
+      }
+    }
+    
+    return map;
   }
 }
