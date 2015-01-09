@@ -820,7 +820,7 @@ public class StorageAPI extends AbstractAPI {
         return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
       }
       
-      new TagDefinitionAccessor().delete(id);
+      new FileTagEntryAccessor().delete(id);
       
       return new ItemResponse<FileTagEntry>(user.getEmail(), fileTagEntry);
     } catch (ValidationException e) {
