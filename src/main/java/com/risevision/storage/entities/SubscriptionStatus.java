@@ -94,6 +94,10 @@ public class SubscriptionStatus {
     return getStatus() != null && getStatus().equals(Status.SUSPENDED.description);
   }
   
+  public boolean isCompanyNotFound() {
+    return getStatus() != null && getStatus().equals(Status.COMPANY_NOT_FOUND.description);
+  }
+  
   protected static List<String> buildList(Status... values) {
     List<String> result = new ArrayList<String>();
     

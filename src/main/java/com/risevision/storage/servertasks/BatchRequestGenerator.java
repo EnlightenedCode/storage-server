@@ -1,18 +1,20 @@
 package com.risevision.storage.servertasks;
 
-import com.google.api.services.storage.*;
-import com.google.api.client.googleapis.services.AbstractGoogleClient;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.IOException;
-import com.google.api.client.googleapis.batch.*;
+import java.util.logging.Logger;
+
+import com.google.api.client.googleapis.batch.BatchRequest;
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
 import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonErrorContainer;
+import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.GenericData;
-import com.google.api.client.http.HttpHeaders;
-import com.google.api.client.googleapis.json.GoogleJsonErrorContainer;
-import java.util.logging.Logger;
+import com.google.api.services.storage.Storage;
+import com.google.api.services.storage.StorageRequest;
+import com.risevision.storage.servertasks.requestupdater.StorageRequestUpdater;
 
 class BatchRequestGenerator {
   private static final Logger log = Logger.getAnonymousLogger();
