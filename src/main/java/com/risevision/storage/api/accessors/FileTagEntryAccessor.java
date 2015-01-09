@@ -20,11 +20,13 @@ import com.risevision.storage.entities.Timeline;
 
 public class FileTagEntryAccessor extends AbstractAccessor {
   private DatastoreService datastoreService;
+  private AutoTrashTagAccessor autoTrashTagAccessor;
   private Gson gson;
   private DateFormat dateFormat;
 
   public FileTagEntryAccessor() {
     this.datastoreService = DatastoreService.getInstance();
+    this.autoTrashTagAccessor = new AutoTrashTagAccessor();
     this.gson = new Gson();
     this.dateFormat = new SimpleDateFormat("MM/dd/yy hh:mm a");
   }
@@ -91,7 +93,7 @@ public class FileTagEntryAccessor extends AbstractAccessor {
     
     datastoreService.put(fileTagEntry);
     
-    if(timelineEndDate != null) {
+    if(timelineEndDate != null && timeline.isTrash()) {
       AutoTrashTag autoTrashTag = new AutoTrashTag(companyId, objectId, timelineEndDate, user.getEmail());
       
       datastoreService.put(autoTrashTag);
@@ -103,9 +105,27 @@ public class FileTagEntryAccessor extends AbstractAccessor {
   public FileTagEntry get(String id) throws Exception {
     return (FileTagEntry) datastoreService.get(new FileTagEntry(id));
   }
-
+  
   public void delete(String id) throws Exception {
-    datastoreService.delete(new FileTagEntry(id));
+    FileTagEntry fileTagEntry = (FileTagEntry) datastoreService.get(new FileTagEntry(id));
+    
+    if(fileTagEntry != null) {
+      // If the tag type is Timeline and is marked as Trash after expiration, tries to get an AutoTrashTag.
+      // If it exists, it is deleted (only one can exist per companyId-objectId, so no extra checks are needed)
+      if(TagType.valueOf(fileTagEntry.getType()) == TagType.LOOKUP) {
+        Timeline timeline = gson.fromJson(fileTagEntry.getValues().get(0), Timeline.class);
+        
+        if(timeline.isTrash()) {
+          AutoTrashTag autoTrashTag = autoTrashTagAccessor.getByObjectId(fileTagEntry.getCompanyId(), fileTagEntry.getObjectId());
+          
+          if(autoTrashTag != null) {
+            datastoreService.delete(autoTrashTag);
+          }
+        }
+      }
+      
+      datastoreService.delete(fileTagEntry);
+    }
   }
 
   public PagedResult<FileTagEntry> list(String companyId, String search, Integer limit, String sort, String cursor) throws Exception {

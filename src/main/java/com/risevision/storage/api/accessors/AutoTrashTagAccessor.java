@@ -28,8 +28,8 @@ public class AutoTrashTagAccessor extends AbstractAccessor {
     datastoreService.delete(new AutoTrashTag(id));
   }
   
-  public AutoTrashTag getByObjectId(String objectId) {
-    PagedResult<AutoTrashTag> list = datastoreService.list(AutoTrashTag.class, null, null, null, parseQuery("objectId:" + objectId));
+  public AutoTrashTag getByObjectId(String companyId, String objectId) {
+    PagedResult<AutoTrashTag> list = datastoreService.list(AutoTrashTag.class, null, null, null, new Condition("companyId", companyId), new Condition("objectId", objectId));
     
     if(list.getList().size() > 0) {
       return list.getList().get(0);
