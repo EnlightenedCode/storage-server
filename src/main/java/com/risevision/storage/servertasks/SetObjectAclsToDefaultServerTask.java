@@ -22,7 +22,7 @@ public class SetObjectAclsToDefaultServerTask extends BatchServerTask {
     super(gcsClient, params);
     confirmURLParams("bucket");
     bucketName = requestParams.get("bucket")[0];
-    gcsClient = temporaryOverrideToAppIdentityCredential();
+    this.gcsClient = temporaryOverrideToAppIdentityCredential();
   }
 
   public void handleRequest() throws IOException {
