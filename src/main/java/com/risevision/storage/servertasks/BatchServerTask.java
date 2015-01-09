@@ -66,7 +66,7 @@ abstract class BatchServerTask extends ServerTask {
     }
 
     options.method(TaskOptions.Method.valueOf("GET"));
-    QueueFactory.getDefaultQueue().add(options);
+    QueueFactory.getQueue("storageBulkOperations").add(options);
   }
 }
 
