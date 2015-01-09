@@ -112,7 +112,7 @@ public class FileTagEntryAccessor extends AbstractAccessor {
     if(fileTagEntry != null) {
       // If the tag type is Timeline and is marked as Trash after expiration, tries to get an AutoTrashTag.
       // If it exists, it is deleted (only one can exist per companyId-objectId, so no extra checks are needed)
-      if(TagType.valueOf(fileTagEntry.getType()) == TagType.LOOKUP) {
+      if(TagType.valueOf(fileTagEntry.getType()) == TagType.TIMELINE) {
         Timeline timeline = gson.fromJson(fileTagEntry.getValues().get(0), Timeline.class);
         
         if(timeline.isTrash()) {
