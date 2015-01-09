@@ -7,6 +7,12 @@ import com.google.api.services.storage.model.*;
 import com.google.api.services.storage.Storage;
 import com.google.api.client.util.GenericData;
 import com.risevision.storage.ObjectAclFactory;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.googleapis.extensions.appengine.auth.oauth2.AppIdentityCredential;
+import com.risevision.storage.Globals;
+import java.util.Arrays;
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 
 public class SetObjectAclsToDefaultServerTask extends BatchServerTask {
   String bucketName;
@@ -16,6 +22,7 @@ public class SetObjectAclsToDefaultServerTask extends BatchServerTask {
     super(gcsClient, params);
     confirmURLParams("bucket");
     bucketName = requestParams.get("bucket")[0];
+    gcsClient = temporaryOverrideToAppIdentityCredential();
   }
 
   public void handleRequest() throws IOException {
@@ -41,6 +48,16 @@ public class SetObjectAclsToDefaultServerTask extends BatchServerTask {
     iteratingRequest = 
     gcsClient.objects().patch
     (requestParams.get("bucket")[0], "toBeIterated", object);
+  }
+
+  private Storage temporaryOverrideToAppIdentityCredential() {
+    HttpRequestInitializer credential =
+    new AppIdentityCredential(Arrays.asList(Globals.STORAGE_SCOPE));
+
+    return new Storage.Builder
+    (new UrlFetchTransport(), JacksonFactory.getDefaultInstance(), credential)
+    .setApplicationName(Globals.STORAGE_APP_NAME)
+    .build();
   }
 }
 

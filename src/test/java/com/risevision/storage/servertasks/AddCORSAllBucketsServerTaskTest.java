@@ -85,7 +85,7 @@ public class AddCORSAllBucketsServerTaskTest {
 
     LocalTaskQueue ltq = LocalTaskQueueTestConfig.getLocalTaskQueue();
     QueueStateInfo qsi = ltq.getQueueStateInfo()
-                            .get(QueueFactory.getDefaultQueue().getQueueName());
+                            .get(QueueFactory.getQueue("storageBulkOperations").getQueueName());
     assertThat("the task queue is empty", qsi.getTaskInfo().size(), is(0));
 
     task.setupCORSPatchRequest();
@@ -94,7 +94,7 @@ public class AddCORSAllBucketsServerTaskTest {
     task.submitNextTask();
 
     qsi = ltq.getQueueStateInfo()
-                            .get(QueueFactory.getDefaultQueue().getQueueName());
+                            .get(QueueFactory.getQueue("storageBulkOperations").getQueueName());
     assertThat("it queued up a task", qsi.getTaskInfo().size(), is(1));
     helper.tearDown();
   }
