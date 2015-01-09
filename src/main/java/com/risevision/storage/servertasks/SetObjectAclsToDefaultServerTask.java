@@ -22,7 +22,6 @@ public class SetObjectAclsToDefaultServerTask extends BatchServerTask {
     super(gcsClient, params);
     confirmURLParams("bucket");
     bucketName = requestParams.get("bucket")[0];
-    this.gcsClient = temporaryOverrideToAppIdentityCredential();
   }
 
   public void handleRequest() throws IOException {
@@ -48,16 +47,6 @@ public class SetObjectAclsToDefaultServerTask extends BatchServerTask {
     iteratingRequest = 
     gcsClient.objects().patch
     (requestParams.get("bucket")[0], "toBeIterated", object);
-  }
-
-  private Storage temporaryOverrideToAppIdentityCredential() {
-    HttpRequestInitializer credential =
-    new AppIdentityCredential(Arrays.asList(Globals.STORAGE_SCOPE));
-
-    return new Storage.Builder
-    (new UrlFetchTransport(), JacksonFactory.getDefaultInstance(), credential)
-    .setApplicationName(Globals.STORAGE_APP_NAME)
-    .build();
   }
 }
 
