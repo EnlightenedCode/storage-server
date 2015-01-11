@@ -21,7 +21,6 @@ import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
 import com.google.common.base.Strings;
 import com.risevision.storage.Globals;
-import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.QueryParam;
 import com.risevision.storage.gcs.StorageHelper;
 import com.risevision.storage.info.ServiceFailedException;
@@ -193,7 +192,7 @@ public class EnableLogging extends AbstractTask {
 	
 	public static boolean verifyBucketLogging(String companyId) throws ServiceFailedException {
 
-		String bucketName = MediaLibraryService.getBucketName(companyId);
+		String bucketName = Globals.COMPANY_BUCKET_PREFIX + companyId;
 
 		try {
 			
@@ -226,13 +225,7 @@ public class EnableLogging extends AbstractTask {
 	    	
 			throw new ServiceFailedException(e.getStatusCode());
 			
-//	        GoogleJsonError error = e.getDetails();
-//
-//	        log.warning("Error code: " + error.getCode());
-//			log.warning("Error message: " + error.getMessage());
-	        // More error information can be retrieved with error.getErrors().
 	      } catch (HttpResponseException e) {
-	        // No Json body was returned by the API.
 	        log.warning("HTTP Status code: " + e.getStatusCode());
 	        log.warning("HTTP Reason: " + e.getMessage());
 	        
@@ -246,53 +239,6 @@ public class EnableLogging extends AbstractTask {
 	      }
     
 	}
-	
-//	public static boolean verifyBucketLogging(String companyId) throws ServiceFailedException {
-//		boolean enabled = false;
-//
-//		String bucketName = MediaLibraryService.getBucketName(companyId);
-//
-//		enabled = checkBucketLogging(bucketName);
-//
-//		if (!enabled) {
-//			updateBucketLogging(bucketName, true);
-//			
-//			return false;
-//		}
-//		
-//		return true;
-//	}
-
-//	private static boolean checkBucketLogging(String bucketName) throws ServiceFailedException {
-//		MediaLibraryService service = MediaLibraryService.getInstance();
-//
-//		try {
-//			InputStream stream = service.getBucketProperty(bucketName, "logging");
-//			if (stream != null) {
-//				LoggingResponse loggingResponse = new LoggingResponse(stream);
-//				
-//				return loggingResponse.getLogging();
-//			}
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		
-//		return false;
-//	}
-//	
-//	private static void updateBucketLogging(String bucketName, boolean enabled) throws ServiceFailedException {
-//		MediaLibraryService service = MediaLibraryService.getInstance();
-//
-//		try {
-//			String propertyXMLdoc = enabled ? LOGGING_ENABLED_XML.replace("%bucketName%", bucketName) : LOGGING_DISABLED_XML;
-//			
-//			service.updateBucketProperty(bucketName, "logging", propertyXMLdoc);
-//		} catch (ServiceFailedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
 	
 }
 

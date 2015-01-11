@@ -31,15 +31,6 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>ReadLogs</servlet-name>
-		<servlet-class>com.risevision.storage.ReadLogsServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>ReadLogs</servlet-name>
-		<url-pattern>/readLogs</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>LogsJob</servlet-name>
 		<servlet-class>com.risevision.storage.LogsJobServlet</servlet-class>
 	</servlet>

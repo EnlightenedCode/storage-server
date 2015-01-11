@@ -8,7 +8,6 @@ import org.mockito.ArgumentCaptor;
 import static org.junit.Assert.*;
 
 import com.risevision.storage.gcs.StorageService;
-import com.risevision.storage.MediaLibraryService;
 import com.risevision.storage.gcs.GCSMockClientBuilder;
 import com.risevision.storage.gcs.StorageClientMock;
 import com.risevision.storage.info.ServiceFailedException;
