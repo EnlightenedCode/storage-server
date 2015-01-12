@@ -38,11 +38,7 @@ public class EnsureCorrectLogBucketServerTask extends BatchServerTask {
   
   @SuppressWarnings("unchecked")
   protected GenericData filterBuckets(GenericData listResult) throws IOException {
-    GenericData returnResult = new GenericData();
-    returnResult.set("kind", listResult.get("kind"));
-    returnResult.set("nextPageToken", listResult.get("nextPageToken"));
-    returnResult.set("prefixes", listResult.get("prefixes"));
-    
+    GenericData returnResult = listResult.clone();
     List<GenericData> returnItems = new ArrayList<>();
     
     for (GenericData item : (List<GenericData>) listResult.get("items")) {
