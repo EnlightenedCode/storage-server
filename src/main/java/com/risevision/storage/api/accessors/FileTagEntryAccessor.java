@@ -150,6 +150,20 @@ public class FileTagEntryAccessor extends AbstractAccessor {
     
     datastoreService.put((List<?>) updated);
   }
+  
+  public void deleteTagsByObjectId(String companyId, Collection<String> objectIds) {
+    List<FileTagEntry> deleted = new ArrayList<FileTagEntry>();
+    
+    for(String objectId : objectIds) {
+      PagedResult<FileTagEntry> result = datastoreService.list(FileTagEntry.class, null, null, null, "companyId", companyId, "objectId", objectId);
+      
+      for(FileTagEntry entry : result.getList()) {
+        deleted.add(entry);
+      }
+    }
+    
+    datastoreService.delete((List<?>) deleted);
+  }
 
   public PagedResult<FileTagEntry> list(String companyId, String search, Integer limit, String sort, String cursor) throws Exception {
     return datastoreService.list(FileTagEntry.class, limit, sort, cursor, mergeFilters(parseQuery(search), "companyId", companyId));
