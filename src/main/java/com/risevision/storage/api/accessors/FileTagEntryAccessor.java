@@ -3,7 +3,10 @@ package com.risevision.storage.api.accessors;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.appengine.api.users.User;
@@ -126,6 +129,26 @@ public class FileTagEntryAccessor extends AbstractAccessor {
       
       datastoreService.delete(fileTagEntry);
     }
+  }
+  
+  public void updateObjectId(String companyId, Collection<String> objectIds, Collection<String> newObjectIds) {
+    List<FileTagEntry> updated = new ArrayList<FileTagEntry>();
+    Iterator<String> itOld = objectIds.iterator();
+    Iterator<String> itNew = newObjectIds.iterator();
+    
+    for(int i = 0; i < objectIds.size(); i++) {
+      String objectId = itOld.next();
+      String newObjectId = itNew.next();
+      
+      PagedResult<FileTagEntry> result = datastoreService.list(FileTagEntry.class, null, null, null, "companyId", companyId, "objectId", objectId);
+      
+      for(FileTagEntry entry : result.getList()) {
+        entry.setObjectId(newObjectId);
+        updated.add(entry);
+      }
+    }
+    
+    datastoreService.put((List<?>) updated);
   }
 
   public PagedResult<FileTagEntry> list(String companyId, String search, Integer limit, String sort, String cursor) throws Exception {

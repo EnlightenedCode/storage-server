@@ -4,7 +4,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -456,4 +458,25 @@ public class Utils {
     
     return true;
   }
+  
+  public static Collection<String> addPrefix(Collection<String> values, String prefix) {
+    Collection<String> newValues = new ArrayList<String>();
+    
+    for(String value : values) {
+      newValues.add(prefix + value);
+    }
+    
+    return newValues;
+  }
+  
+  public static Collection<String> replaceString(Collection<String> values, String regex, String replacement) {
+    Collection<String> newValues = new ArrayList<String>();
+    
+    for(String value : values) {
+      newValues.add(value.replaceAll(regex, replacement));
+    }
+    
+    return newValues;
+  }
+  
 }

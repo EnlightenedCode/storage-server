@@ -49,13 +49,17 @@ public class DatastoreService {
    }
 
   public Object put(Object entity) {
-      ofy().save().entity(entity).now();
-      
-      return entity;
+    ofy().save().entity(entity).now();
+    
+    return entity;
+  }
+  
+  public void put(List<?> entities) {
+    ofy().save().entities(entities).now();
   }
 
   public Object get(Object entity) {
-      return ofy().load().entity(entity).now();
+    return ofy().load().entity(entity).now();
   }
 
   public Object delete(Object entity) {

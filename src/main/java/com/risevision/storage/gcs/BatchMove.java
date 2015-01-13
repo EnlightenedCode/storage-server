@@ -14,6 +14,9 @@ import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.StorageObject;
+import com.risevision.storage.Globals;
+import com.risevision.storage.Utils;
+import com.risevision.storage.api.accessors.FileTagEntryAccessor;
 import com.risevision.storage.info.ServiceFailedException;
 
 public class BatchMove {
@@ -63,6 +66,7 @@ public class BatchMove {
     errorList = new ArrayList<String>();
     Storage.Objects.List listRequest;
     com.google.api.services.storage.model.Objects listResult;
+    List<String> updatedFiles = new ArrayList<String>();
 
     try {
       for (String item : itemList) {
@@ -82,6 +86,7 @@ public class BatchMove {
                 }
                 else {
                   moveFile(bucketName, prefix, bucketItem, objName, destinationFolder, batchCopy, batchDelete);
+                  updatedFiles.add(objName);
                 }
               }
             }
@@ -99,6 +104,9 @@ public class BatchMove {
       if(batchDelete.size() > 0) {
         batchDelete.execute();
       }
+      
+      new FileTagEntryAccessor().
+        updateObjectId(bucketName.replace(Globals.COMPANY_BUCKET_PREFIX, ""), updatedFiles, Utils.addPrefix(updatedFiles, Globals.TRASH));
     } catch (IOException e) {
       log.warning(e.getMessage());
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
