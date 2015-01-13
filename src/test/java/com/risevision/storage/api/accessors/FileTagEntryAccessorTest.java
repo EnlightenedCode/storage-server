@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.google.appengine.api.users.User;
+import com.risevision.storage.Utils;
 import com.risevision.storage.api.UserCompanyVerifier;
 import com.risevision.storage.api.exception.ValidationException;
 import com.risevision.storage.datastore.DatastoreService.PagedResult;
@@ -48,7 +49,7 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
     
     filename = "unnamed.png";
     name = "test";
-    type =  "Lookup";
+    type =  "LOOKUP";
     values = new LinkedList<String>();
     values.add("value1");
     user = new User("test@gmail.com","example.com");
@@ -208,6 +209,30 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
     
     PagedResult<FileTagEntry> responseFromList = fileTagEntryAccessor.list(companyId, "objectId: file2", 100, null, null);
     
+    assertThat(responseFromList.getList().size(), is(1));
+  }
+
+  @Test
+  public void itShouldRenameObjectIds() throws Exception {
+    PagedResult<FileTagEntry> responseFromList = null;
+    List<String> objs = getList("file1", "file2");
+    
+    tagDefinitionAccessor.put(companyId, "test2", type, getList("value1", "value2"), user);
+    
+    fileTagEntryAccessor.put(companyId, "file1", "test", type, getList("value1"), user);
+    fileTagEntryAccessor.put(companyId, "file1", "test2", type, getList("value2"), user);
+    fileTagEntryAccessor.put(companyId, "file2", "test", type, getList("value1"), user);
+    fileTagEntryAccessor.put(companyId, "file3", "test2", type, getList("value1"), user);
+    
+    fileTagEntryAccessor.updateObjectId(companyId, objs, Utils.addPrefix(objs, "--TRASH--/"));
+    
+    responseFromList = fileTagEntryAccessor.list(companyId, "objectId: --TRASH--/file1", 100, null, null);
+    assertThat(responseFromList.getList().size(), is(2));
+    
+    responseFromList = fileTagEntryAccessor.list(companyId, "objectId: file2", 100, null, null);
+    assertThat(responseFromList.getList().size(), is(0));
+    
+    responseFromList = fileTagEntryAccessor.list(companyId, "objectId: file3", 100, null, null);
     assertThat(responseFromList.getList().size(), is(1));
   }
   
