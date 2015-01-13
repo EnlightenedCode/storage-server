@@ -15,6 +15,7 @@ import com.google.api.client.http.HttpHeaders;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.StorageObject;
 import com.risevision.storage.Globals;
+import com.risevision.storage.ObjectAclFactory;
 import com.risevision.storage.Utils;
 import com.risevision.storage.api.accessors.FileTagEntryAccessor;
 import com.risevision.storage.info.ServiceFailedException;
@@ -144,7 +145,9 @@ public class BatchRestore {
       rebuildParentPath(bucketName, newName);
     }
     
-    storage.objects().copy(bucketName, item.getName(), bucketName, newName, storageObject).setDestinationPredefinedAcl("publicRead")
+    storageObject.setAcl(ObjectAclFactory.getDefaultAcl());
+    
+    storage.objects().copy(bucketName, item.getName(), bucketName, newName, storageObject)
       .queue(batchCopy, new BatchRestoreCallback(item.getName()));
     storage.objects().delete(bucketName, item.getName())
         .queue(batchDelete, new BatchRestoreCallback(item.getName()));
