@@ -57,6 +57,7 @@ public class FileTagEntryAccessor extends AbstractAccessor {
 
     // Make sure all values are in the correct case.
     type = type.toUpperCase();
+    // Also make sure name is lower case.
     name = name.toLowerCase();
     
     if(TagType.valueOf(type) == TagType.LOOKUP) {
@@ -68,6 +69,7 @@ public class FileTagEntryAccessor extends AbstractAccessor {
     }
     
     if(TagType.valueOf(type) == TagType.TIMELINE) {
+      // Verify Timeline definition is valid
       try {
         timeline = gson.fromJson(values.get(0), Timeline.class);
         timelineEndDate = !Utils.isEmpty(timeline.getEndDate()) ? dateFormat.parse(timeline.getEndDate()) : null;
@@ -79,19 +81,19 @@ public class FileTagEntryAccessor extends AbstractAccessor {
         throw new ValidationException("Timeline end date is not valid");
       }
     }
-    
-    // Verify if tag values exist in parent tag definition
-    TagDefinition tagDef = new TagDefinitionAccessor().get(companyId, name, type);
-    
-    if(tagDef == null) {
-      throw new ValidationException("Parent tag definition does not exist");
+    else {
+      // Verify if tag values exist in parent tag definition
+      TagDefinition tagDef = new TagDefinitionAccessor().get(companyId, name, type);
+      
+      if(tagDef == null) {
+        throw new ValidationException("Parent tag definition does not exist");
+      }
+      
+      if(TagType.valueOf(type) == TagType.LOOKUP && (tagDef == null || !Utils.allItemsExist(values, tagDef.getValues()))) {
+        throw new ValidationException("All tag values must exist in the parent tag definition");
+      }
     }
     
-    if(TagType.valueOf(type) == TagType.LOOKUP && (tagDef == null || !Utils.allItemsExist(values, tagDef.getValues()))) {
-      throw new ValidationException("All tag values must exist in the parent tag definition");
-    }
-    
-    // Also make sure name is lower case.
     FileTagEntry fileTagEntry = new FileTagEntry(companyId, objectId, name, type, values, user.getEmail());
     
     datastoreService.put(fileTagEntry);
