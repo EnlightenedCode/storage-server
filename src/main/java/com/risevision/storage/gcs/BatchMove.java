@@ -94,6 +94,7 @@ public class BatchMove {
           } while (null != listResult.getNextPageToken());
         } else {
           moveFile(bucketName, "", storage.objects().get(bucketName, item).execute(), item, destinationFolder, batchCopy, batchDelete);
+          updatedFiles.add(item);
         }
       }
       

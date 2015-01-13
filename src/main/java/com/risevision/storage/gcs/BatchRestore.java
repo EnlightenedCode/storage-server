@@ -86,6 +86,7 @@ public class BatchRestore {
           } while (null != listResult.getNextPageToken());
         } else {
           restoreFile(bucketName, storage.objects().get(bucketName, item).execute(), batchCopy, batchDelete);
+          updatedFiles.add(item);
         }
       }
 
