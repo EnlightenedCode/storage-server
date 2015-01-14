@@ -60,6 +60,11 @@ public class FileTagEntryAccessor extends AbstractAccessor {
     // Also make sure name is lower case.
     name = name.toLowerCase();
     
+    // If values is null, remove the FileTagEntry
+    if(values == null) {
+      return delete(new FileTagEntry(companyId, objectId, type, name, values, user.getEmail()).getId());
+    }
+    
     if(TagType.valueOf(type) == TagType.LOOKUP) {
       Utils.changeValuesToLowerCase(values);
     }
@@ -111,7 +116,7 @@ public class FileTagEntryAccessor extends AbstractAccessor {
     return (FileTagEntry) datastoreService.get(new FileTagEntry(id));
   }
   
-  public void delete(String id) throws Exception {
+  public FileTagEntry delete(String id) throws Exception {
     FileTagEntry fileTagEntry = (FileTagEntry) datastoreService.get(new FileTagEntry(id));
     
     if(fileTagEntry != null) {
@@ -131,6 +136,8 @@ public class FileTagEntryAccessor extends AbstractAccessor {
       
       datastoreService.delete(fileTagEntry);
     }
+    
+    return fileTagEntry;
   }
   
   public void updateObjectId(String companyId, Collection<String> objectIds, Collection<String> newObjectIds) {
