@@ -14,6 +14,10 @@ public class AutoTrashTag extends DatastoreEntity {
   @Index
   private Date expiration;
   
+  public AutoTrashTag() {
+    super();
+  }
+  
   public AutoTrashTag(String id) {
     super(id);
   }

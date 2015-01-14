@@ -14,6 +14,10 @@ public class FileTagEntry extends DatastoreEntity {
   public String name;
   public String type;
   public List<String> values;
+  
+  public FileTagEntry() {
+    super();
+  }
 
   public FileTagEntry(String id) {
       super(id);

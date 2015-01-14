@@ -16,6 +16,10 @@ public class TagDefinition extends DatastoreEntity {
   public String name;
   public String type;
   public List<String> values;
+  
+  public TagDefinition() {
+    super();
+  }
 
   public TagDefinition(String id) {
     super(id);
