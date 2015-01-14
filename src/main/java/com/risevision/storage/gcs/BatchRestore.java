@@ -14,10 +14,7 @@ import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.StorageObject;
-import com.risevision.storage.Globals;
 import com.risevision.storage.ObjectAclFactory;
-import com.risevision.storage.Utils;
-import com.risevision.storage.api.accessors.FileTagEntryAccessor;
 import com.risevision.storage.info.ServiceFailedException;
 
 public class BatchRestore {
@@ -59,7 +56,6 @@ public class BatchRestore {
     errorList = new ArrayList<String>();
     Storage.Objects.List listRequest;
     com.google.api.services.storage.model.Objects listResult;
-    List<String> updatedFiles = new ArrayList<String>();
 
     try {
       for (String item : itemList) {
@@ -78,7 +74,6 @@ public class BatchRestore {
                 }
                 else {
                   restoreFile(bucketName, bucketItem, batchCopy, batchDelete);
-                  updatedFiles.add(objName);
                 }
               }
             }
@@ -86,7 +81,6 @@ public class BatchRestore {
           } while (null != listResult.getNextPageToken());
         } else {
           restoreFile(bucketName, storage.objects().get(bucketName, item).execute(), batchCopy, batchDelete);
-          updatedFiles.add(item);
         }
       }
 
@@ -97,9 +91,6 @@ public class BatchRestore {
       if(batchDelete.size() > 0) {
         batchDelete.execute();
       }
-      
-      new FileTagEntryAccessor().
-        updateObjectId(bucketName.replace(Globals.COMPANY_BUCKET_PREFIX, ""), updatedFiles, Utils.replaceString(updatedFiles, Globals.TRASH, ""));
     } catch (IOException e) {
       log.warning(e.getMessage());
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
