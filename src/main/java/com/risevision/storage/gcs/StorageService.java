@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableList;
 import com.risevision.storage.Globals;
 import com.risevision.storage.ObjectAclFactory;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
-import com.risevision.storage.api.accessors.FileTagEntryAccessor;
 import com.risevision.storage.info.ServiceFailedException;
 
 public final class StorageService {
@@ -248,35 +247,8 @@ public final class StorageService {
   }
 
   public List<String> deleteMediaItems(String bucketName, List<String> items)
-  throws ServiceFailedException {
-    List<String> errorItems = new ArrayList<String>();
-    if (items.size() == 0) {return errorItems;}
-    String plurality = items.size() > 1 ? "s" : "";
-    log.info("Deleting " + Integer.toString(items.size()) +
-             " object" + plurality + " from " + bucketName +
-             " using gcs client library");
-
-    if (items.size() == 1 && items.get(0).endsWith("/") == false) {
-      try {
-        storage.objects().delete(bucketName, items.get(0)).execute();
-        
-        new FileTagEntryAccessor().
-          deleteTagsByObjectId(bucketName.replace(Globals.COMPANY_BUCKET_PREFIX, ""), items);
-      } catch (GoogleJsonResponseException e) {
-        if (e.getDetails().getCode() != ServiceFailedException.NOT_FOUND) {
-          log.warning(e.getDetails().getMessage());
-          errorItems.add(items.get(0));
-        }
-      } catch (IOException e) {
-        log.warning(e.getMessage());
-        errorItems.add(items.get(0));
-      }
-      return errorItems;
-    }
-
-    BatchDelete batchDelete = new BatchDelete(storage);
-    errorItems = batchDelete.deleteFiles(bucketName, items);
-    return errorItems;
+  throws ServiceFailedException {    
+    return new BatchDelete(storage).deleteFiles(bucketName, items);
   }
   
   /**
