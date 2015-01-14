@@ -15,20 +15,17 @@ public class FileTagEntry extends DatastoreEntity {
   public String type;
   public List<String> values;
 
-  public FileTagEntry() {
-      super();
-  }
-
   public FileTagEntry(String id) {
       super(id);
   }
 
-  public FileTagEntry(String companyId, String objectId, String name, String type, List<String> values, String email) {
-      super();
+  public FileTagEntry(String companyId, String objectId, String type, String name, List<String> values, String email) {
+      super(companyId + objectId + type + name);
+      
       this.companyId = companyId;
       this.objectId = objectId;
-      this.name = name;
       this.type = type;
+      this.name = name;
       this.values = values;
       this.setChangedBy(email);
   }
@@ -49,20 +46,20 @@ public class FileTagEntry extends DatastoreEntity {
     this.objectId = objectId;
   }
 
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
   public String getType() {
     return type;
   }
 
   public void setType(String type) {
     this.type = type;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   public List<String> getValues() {

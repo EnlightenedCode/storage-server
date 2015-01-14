@@ -60,8 +60,8 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
     fileTagEntryAccessor = new FileTagEntryAccessor();
     
     try {
-      tagDefinitionAccessor.put(companyId, name, type, getList("value1", "value2"), user);
-      tagDefinitionAccessor.put(companyId2, name, type, getList("value1", "value2", "value3"), user);
+      tagDefinitionAccessor.put(companyId, type, name, getList("value1", "value2"), user);
+      tagDefinitionAccessor.put(companyId2, type, name, getList("value1", "value2", "value3"), user);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -217,7 +217,7 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
     PagedResult<FileTagEntry> responseFromList = null;
     List<String> objs = getList("file1", "file2");
     
-    tagDefinitionAccessor.put(companyId, "test2", type, getList("value1", "value2"), user);
+    tagDefinitionAccessor.put(companyId, type, "test2", getList("value1", "value2"), user);
     
     fileTagEntryAccessor.put(companyId, "file1", "test", type, getList("value1"), user);
     fileTagEntryAccessor.put(companyId, "file1", "test2", type, getList("value2"), user);

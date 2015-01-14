@@ -83,7 +83,7 @@ public class FileTagEntryAccessor extends AbstractAccessor {
     }
     else {
       // Verify if tag values exist in parent tag definition
-      TagDefinition tagDef = new TagDefinitionAccessor().get(companyId, name, type);
+      TagDefinition tagDef = new TagDefinitionAccessor().get(companyId, type, name);
       
       if(tagDef == null) {
         throw new ValidationException("Parent tag definition does not exist");
@@ -94,7 +94,7 @@ public class FileTagEntryAccessor extends AbstractAccessor {
       }
     }
     
-    FileTagEntry fileTagEntry = new FileTagEntry(companyId, objectId, name, type, values, user.getEmail());
+    FileTagEntry fileTagEntry = new FileTagEntry(companyId, objectId, type, name, values, user.getEmail());
     
     datastoreService.put(fileTagEntry);
     

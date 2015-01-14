@@ -618,7 +618,7 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      TagDefinition tagDefinition = new TagDefinitionAccessor().put(companyId, name, type, values, user);
+      TagDefinition tagDefinition = new TagDefinitionAccessor().put(companyId, type, name, values, user);
       
       return new ItemResponse<TagDefinition>(user.getEmail(), tagDefinition);
     } catch (ValidationException e) {

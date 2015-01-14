@@ -19,6 +19,8 @@ public class AutoTrashTag extends DatastoreEntity {
   }
   
   public AutoTrashTag(String companyId, String objectId, Date expiration, String email) {
+    setId(companyId + objectId);
+    
     setCompanyId(companyId);
     setObjectId(objectId);
     setExpiration(expiration);

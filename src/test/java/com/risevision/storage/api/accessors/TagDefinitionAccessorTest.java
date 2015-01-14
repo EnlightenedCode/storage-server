@@ -61,14 +61,14 @@ public class TagDefinitionAccessorTest extends ObjectifyTest {
 
   @Test
   public void itShouldAddATagDefinition() throws Exception {
-    TagDefinition response = tagDefinitionAccessor.put(companyId, name, type, values, user);
+    TagDefinition response = tagDefinitionAccessor.put(companyId, type, name, values, user);
 
     assertThat(response, is(instanceOf(TagDefinition.class)));
   }
 
   @Test
   public void itShouldAddATagDefinitionWithAnUUID() throws Exception {
-    TagDefinition response = tagDefinitionAccessor.put(companyId, name, type, values, user);
+    TagDefinition response = tagDefinitionAccessor.put(companyId, type, name, values, user);
 
     assertThat(response.getId(), is(notNullValue()));
     assertThat(response.getId(), is(instanceOf(String.class)));
@@ -76,7 +76,7 @@ public class TagDefinitionAccessorTest extends ObjectifyTest {
 
   @Test
   public void itShouldAddATagDefinitionWithStatusParameters() throws Exception {
-    TagDefinition response = tagDefinitionAccessor.put(companyId, name, type, values, user);
+    TagDefinition response = tagDefinitionAccessor.put(companyId, type, name, values, user);
 
     assertThat(response.getId(), is(notNullValue()));
     assertThat(response.getCreatedBy(), is(notNullValue()));
@@ -91,7 +91,7 @@ public class TagDefinitionAccessorTest extends ObjectifyTest {
     values.clear();
     values.add("VALUE1");
     values.add("Value2");
-    TagDefinition response = tagDefinitionAccessor.put(companyId, name, type, values, user);
+    TagDefinition response = tagDefinitionAccessor.put(companyId, type, name, values, user);
 
     // check if it saves in lower case
     assertThat(response.getName(), is("test"));
@@ -102,30 +102,30 @@ public class TagDefinitionAccessorTest extends ObjectifyTest {
   @Test(expected = ValidationException.class)
   public void itShouldNotAddATagDefinitionWithoutCompanyId() throws Exception {
     @SuppressWarnings("unused")
-    TagDefinition response = tagDefinitionAccessor.put("", name, type, values, user);
+    TagDefinition response = tagDefinitionAccessor.put("", type, name, values, user);
   }
 
   @Test(expected = ValidationException.class)
   public void itShouldNotAddATagDefinitionWithoutName() throws Exception {
     @SuppressWarnings("unused")
-    TagDefinition response = tagDefinitionAccessor.put(companyId, "", type, values, user);
+    TagDefinition response = tagDefinitionAccessor.put(companyId, type, "", values, user);
   }
 
   @Test(expected = ValidationException.class)
   public void itShouldNotAddATagDefinitionWithoutType() throws Exception {
     @SuppressWarnings("unused")
-    TagDefinition response = tagDefinitionAccessor.put(companyId, name, "", values, user);
+    TagDefinition response = tagDefinitionAccessor.put(companyId, "", name, values, user);
   }
 
   @Test(expected = ValidationException.class)
   public void itShouldNotAddAFreeformTagDefinitionWithValues() throws Exception {
     @SuppressWarnings("unused")
-    TagDefinition response = tagDefinitionAccessor.put(companyId, name, "Freeform", values, user);
+    TagDefinition response = tagDefinitionAccessor.put(companyId, "Freeform", name, values, user);
   }
 
   @Test
   public void itShouldRetrieveATagDefinitionById() throws Exception {
-    TagDefinition responseFromAdd = tagDefinitionAccessor.put(companyId, name, type, values, user);
+    TagDefinition responseFromAdd = tagDefinitionAccessor.put(companyId, type, name, values, user);
 
     String id = responseFromAdd.getId();
 
@@ -136,7 +136,7 @@ public class TagDefinitionAccessorTest extends ObjectifyTest {
 
   @Test
   public void itShouldDeleteATagDefinitionById() throws Exception {
-    TagDefinition responseFromAdd = tagDefinitionAccessor.put(companyId, name, type, values, user);
+    TagDefinition responseFromAdd = tagDefinitionAccessor.put(companyId, type, name, values, user);
 
     String id = responseFromAdd.getId();
     
@@ -151,9 +151,9 @@ public class TagDefinitionAccessorTest extends ObjectifyTest {
   public void itShouldFindTwoElementsByCompanyId() throws Exception {
     String companyId2 = "4598acdf-e2e5-72da-b2d1-20bd28b7fbf5";
     
-    tagDefinitionAccessor.put(companyId, "test1", type, getList("test_value1"), user);
-    tagDefinitionAccessor.put(companyId, "test2", type, getList("test_value2"), user);
-    tagDefinitionAccessor.put(companyId2, "test3", type, getList("test_value3"), user);
+    tagDefinitionAccessor.put(companyId, type, "test1", getList("test_value1"), user);
+    tagDefinitionAccessor.put(companyId, type, "test2", getList("test_value2"), user);
+    tagDefinitionAccessor.put(companyId2, type, "test3", getList("test_value3"), user);
     
     PagedResult<TagDefinition> responseFromList = tagDefinitionAccessor.list(companyId, null, 100, null, null);
     
