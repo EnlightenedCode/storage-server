@@ -12,6 +12,7 @@ import com.google.api.client.http.HttpHeaders;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.StorageObject;
 import com.risevision.storage.Globals;
+import com.risevision.storage.Utils;
 import com.risevision.storage.api.accessors.FileTagEntryAccessor;
 import com.risevision.storage.info.ServiceFailedException;
 
@@ -90,7 +91,7 @@ public class BatchDelete {
       }
       
       new FileTagEntryAccessor().
-        deleteTagsByObjectId(bucketName.replace(Globals.COMPANY_BUCKET_PREFIX, ""), deletedFiles);
+        deleteTagsByObjectId(bucketName.replace(Globals.COMPANY_BUCKET_PREFIX, ""), Utils.replaceString(deletedFiles, Globals.TRASH, ""));
     } catch (IOException e) {
       log.warning(e.getMessage());
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
