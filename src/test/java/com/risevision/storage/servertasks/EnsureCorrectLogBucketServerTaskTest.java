@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.dev.LocalTaskQueue;
@@ -53,7 +55,7 @@ public class EnsureCorrectLogBucketServerTaskTest {
     LocalTaskQueue ltq = LocalTaskQueueTestConfig.getLocalTaskQueue();
     QueueStateInfo qsi = ltq.getQueueStateInfo()
                             .get(QueueFactory.getQueue("storageBulkOperations").getQueueName());
-    //assertThat("the task queue is empty", qsi.getTaskInfo().size(), is(0));
+    assertThat("the task queue is empty", qsi.getTaskInfo().size(), is(0));
     
     task.setListResult();
     task.prepareBatchRequest();
@@ -61,7 +63,7 @@ public class EnsureCorrectLogBucketServerTaskTest {
 
     qsi = ltq.getQueueStateInfo()
                             .get(QueueFactory.getQueue("storageBulkOperations").getQueueName());
-    //assertThat("it queued up a task", qsi.getTaskInfo().size(), is(1));
+    assertThat("it queued up a task", qsi.getTaskInfo().size(), is(1));
     helper.tearDown();
   }
 
@@ -76,7 +78,7 @@ public class EnsureCorrectLogBucketServerTaskTest {
     task.setListResult();
     task.prepareBatchRequest();
     
-    //assertThat("it batched a single update", task.batchRequest.size(), is(1));
+    assertThat("it batched a single update", task.batchRequest.size(), is(1));
   }
   
   protected String getListResponse(boolean nextPage) {
