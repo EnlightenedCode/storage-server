@@ -4,32 +4,45 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
+
+import org.mortbay.log.Log;
 
 import com.google.api.client.googleapis.batch.BatchRequest;
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.http.*;
+import com.google.api.client.http.ByteArrayContent;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.storage.Storage;
-import com.google.api.services.storage.model.*;
+import com.google.api.services.storage.model.Bucket;
+import com.google.api.services.storage.model.BucketAccessControl;
+import com.google.api.services.storage.model.StorageObject;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.risevision.storage.Globals;
+import com.risevision.storage.ObjectAclFactory;
 import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
 import com.risevision.storage.info.ServiceFailedException;
-import com.risevision.storage.ObjectAclFactory;
-import com.google.appengine.api.taskqueue.TaskOptions;
-import com.google.appengine.api.taskqueue.QueueFactory;
 
 public final class StorageService {
   static Storage storage;
+  private Map<String, Boolean> existingBuckets;
   protected static final Logger log = Logger.getAnonymousLogger();
 
   public StorageService(Storage storage) {
     this.storage = storage;
+    this.existingBuckets = new HashMap<String, Boolean>();
   }
 
   public ListAllMyBucketsResponse getAllMyBuckets()
@@ -45,6 +58,30 @@ public final class StorageService {
   public String getBucketPropertyString(String bucketName, String property)
   throws ServiceFailedException {
     return null;
+  }
+  
+  public boolean bucketExists(String bucketName) throws ServiceFailedException {
+    if(!existingBuckets.containsKey(bucketName)) {
+      try {
+        storage.buckets().get(bucketName).execute();
+        existingBuckets.put(bucketName, true);
+      }
+      catch (GoogleJsonResponseException e) {
+        if (e.getStatusCode() == ServiceFailedException.NOT_FOUND) {
+          existingBuckets.put(bucketName, false);
+        }
+        else {
+          Log.warn("bucketExists", e);
+          throw new ServiceFailedException(e.getStatusCode());
+        }
+      }
+      catch (IOException e) {
+        Log.warn("bucketExists", e);
+        throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
+      }
+    }
+    
+    return existingBuckets.get(bucketName);
   }
 
   public List<StorageObject> getBucketItems(String bucketName,
@@ -162,6 +199,7 @@ public final class StorageService {
 
     try {
       storage.buckets().insert(Globals.PROJECT_ID, newBucket).execute();
+      existingBuckets.put(bucketName, true);
     } catch (IOException e) {
       log.warning(e.getMessage());
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
@@ -176,6 +214,7 @@ public final class StorageService {
 
     try {
       storage.buckets().delete(bucketName).execute();
+      existingBuckets.put(bucketName, false);
     } catch (IOException e) {
       log.warning(e.getMessage());
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
