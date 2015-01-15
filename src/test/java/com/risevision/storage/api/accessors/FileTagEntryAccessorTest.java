@@ -75,14 +75,14 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
 
   @Test
   public void itShouldAddATagDefinition() throws Exception {
-    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, name, type, values, user);
+    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, type, name, values, user);
 
     assertThat(response, is(instanceOf(FileTagEntry.class)));
   }
 
   @Test
   public void itShouldAddATagDefinitionWithAnUUID() throws Exception {
-    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, name, type, values, user);
+    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, type, name, values, user);
 
     assertThat(response.getId(), is(notNullValue()));
     assertThat(response.getId(), is(instanceOf(String.class)));
@@ -90,7 +90,7 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
 
   @Test
   public void itShouldAddATagDefinitionWithStatusParameters() throws Exception {
-    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, name, type, values, user);
+    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, type, name, values, user);
 
     assertThat(response.getId(), is(notNullValue()));
     assertThat(response.getCreatedBy(), is(notNullValue()));
@@ -105,7 +105,7 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
     values.clear();
     values.add("VALUE1");
     values.add("Value2");
-    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, name, type, values, user);
+    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, type, name, values, user);
 
     // check if it saves in lower case
     assertThat(response.getName(), is("test"));
@@ -116,25 +116,25 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
   @Test(expected = ValidationException.class)
   public void itShouldNotAddATagDefinitionWithoutCompanyId() throws Exception {
     @SuppressWarnings("unused")
-    FileTagEntry response = fileTagEntryAccessor.put("", filename, name, type, values, user);
+    FileTagEntry response = fileTagEntryAccessor.put("", filename, type, name, values, user);
   }
 
   @Test(expected = ValidationException.class)
   public void itShouldNotAddATagDefinitionWithoutObjectId() throws Exception {
     @SuppressWarnings("unused")
-    FileTagEntry response = fileTagEntryAccessor.put(companyId, "", name, type, values, user);
+    FileTagEntry response = fileTagEntryAccessor.put(companyId, "", type, name, values, user);
   }
 
   @Test(expected = ValidationException.class)
   public void itShouldNotAddATagDefinitionWithoutName() throws Exception {
     @SuppressWarnings("unused")
-    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, "", type, values, user);
+    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, type, "", values, user);
   }
 
   @Test(expected = ValidationException.class)
   public void itShouldNotAddATagDefinitionWithoutType() throws Exception {
     @SuppressWarnings("unused")
-    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, name, "", values, user);
+    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, "", name, values, user);
   }
 
   @Test(expected = ValidationException.class)
@@ -143,7 +143,7 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
     values.add("value5");
     
     @SuppressWarnings("unused")
-    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, name, type, values, user);
+    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, type, name, values, user);
   }
 
   @Test(expected = ValidationException.class)
@@ -151,7 +151,7 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
     values.clear();
     
     @SuppressWarnings("unused")
-    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, name, "Freeform", values, user);
+    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, "Freeform", name, values, user);
   }
 
   @Test(expected = Exception.class)
@@ -161,12 +161,12 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
     values.add("value2");
     
     @SuppressWarnings("unused")
-    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, name, "Freeform", values, user);
+    FileTagEntry response = fileTagEntryAccessor.put(companyId, filename, "Freeform", name, values, user);
   }
   
   @Test
   public void itShouldRetrieveATagDefinitionById() throws Exception {
-    FileTagEntry responseFromAdd = fileTagEntryAccessor.put(companyId, filename, name, type, values, user);
+    FileTagEntry responseFromAdd = fileTagEntryAccessor.put(companyId, filename, type, name, values, user);
 
     String id = responseFromAdd.getId();
 
@@ -177,7 +177,7 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
 
   @Test
   public void itShouldDeleteATagDefinitionById() throws Exception {
-    FileTagEntry responseFromAdd = fileTagEntryAccessor.put(companyId, filename, name, type, values, user);
+    FileTagEntry responseFromAdd = fileTagEntryAccessor.put(companyId, filename, type, name, values, user);
 
     String id = responseFromAdd.getId();
     
@@ -190,9 +190,9 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
 
   @Test
   public void itShouldFindTwoElementsByCompanyId() throws Exception {
-    fileTagEntryAccessor.put(companyId, "file1", "test", type, getList("value1"), user);
-    fileTagEntryAccessor.put(companyId, "file2", "test", type, getList("value1"), user);
-    fileTagEntryAccessor.put(companyId2, "file3", "test", type, getList("value1"), user);
+    fileTagEntryAccessor.put(companyId, "file1", type, "test", getList("value1"), user);
+    fileTagEntryAccessor.put(companyId, "file2", type, "test", getList("value1"), user);
+    fileTagEntryAccessor.put(companyId2, "file3", type, "test", getList("value1"), user);
     
     PagedResult<FileTagEntry> responseFromList = fileTagEntryAccessor.list(companyId, null, 100, null, null);
     
@@ -203,9 +203,9 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
   public void itShouldFindTwoElementsBySearchFilter() throws Exception {
     String companyId2 = "4598acdf-e2e5-72da-b2d1-20bd28b7fbf5";
     
-    fileTagEntryAccessor.put(companyId, "file1", "test", type, getList("value1"), user);
-    fileTagEntryAccessor.put(companyId, "file2", "test", type, getList("value1"), user);
-    fileTagEntryAccessor.put(companyId2, "file3", "test", type, getList("value1"), user);
+    fileTagEntryAccessor.put(companyId, "file1", type, "test", getList("value1"), user);
+    fileTagEntryAccessor.put(companyId, "file2", type, "test", getList("value1"), user);
+    fileTagEntryAccessor.put(companyId2, "file3", type, "test", getList("value1"), user);
     
     PagedResult<FileTagEntry> responseFromList = fileTagEntryAccessor.list(companyId, "objectId: file2", 100, null, null);
     
@@ -219,10 +219,10 @@ public class FileTagEntryAccessorTest extends ObjectifyTest {
     
     tagDefinitionAccessor.put(companyId, type, "test2", getList("value1", "value2"), user);
     
-    fileTagEntryAccessor.put(companyId, "file1", "test", type, getList("value1"), user);
-    fileTagEntryAccessor.put(companyId, "file1", "test2", type, getList("value2"), user);
-    fileTagEntryAccessor.put(companyId, "file2", "test", type, getList("value1"), user);
-    fileTagEntryAccessor.put(companyId, "file3", "test2", type, getList("value1"), user);
+    fileTagEntryAccessor.put(companyId, "file1", type, "test", getList("value1"), user);
+    fileTagEntryAccessor.put(companyId, "file1", type, "test2", getList("value2"), user);
+    fileTagEntryAccessor.put(companyId, "file2", type, "test", getList("value1"), user);
+    fileTagEntryAccessor.put(companyId, "file3", type, "test2", getList("value1"), user);
     
     fileTagEntryAccessor.updateObjectId(companyId, objs, Utils.addPrefix(objs, "--TRASH--/"));
     

@@ -23,18 +23,16 @@ import com.risevision.storage.entities.Timeline;
 
 public class FileTagEntryAccessor extends AbstractAccessor {
   private DatastoreService datastoreService;
-  private AutoTrashTagAccessor autoTrashTagAccessor;
   private Gson gson;
   private DateFormat dateFormat;
 
   public FileTagEntryAccessor() {
     this.datastoreService = DatastoreService.getInstance();
-    this.autoTrashTagAccessor = new AutoTrashTagAccessor();
     this.gson = new Gson();
     this.dateFormat = new SimpleDateFormat("MM/dd/yy hh:mm a");
   }
 
-  public FileTagEntry put(String companyId, String objectId, String name, String type, List<String> values, User user) throws Exception {
+  public FileTagEntry put(String companyId, String objectId, String type, String name, List<String> values, User user) throws Exception {
     Timeline timeline = null;
     Date timelineEndDate = null;
     
@@ -103,10 +101,15 @@ public class FileTagEntryAccessor extends AbstractAccessor {
     
     datastoreService.put(fileTagEntry);
     
-    if(timelineEndDate != null && timeline.isTrash()) {
+    if(TagType.valueOf(type) == TagType.TIMELINE) {
       AutoTrashTag autoTrashTag = new AutoTrashTag(companyId, objectId, timelineEndDate, user.getEmail());
       
-      datastoreService.put(autoTrashTag);
+      if(timelineEndDate != null && timeline.isTrash()) {
+        datastoreService.put(autoTrashTag);
+      }
+      else {
+        datastoreService.delete(autoTrashTag);
+      }
     }
     
     return fileTagEntry;
@@ -126,11 +129,7 @@ public class FileTagEntryAccessor extends AbstractAccessor {
         Timeline timeline = gson.fromJson(fileTagEntry.getValues().get(0), Timeline.class);
         
         if(timeline.isTrash()) {
-          AutoTrashTag autoTrashTag = autoTrashTagAccessor.getByObjectId(fileTagEntry.getCompanyId(), fileTagEntry.getObjectId());
-          
-          if(autoTrashTag != null) {
-            datastoreService.delete(autoTrashTag);
-          }
+          datastoreService.delete(new AutoTrashTag(fileTagEntry.getCompanyId(), fileTagEntry.getObjectId(), null, null));
         }
       }
       
