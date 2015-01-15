@@ -8,8 +8,6 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import java.util.logging.Logger;
-
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.dev.LocalTaskQueue;
 import com.google.appengine.api.taskqueue.dev.QueueStateInfo;
@@ -18,13 +16,10 @@ import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.risevision.storage.gcs.GCSMockClientBuilder;
 
 public class EnsureCorrectLogBucketServerTaskTest {
-  protected static final Logger log = Logger.getAnonymousLogger();
-
   Map<String, String[]> requestParams = new HashMap<>();
 
   @Test (expected = IOException.class)
   public void itThrowsOnServerError() throws IOException {
-    log.info("Verifying throws on error");
     EnsureCorrectLogBucketServerTask task = new EnsureCorrectLogBucketServerTask
     (new GCSMockClientBuilder(404).build(), requestParams);
     
@@ -32,7 +27,6 @@ public class EnsureCorrectLogBucketServerTaskTest {
   }
 
   @Test public void itBatchesRequestsWithNoPageToken() throws IOException {
-    log.info("handles page token");
     String listResponse = getListResponse(false);
     
     requestParams.put("maxResults", new String[] {"50"});
@@ -48,7 +42,6 @@ public class EnsureCorrectLogBucketServerTaskTest {
   @Test public void itSubmitsNextTaskWithPageToken() throws IOException {
     String listResponse = getListResponse(true);
     
-    log.info("submits into task queue");
     requestParams.put("maxResults", new String[] {"50"});
 
     EnsureCorrectLogBucketServerTask task = new EnsureCorrectLogBucketServerTask
@@ -74,7 +67,6 @@ public class EnsureCorrectLogBucketServerTaskTest {
   }
 
   @Test public void itBatchesOnlyOneItem() throws IOException {
-    log.info("batches only one item");
     String listResponse = getListResponse(false);
     
     requestParams.put("maxResults", new String[] {"50"});
@@ -98,7 +90,7 @@ public class EnsureCorrectLogBucketServerTaskTest {
                 "\"kind\": \"storage#bucket\"," + 
                 "\"name\": \"risemedialibrary-subscribedBucketName\"," +
                 "\"cors\": []," +
-                "\"logging\":{\"logBucket\":\"rise-storage-logs\",\"logObjectPrefix\":\"risemedialibrary-subscribedBucketName\"}" +
+                "\"logging\":{\"logBucket\":\"bad-log-bucket\",\"logObjectPrefix\":\"risemedialibrary-subscribedBucketName\"}" +
               "}," +
               "{" +
                 "\"kind\": \"storage#bucket\"," + 
