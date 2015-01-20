@@ -146,7 +146,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    checkPublicReadPermission("test1", false);
+    checkPublicReadObject("test1");
   });
 
   casper.then(function() {
@@ -154,11 +154,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    var resp = casper.evaluate(function() {
-      return JSON.parse(document.getElementById("response").innerHTML);
-    });
-    casper.test.assert
-    (resp.code === 401 , "Public read denied.");
+    casper.test.assertSelectorHasText("#response", "Not Found");
   });
 
   casper.then(function() {
@@ -171,7 +167,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    checkPublicReadPermission("test1", true);
+    checkPublicReadObject("test1");
   });
 
   casper.then(function() {
@@ -179,10 +175,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    var resp = casper.evaluate(function() {
-      return JSON.parse(document.getElementById("response").innerHTML);
-    });
-    casper.test.assert(resp.kind === "storage#object", "Public read granted.");
+    casper.test.assertSelectorHasText("#response", "READER");
   });
 
   casper.then(function() {
@@ -301,7 +294,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    checkPublicReadPermission("test2", false);
+    checkPublicReadObject("test2");
   });
 
   casper.then(function() {
@@ -309,11 +302,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    var resp = casper.evaluate(function() {
-      return JSON.parse(document.getElementById("response").innerHTML);
-    });
-    casper.test.assert
-    (resp.code === 401 , "Public read denied.");
+    this.test.assertSelectorHasText("#response", "Not Found");
   });
 
   casper.then(function() {
@@ -326,7 +315,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    checkPublicReadPermission("test2", true);
+    checkPublicReadObject("test2");
   });
 
   casper.then(function() {
@@ -334,10 +323,7 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    var resp = casper.evaluate(function() {
-      return JSON.parse(document.getElementById("response").innerHTML);
-    });
-    casper.test.assert(resp.kind === "storage#object", "Public read granted.");
+    this.test.assertSelectorHasText("#response", "READER");
   });
 
   casper.then(function() {
@@ -634,37 +620,9 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
     test.done();
   });
 
-  function checkPublicReadPermission(filename, passfail, attemptNumber) {
-    var uri = casper.getHTML("#bucketPath") + "/o/" + filename;
-    var curl;
-
-    if (attemptNumber === undefined) {attemptNumber = 0;}
-    attemptNumber += 1;
-
-    casper.evaluate(function() {
-      document.getElementById("response").style.display = "none";
-    });
-
-    repetitivePermissionCheck(attemptNumber);
-
-    function repetitivePermissionCheck(attemptNumber) {
-      console.log("permission check number " + attemptNumber);
-      console.log("uri:" + uri);
-      curl = require("child_process").spawn("curl", uri);
-      curl.stdout.on("data", function(data) {
-        var jsonResponse = JSON.parse(data);
-        console.log("public read result: " + JSON.stringify(jsonResponse));
-        if ((passfail === true && jsonResponse.kind !== undefined) ||
-            (passfail === false && jsonResponse.error !== undefined) ||
-            (attemptNumber > 50)) {
-          casper.evaluate(function(resp) {
-            document.getElementById("response").innerHTML = JSON.stringify(resp);
-            document.getElementById("response").style.display = "inline";
-          }, jsonResponse);
-        } else {
-          setTimeout(function() {repetitivePermissionCheck(attemptNumber + 1);}, 6000);
-        }
-      });
-    }
+  function checkPublicReadObject(obj) {
+    casper.evaluate(function (obj) {
+      checkPublicReadObject(obj);
+    }, obj);
   }
 });
