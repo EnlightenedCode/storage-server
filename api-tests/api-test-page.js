@@ -302,3 +302,19 @@ function removePublicReadBucket() {
   initiateServerTask("RemovePublicReadBucket",
   {bucket: "risemedialibrary-" + jenkinsCompany});
 }
+
+function checkPublicReadObject(obj) {
+  var uri = document.getElementById("bucketPath").innerHTML + "/o/" + obj + "/acl/allUsers";
+  var requestObj = {"path": uri};
+
+  responseId.style.display = "none";
+
+  gapi.client.request(requestObj)
+  .then(function(resp) {
+    responseId.innerHTML = JSON.stringify(resp);
+    responseId.style.display = "inline";
+  }, function(resp) {
+    responseId.innerHTML = JSON.stringify(resp);
+    responseId.style.display = "inline";
+  });
+}
