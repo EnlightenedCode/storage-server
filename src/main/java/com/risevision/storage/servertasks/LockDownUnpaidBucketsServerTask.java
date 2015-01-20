@@ -1,19 +1,25 @@
 package com.risevision.storage.servertasks;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.api.services.bigquery.model.GetQueryResultsResponse;
+import com.google.api.services.bigquery.model.QueryResponse;
+import com.google.api.services.bigquery.model.TableRow;
 import com.google.api.services.storage.Storage;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 import com.risevision.storage.Globals;
 import com.risevision.storage.api.SubscriptionStatusFetcher;
 import com.risevision.storage.api.impl.SubscriptionStatusFetcherImpl;
 import com.risevision.storage.entities.SubscriptionStatus;
 import com.risevision.storage.gcs.ActiveBucketFetcher;
 import com.risevision.storage.gcs.impl.ActiveBucketFetcherImpl;
+import com.risevision.storage.info.ServiceFailedException;
 
-public class LockDownUnpaidBucketsServerTask extends ServerTask {
+public class LockDownUnpaidBucketsServerTask extends BatchServerTask {
   private ActiveBucketFetcher activeBucketFetcher;
   private SubscriptionStatusFetcher statusFetcher;
   private int days;
@@ -27,53 +33,52 @@ public class LockDownUnpaidBucketsServerTask extends ServerTask {
     
     confirmURLParams("days");
     
-    setActiveBucketFetcher(activeBucketFetcher);
-    setStatusFetcher(statusFetcher);
-    setDays(new Integer(params.get("days")[0]));
+    this.activeBucketFetcher = activeBucketFetcher;
+    this.statusFetcher = statusFetcher;
+    this.days = new Integer(params.get("days")[0]);
   }
 
   @Override
   void handleRequest() throws IOException {
-    try {
-      List<String> companies = getActiveBucketFetcher().execute(getDays());
-      
-      for(String company : companies) {
-        SubscriptionStatus status = getStatusFetcher().getSubscriptionStatus(company);
-        
+    List<TaskOptions> taskList = new ArrayList<>();
+    List<TableRow> rows;
+
+    if (pageToken == null) {
+      listResult = activeBucketFetcher.getResults(days, maxResults);
+      rows = ((QueryResponse)listResult).getRows();
+    } else {
+      listResult = activeBucketFetcher.getPagedResults
+      (requestParams.get("jobId")[0], maxResults, pageToken);
+      rows = ((GetQueryResultsResponse)listResult).getRows();
+    }
+
+    if (rows == null) {
+      log.info("No active buckets");
+      return;
+    }
+
+    for(TableRow row : rows) {
+      String companyId = (String) row.getF().get(0).getV();
+
+      try {
+        SubscriptionStatus status = statusFetcher.getSubscriptionStatus(companyId);
         if(!status.isActive()) {
-          Map<String, String[]> params = new HashMap<String, String[]>();
-          
-          params.put("bucket", new String[] { Globals.COMPANY_BUCKET_PREFIX + company });
-          new RemovePublicReadBucketServerTask(getGcsClient(), params).handleRequest();
+          taskList.add(makeTask(companyId));
         }
+      } catch (ServiceFailedException e) {
+        throw new IOException("SubscriptionStatusFetcher error");
       }
     }
-    catch (Exception e) {
-      throw new IOException(e);
-    }
-  }
-  
-  public ActiveBucketFetcher getActiveBucketFetcher() {
-    return activeBucketFetcher;
-  }
-  
-  public void setActiveBucketFetcher(ActiveBucketFetcher activeBucketFetcher) {
-    this.activeBucketFetcher = activeBucketFetcher;
+    
+    QueueFactory.getQueue("storageBulkOperations").add(taskList);
+
+    submitNextTask();
   }
 
-  public SubscriptionStatusFetcher getStatusFetcher() {
-    return statusFetcher;
-  }
-
-  public void setStatusFetcher(SubscriptionStatusFetcher statusFetcher) {
-    this.statusFetcher = statusFetcher;
-  }
-
-  public int getDays() {
-    return days;
-  }
-
-  public void setDays(int days) {
-    this.days = days;
+  private TaskOptions makeTask(String companyId) {
+    return TaskOptions.Builder.withUrl("/servertask")
+    .method(TaskOptions.Method.valueOf("GET"))
+    .param("task", "RemovePublicReadBucket")
+    .param("bucket", Globals.COMPANY_BUCKET_PREFIX + companyId);
   }
 }

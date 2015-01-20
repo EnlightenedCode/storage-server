@@ -58,7 +58,13 @@ abstract class BatchServerTask extends ServerTask {
       }
     }
 
+    GenericData bqJobReference = (GenericData) listResult.get("jobReference");
+    if (requestParams.get("jobId") == null && bqJobReference != null) {
+      options.param("jobId", (String)bqJobReference.get("jobId"));
+    }
+
     options.param("pageToken", (String)listResult.get("nextPageToken"));
+
     if (requestParams.get("task") == null) {
       String className = this.getClass().getSimpleName();
       String taskName = className.substring(0, className.lastIndexOf("ServerTask"));

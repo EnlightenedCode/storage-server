@@ -10,6 +10,7 @@ import com.risevision.storage.info.ServiceFailedException;
 
 public class SubscriptionStatusFetcherMock implements SubscriptionStatusFetcher {
   private Map<String, String> status;
+  private boolean mockFailure = false;
   
   public SubscriptionStatusFetcherMock() {
     status = new HashMap<String, String>();
@@ -25,6 +26,12 @@ public class SubscriptionStatusFetcherMock implements SubscriptionStatusFetcher 
   
   @Override
   public SubscriptionStatus getSubscriptionStatus(String companyId) throws ServiceFailedException {
+    if (mockFailure) {throw new ServiceFailedException();}
     return new Gson().fromJson(status.get(companyId), SubscriptionStatus.class);
+  }
+
+  public SubscriptionStatusFetcherMock mockFailure() {
+    mockFailure = true;
+    return this;
   }
 }
