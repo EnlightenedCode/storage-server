@@ -90,6 +90,7 @@ public class StorageAPI extends AbstractAPI {
     SubscriptionStatus status = subscriptionStatusFetcher.getSubscriptionStatus(companyId);
     
     if(!status.isActive()) {
+      log.info("Subscription is not active");
       throw new ServiceFailedException(ServiceFailedException.FORBIDDEN);
     }
   }
@@ -200,7 +201,11 @@ public class StorageAPI extends AbstractAPI {
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
       verifyActiveSubscription(companyId);
+    } catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "User not permitted");
+    }
 
+    try {
       gcsService.enablePublicRead(companyId);
 
       result.result = true;
