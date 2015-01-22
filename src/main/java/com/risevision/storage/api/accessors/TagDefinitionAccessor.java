@@ -1,6 +1,7 @@
 package com.risevision.storage.api.accessors;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.google.appengine.api.users.User;
@@ -49,7 +50,9 @@ public class TagDefinitionAccessor extends AbstractAccessor {
       throw new ValidationException("Lookup tags must have predefined values");
     }
 
+    // Convert to lower case an remove duplicates
     Utils.changeValuesToLowerCase(values);
+    values = new ArrayList<String>(new LinkedHashSet<String>(values));
 
     TagDefinition tagDefinition = new TagDefinition(companyId, type, name, values, user.getEmail());
     datastoreService.put(tagDefinition);

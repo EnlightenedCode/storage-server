@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.google.appengine.api.users.User;
@@ -64,7 +65,9 @@ public class FileTagEntryAccessor extends AbstractAccessor {
     }
     
     if(TagType.valueOf(type) == TagType.LOOKUP) {
+      // Convert to lower case an remove duplicates
       Utils.changeValuesToLowerCase(values);
+      values = new ArrayList<String>(new LinkedHashSet<String>(values));
     }
     
     if(TagType.valueOf(type) == TagType.FREEFORM && values.size() != 1) {
