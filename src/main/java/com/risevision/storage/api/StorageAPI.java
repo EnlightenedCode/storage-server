@@ -240,10 +240,18 @@ public class StorageAPI extends AbstractAPI {
     
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
-    } catch (ServiceFailedException e) {
+    }
+    catch (ServiceFailedException e) {
       return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "delete-verify-company", user.getEmail());
     }
-
+    
+    try {
+      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "delete-content-producer", user.getEmail());
+    }
+    
     try {
       gcsService.deleteMediaItems(Globals.COMPANY_BUCKET_PREFIX + companyId,
                                   files);
@@ -288,6 +296,13 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
+      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "folder-content-producer", user.getEmail());
+    }
+    
+    try {
       verifyAndCreateBucket(companyId, user, "folder");
     }
     catch (ServiceFailedException e) {
@@ -321,13 +336,11 @@ public class StorageAPI extends AbstractAPI {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
 
-    String bucketName; 
-
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
       initiateTrial(companyId);
 
-      bucketName = Globals.COMPANY_BUCKET_PREFIX + companyId;
+      String bucketName = Globals.COMPANY_BUCKET_PREFIX + companyId;
 
       gcsService.createBucket(bucketName);
 
@@ -451,6 +464,13 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
+      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "upload-content-producer", user.getEmail());
+    }
+    
+    try {
       verifyAndCreateBucket(companyId, user, "upload");
     }
     catch (ServiceFailedException e) {
@@ -506,6 +526,13 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
+      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "signed-url-content-producer", user.getEmail());
+    }
+    
+    try {
       log.info("Requesting signed download uri for " + result.userEmail);
       result.message = gcsService.getSignedDownloadURI(Globals.COMPANY_BUCKET_PREFIX +
                                                        companyId,
@@ -537,7 +564,19 @@ public class StorageAPI extends AbstractAPI {
 
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "trash-verify-company", user.getEmail());
+    }
+    
+    try {
+      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "trash-content-producer", user.getEmail());
+    }
 
+    try {
       gcsService.moveToTrash(Globals.COMPANY_BUCKET_PREFIX + companyId, files);
 
       log.info("Move to trash complete");
@@ -573,10 +612,22 @@ public class StorageAPI extends AbstractAPI {
     catch (ServiceFailedException e) {
       return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "restore-inactive-subscription", user.getEmail());
     }
-
+    
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
-      
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "restore-verify-company", user.getEmail());
+    }
+    
+    try {
+      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "restore-content-producer", user.getEmail());
+    }
+
+    try {
       gcsService.restoreFromTrash(Globals.COMPANY_BUCKET_PREFIX + companyId, files);
 
       log.info("Restore from trash complete");
@@ -610,6 +661,13 @@ public class StorageAPI extends AbstractAPI {
     }
     catch (ServiceFailedException e) {
       return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
+    }
+    
+    try {
+      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
     }
     
     try {
@@ -648,6 +706,13 @@ public class StorageAPI extends AbstractAPI {
         return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
       }
       
+      try {
+        new UserRoleVerifier().verifyContentProducer(user.getEmail());
+      }
+      catch (ServiceFailedException e) {
+        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
+      }
+      
       return new ItemResponse<TagDefinition>(user.getEmail(), tagDefinition);
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
@@ -679,6 +744,13 @@ public class StorageAPI extends AbstractAPI {
       }
       catch (ServiceFailedException e) {
         return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
+      }
+      
+      try {
+        new UserRoleVerifier().verifyContentProducer(user.getEmail());
+      }
+      catch (ServiceFailedException e) {
+        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
       }
       
       tagDefinitionAccessor.delete(id);
@@ -714,6 +786,13 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
+      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
+    }
+    
+    try {
       PagedResult<TagDefinition> pagedResult = tagDefinitionAccessor.list(companyId, search, limit, sort, cursor);
       
       return new ListResponse<TagDefinition>(user.getEmail(), pagedResult.getList(), pagedResult.getCursor());
@@ -744,6 +823,13 @@ public class StorageAPI extends AbstractAPI {
     }
     catch (ServiceFailedException e) {
       return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
+    }
+    
+    try {
+      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
     }
     
     try {
@@ -782,6 +868,13 @@ public class StorageAPI extends AbstractAPI {
         return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
       }
       
+      try {
+        new UserRoleVerifier().verifyContentProducer(user.getEmail());
+      }
+      catch (ServiceFailedException e) {
+        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
+      }
+      
       return new ItemResponse<FileTagEntry>(user.getEmail(), fileTagEntry);
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
@@ -815,6 +908,13 @@ public class StorageAPI extends AbstractAPI {
         return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
       }
       
+      try {
+        new UserRoleVerifier().verifyContentProducer(user.getEmail());
+      }
+      catch (ServiceFailedException e) {
+        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
+      }
+      
       fileTagEntryAccessor.delete(id);
       
       return new ItemResponse<FileTagEntry>(user.getEmail(), fileTagEntry);
@@ -845,6 +945,13 @@ public class StorageAPI extends AbstractAPI {
     }
     catch (ServiceFailedException e) {
       return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
+    }
+    
+    try {
+      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
     }
     
     try {
