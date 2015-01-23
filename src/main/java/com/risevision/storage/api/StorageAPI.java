@@ -526,13 +526,6 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      new UserRoleVerifier().verifyContentProducer(user.getEmail());
-    }
-    catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "signed-url-content-producer", user.getEmail());
-    }
-    
-    try {
       log.info("Requesting signed download uri for " + result.userEmail);
       result.message = gcsService.getSignedDownloadURI(Globals.COMPANY_BUCKET_PREFIX +
                                                        companyId,
