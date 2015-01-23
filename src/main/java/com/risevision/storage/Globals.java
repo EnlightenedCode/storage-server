@@ -50,6 +50,7 @@ public final class Globals {
   public static final String DATASET_ID;
   public static final String STORE_BASE_URL;
   public static final String USER_VERIFICATION_URL;
+  public static final String USER_GET_URL;
   public static final String RVCORE_P12_PATH;
   public static final String RVCORE_ID;
   public static final String PROJECT_ID;
@@ -63,6 +64,7 @@ public final class Globals {
   private static String datasetParameter;
   private static String storeBaseURL;
   private static String userVerificationURL;
+  private static String userGetURL;
   private static String rvcore_p12_path;
   private static String rvcore_id;
   private static String project_id;
@@ -84,6 +86,7 @@ public final class Globals {
       datasetParameter = buildProperties.getProperty("DATASET_ID");
       storeBaseURL = buildProperties.getProperty("STORE_BASE_URL");
       userVerificationURL = buildProperties.getProperty("USER_VERIFICATION_URL");
+      userGetURL = buildProperties.getProperty("USER_GET_URL");
       rvcore_p12_path = buildProperties.getProperty("RVCORE_P12_PATH");
       rvcore_id = buildProperties.getProperty("RVCORE_ID");
       project_id = buildProperties.getProperty("PROJECT_ID");
@@ -100,6 +103,7 @@ public final class Globals {
       DATASET_ID = datasetParameter;
       STORE_BASE_URL = storeBaseURL;
       USER_VERIFICATION_URL = userVerificationURL;
+      USER_GET_URL = userGetURL;
       RVCORE_P12_PATH = rvcore_p12_path;
       RVCORE_ID= rvcore_id;
       PROJECT_ID = project_id;
