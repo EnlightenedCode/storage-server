@@ -52,8 +52,11 @@ public class TagDefinitionAccessor extends AbstractAccessor {
 
     // Convert to lower case an remove duplicates
     Utils.changeValuesToLowerCase(values);
-    values = new ArrayList<String>(new LinkedHashSet<String>(values));
-
+    
+    if(values != null) {
+      values = new ArrayList<String>(new LinkedHashSet<String>(values));
+    }
+    
     TagDefinition tagDefinition = new TagDefinition(companyId, type, name, values, user.getEmail());
     datastoreService.put(tagDefinition);
 

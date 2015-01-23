@@ -67,7 +67,10 @@ public class FileTagEntryAccessor extends AbstractAccessor {
     if(TagType.valueOf(type) == TagType.LOOKUP) {
       // Convert to lower case an remove duplicates
       Utils.changeValuesToLowerCase(values);
-      values = new ArrayList<String>(new LinkedHashSet<String>(values));
+      
+      if(values != null) {
+        values = new ArrayList<String>(new LinkedHashSet<String>(values));
+      }
     }
     
     if(TagType.valueOf(type) == TagType.FREEFORM && values.size() != 1) {
