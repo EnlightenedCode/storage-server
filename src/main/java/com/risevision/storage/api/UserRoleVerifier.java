@@ -2,6 +2,7 @@ package com.risevision.storage.api;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.risevision.storage.Globals;
 import com.risevision.storage.api.impl.CoreUserFetcherImpl;
 import com.risevision.storage.entities.core.CoreError;
 import com.risevision.storage.entities.core.CoreResponse;
@@ -14,7 +15,7 @@ public class UserRoleVerifier extends AbstractVerifier {
 
     log.info("Verifying user " + email + " has the roles: " + StringUtils.join(roles, ", "));
 
-    //if (Globals.devserver) {return;}
+    if (Globals.devserver) {return;}
 
     CoreUserFetcher coreUserFetcher = new CoreUserFetcherImpl();
     CoreResponse<CoreUser> response = coreUserFetcher.getCoreUser(email);
