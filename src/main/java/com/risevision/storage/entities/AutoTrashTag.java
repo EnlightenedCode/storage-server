@@ -2,9 +2,11 @@ package com.risevision.storage.entities;
 
 import java.util.Date;
 
+import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Index;
 import com.googlecode.objectify.annotation.Subclass;
 
+@Entity
 @Subclass(index = true)
 public class AutoTrashTag extends DatastoreEntity {
   @Index

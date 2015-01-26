@@ -2,12 +2,14 @@ package com.risevision.storage.entities;
 
 import java.util.List;
 
+import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Index;
 import com.googlecode.objectify.annotation.Subclass;
 
 /**
  * Created by rodrigopavezi on 12/9/14.
  */
+@Entity
 @Subclass(index=true)
 public class TagDefinition extends DatastoreEntity {
   @Index
