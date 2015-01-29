@@ -135,9 +135,6 @@ public class StorageAPI extends AbstractAPI {
     SubscriptionStatus status = null;
     String bucketName = Globals.COMPANY_BUCKET_PREFIX + companyId;
     
-    if(gcsService.bucketExists(bucketName))
-      return;
-    
     status = subscriptionStatusFetcher.getSubscriptionStatus(companyId);
     
     if(!status.isActive() && !status.isTrialAvailable()) {
@@ -147,6 +144,8 @@ public class StorageAPI extends AbstractAPI {
     if(status.isTrialAvailable()) {
       initiateTrial(companyId);
     }
+
+    if (gcsService.bucketExists(bucketName)) {return;}
     
     gcsService.createBucket(bucketName);
   }
@@ -515,7 +514,7 @@ public class StorageAPI extends AbstractAPI {
       result.result = false;
       result.message = "signed-download-uri-request-failed";
       result.userEmail = user.getEmail();
-      log.warning("Upload URI request failed - Status: " + e.getReason());
+      log.warning("Download URI request failed - Status: " + e.getReason());
     }
     return result;
   }
