@@ -699,13 +699,6 @@ public class StorageAPI extends AbstractAPI {
         return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
       }
       
-      try {
-        new UserRoleVerifier().verifyContentProducer(user.getEmail());
-      }
-      catch (ServiceFailedException e) {
-        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
-      }
-      
       return new ItemResponse<TagDefinition>(user.getEmail(), tagDefinition);
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
@@ -859,13 +852,6 @@ public class StorageAPI extends AbstractAPI {
       }
       catch (ServiceFailedException e) {
         return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
-      }
-      
-      try {
-        new UserRoleVerifier().verifyContentProducer(user.getEmail());
-      }
-      catch (ServiceFailedException e) {
-        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
       }
       
       return new ItemResponse<FileTagEntry>(user.getEmail(), fileTagEntry);
