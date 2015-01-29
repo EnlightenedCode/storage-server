@@ -246,10 +246,10 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+      new UserRoleVerifier().verifyPrivilegedRole(user.getEmail());
     }
     catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "delete-content-producer", user.getEmail());
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "delete-restricted-role", user.getEmail());
     }
     
     try {
@@ -296,10 +296,10 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+      new UserRoleVerifier().verifyPrivilegedRole(user.getEmail());
     }
     catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "folder-content-producer", user.getEmail());
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "folder-restricted-role", user.getEmail());
     }
     
     try {
@@ -464,10 +464,10 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+      new UserRoleVerifier().verifyPrivilegedRole(user.getEmail());
     }
     catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "upload-content-producer", user.getEmail());
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "upload-restricted-role", user.getEmail());
     }
     
     try {
@@ -563,10 +563,10 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+      new UserRoleVerifier().verifyPrivilegedRole(user.getEmail());
     }
     catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "trash-content-producer", user.getEmail());
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "trash-restricted-role", user.getEmail());
     }
 
     try {
@@ -614,10 +614,10 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+      new UserRoleVerifier().verifyPrivilegedRole(user.getEmail());
     }
     catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "restore-content-producer", user.getEmail());
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "restore-restricted-role", user.getEmail());
     }
 
     try {
@@ -657,10 +657,10 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+      new UserRoleVerifier().verifyPrivilegedRole(user.getEmail());
     }
     catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-restricted-role", user.getEmail());
     }
     
     try {
@@ -733,10 +733,10 @@ public class StorageAPI extends AbstractAPI {
       }
       
       try {
-        new UserRoleVerifier().verifyContentProducer(user.getEmail());
+        new UserRoleVerifier().verifyPrivilegedRole(user.getEmail());
       }
       catch (ServiceFailedException e) {
-        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
+        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-restricted-role", user.getEmail());
       }
       
       tagDefinitionAccessor.delete(id);
@@ -812,10 +812,10 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+      new UserRoleVerifier().verifyPrivilegedRole(user.getEmail());
     }
     catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-restricted-role", user.getEmail());
     }
     
     try {
@@ -888,10 +888,10 @@ public class StorageAPI extends AbstractAPI {
       }
       
       try {
-        new UserRoleVerifier().verifyContentProducer(user.getEmail());
+        new UserRoleVerifier().verifyPrivilegedRole(user.getEmail());
       }
       catch (ServiceFailedException e) {
-        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
+        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-restricted-role", user.getEmail());
       }
       
       fileTagEntryAccessor.delete(id);

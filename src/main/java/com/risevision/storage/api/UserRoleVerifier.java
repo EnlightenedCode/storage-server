@@ -10,7 +10,11 @@ import com.risevision.storage.entities.core.CoreUser;
 import com.risevision.storage.info.ServiceFailedException;
 
 public class UserRoleVerifier extends AbstractVerifier {
-  public void verifyUserRoles(String email, String... roles) throws ServiceFailedException {
+  public enum RequiredRole {
+    ANY, ALL;
+  }
+  
+  public void verifyUserRoles(String email, RequiredRole requiredRole, String... roles) throws ServiceFailedException {
     email = replaceWithLocalUserEmail(email);
 
     log.info("Verifying user " + email + " has the roles: " + StringUtils.join(roles, ", "));
@@ -25,7 +29,16 @@ public class UserRoleVerifier extends AbstractVerifier {
     if(error != null) {
       throw new ServiceFailedException(error.getCode(), error.getMessage());
     }
-    else {
+    else if(requiredRole == RequiredRole.ANY) {
+      for(String role : roles) {
+        if(user.getRoles().contains(role)) {
+          return;
+        }
+      }
+      
+      throw new ServiceFailedException(403, "User " + email + " does not have any of the provided roles: " + StringUtils.join(roles, ", "));
+    }
+    else if(requiredRole == RequiredRole.ALL) {
       for(String role : roles) {
         if(!user.getRoles().contains(role)) {
           throw new ServiceFailedException(403, "User " + email + " does not have role " + role);
@@ -34,7 +47,7 @@ public class UserRoleVerifier extends AbstractVerifier {
     }
   }
   
-  public void verifyContentProducer(String email) throws ServiceFailedException {
-    verifyUserRoles(email, "cp");
+  public void verifyPrivilegedRole(String email) throws ServiceFailedException {
+    verifyUserRoles(email, RequiredRole.ANY, "ua", "ce", "cp");
   }
 }
