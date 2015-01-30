@@ -602,8 +602,8 @@ public class StorageAPI extends AbstractAPI {
   path = "tagdef",
   httpMethod = HttpMethod.PUT)
   public SimpleResponse putTagDefinition(@Named("companyId") String companyId,
-                                         @Named("name") String name,
                                          @Named("type") String type,
+                                         @Named("name") String name,
                                          @Nullable @Named("values") List<String> values,
                                          User user) throws ServiceException {
     if(user == null) {
@@ -618,7 +618,7 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      TagDefinition tagDefinition = new TagDefinitionAccessor().put(companyId, name, type, values, user);
+      TagDefinition tagDefinition = new TagDefinitionAccessor().put(companyId, type, name, values, user);
       
       return new ItemResponse<TagDefinition>(user.getEmail(), tagDefinition);
     } catch (ValidationException e) {
@@ -736,8 +736,8 @@ public class StorageAPI extends AbstractAPI {
   httpMethod = HttpMethod.PUT)
   public SimpleResponse putFileTagEntry(@Named("companyId") String companyId,
                                         @Named("objectId") String objectId,
-                                        @Named("name") String name,
                                         @Named("type") String type,
+                                        @Named("name") String name,
                                         @Nullable @Named("values") List<String> values,
                                         User user) throws ServiceException {
     if(user == null) {
@@ -752,7 +752,7 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      FileTagEntry fileTagEntry = new FileTagEntryAccessor().put(companyId, objectId, name, type, values, user);
+      FileTagEntry fileTagEntry = new FileTagEntryAccessor().put(companyId, objectId, type, name, values, user);
       
       return new ItemResponse<FileTagEntry>(user.getEmail(), fileTagEntry);
     } catch (ValidationException e) {
@@ -820,7 +820,7 @@ public class StorageAPI extends AbstractAPI {
         return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
       }
       
-      new TagDefinitionAccessor().delete(id);
+      new FileTagEntryAccessor().delete(id);
       
       return new ItemResponse<FileTagEntry>(user.getEmail(), fileTagEntry);
     } catch (ValidationException e) {

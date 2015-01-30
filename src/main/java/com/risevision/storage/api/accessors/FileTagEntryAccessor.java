@@ -1,23 +1,42 @@
 package com.risevision.storage.api.accessors;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.google.appengine.api.users.User;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.risevision.storage.Utils;
 import com.risevision.storage.api.exception.ValidationException;
 import com.risevision.storage.datastore.DatastoreService;
 import com.risevision.storage.datastore.DatastoreService.PagedResult;
+import com.risevision.storage.entities.AutoTrashTag;
 import com.risevision.storage.entities.FileTagEntry;
 import com.risevision.storage.entities.TagDefinition;
+import com.risevision.storage.entities.Timeline;
 
 public class FileTagEntryAccessor extends AbstractAccessor {
   private DatastoreService datastoreService;
+  private Gson gson;
+  private DateFormat dateFormat;
 
   public FileTagEntryAccessor() {
     this.datastoreService = DatastoreService.getInstance();
+    this.gson = new Gson();
+    this.dateFormat = new SimpleDateFormat("MM/dd/yy hh:mm a");
   }
 
-  public FileTagEntry put(String companyId, String objectId, String name, String type, List<String> values, User user) throws Exception {
+  public FileTagEntry put(String companyId, String objectId, String type, String name, List<String> values, User user) throws Exception {
+    Timeline timeline = null;
+    Date timelineEndDate = null;
+    
     // Validate required fields
     if(Utils.isEmpty(companyId)) {
       throw new ValidationException("Company id is required");
@@ -35,30 +54,69 @@ public class FileTagEntryAccessor extends AbstractAccessor {
       throw new ValidationException("Tag type is required");
     }
 
+    // Make sure all values are in the correct case.
     type = type.toUpperCase();
+    // Also make sure name is lower case.
+    name = name.toLowerCase();
+    
+    // If values is null, remove the FileTagEntry
+    if(values == null) {
+      return delete(new FileTagEntry(companyId, objectId, type, name, values, user.getEmail()).getId());
+    }
+    
+    if(TagType.valueOf(type) == TagType.LOOKUP) {
+      // Convert to lower case an remove duplicates
+      Utils.changeValuesToLowerCase(values);
+      
+      if(values != null) {
+        values = new ArrayList<String>(new LinkedHashSet<String>(values));
+      }
+    }
     
     if(TagType.valueOf(type) == TagType.FREEFORM && values.size() != 1) {
       throw new ValidationException("Freeform tags must have exactly one value");
     }
     
-    // Make sure all values are lower case.
-    name = name.toLowerCase();
-    Utils.changeValuesToLowerCase(values);
-    
-    // Verify if tag values exist in parent tag definition
-    TagDefinition tagDef = new TagDefinitionAccessor().get(companyId, name, type);
-    
-    if(tagDef == null) {
-      throw new ValidationException("Parent tag definition does not exist");
+    if(TagType.valueOf(type) == TagType.TIMELINE) {
+      // Verify Timeline definition is valid
+      try {
+        timeline = gson.fromJson(values.get(0), Timeline.class);
+        timelineEndDate = !Utils.isEmpty(timeline.getEndDate()) ? dateFormat.parse(timeline.getEndDate()) : null;
+      }
+      catch (JsonSyntaxException e) {
+        throw new ValidationException("Timeline definition is not valid");
+      }
+      catch (ParseException e) {
+        throw new ValidationException("Timeline end date is not valid");
+      }
+    }
+    else {
+      // Verify if tag values exist in parent tag definition
+      TagDefinition tagDef = new TagDefinitionAccessor().get(companyId, type, name);
+      
+      if(tagDef == null) {
+        throw new ValidationException("Parent tag definition does not exist");
+      }
+      
+      if(TagType.valueOf(type) == TagType.LOOKUP && (tagDef == null || !Utils.allItemsExist(values, tagDef.getValues()))) {
+        throw new ValidationException("All tag values must exist in the parent tag definition");
+      }
     }
     
-    if(TagType.valueOf(type) == TagType.LOOKUP && (tagDef == null || !Utils.allItemsExist(values, tagDef.getValues()))) {
-      throw new ValidationException("All tag values must exist in the parent tag definition");
-    }
-
-    // Also make sure name is lower case.
-    FileTagEntry fileTagEntry = new FileTagEntry(companyId, objectId, name, type, values, user.getEmail());
+    FileTagEntry fileTagEntry = new FileTagEntry(companyId, objectId, type, name, values, user.getEmail());
+    
     datastoreService.put(fileTagEntry);
+    
+    if(TagType.valueOf(type) == TagType.TIMELINE) {
+      AutoTrashTag autoTrashTag = new AutoTrashTag(companyId, objectId, timelineEndDate, user.getEmail());
+      
+      if(timelineEndDate != null && timeline.isTrash()) {
+        datastoreService.put(autoTrashTag);
+      }
+      else {
+        datastoreService.delete(autoTrashTag);
+      }
+    }
     
     return fileTagEntry;
   }
@@ -66,9 +124,59 @@ public class FileTagEntryAccessor extends AbstractAccessor {
   public FileTagEntry get(String id) throws Exception {
     return (FileTagEntry) datastoreService.get(new FileTagEntry(id));
   }
-
-  public void delete(String id) throws Exception {
-    datastoreService.delete(new FileTagEntry(id));
+  
+  public FileTagEntry delete(String id) throws Exception {
+    FileTagEntry fileTagEntry = (FileTagEntry) datastoreService.get(new FileTagEntry(id));
+    
+    if(fileTagEntry != null) {
+      // If the tag type is Timeline and is marked as Trash after expiration, tries to get an AutoTrashTag.
+      // If it exists, it is deleted (only one can exist per companyId-objectId, so no extra checks are needed)
+      if(TagType.valueOf(fileTagEntry.getType()) == TagType.TIMELINE) {
+        Timeline timeline = gson.fromJson(fileTagEntry.getValues().get(0), Timeline.class);
+        
+        if(timeline.isTrash()) {
+          datastoreService.delete(new AutoTrashTag(fileTagEntry.getCompanyId(), fileTagEntry.getObjectId(), null, null));
+        }
+      }
+      
+      datastoreService.delete(fileTagEntry);
+    }
+    
+    return fileTagEntry;
+  }
+  
+  public void updateObjectId(String companyId, Collection<String> objectIds, Collection<String> newObjectIds) {
+    List<FileTagEntry> updated = new ArrayList<FileTagEntry>();
+    Iterator<String> itOld = objectIds.iterator();
+    Iterator<String> itNew = newObjectIds.iterator();
+    
+    for(int i = 0; i < objectIds.size(); i++) {
+      String objectId = itOld.next();
+      String newObjectId = itNew.next();
+      
+      PagedResult<FileTagEntry> result = datastoreService.list(FileTagEntry.class, null, null, null, "companyId", companyId, "objectId", objectId);
+      
+      for(FileTagEntry entry : result.getList()) {
+        entry.setObjectId(newObjectId);
+        updated.add(entry);
+      }
+    }
+    
+    datastoreService.put((List<?>) updated);
+  }
+  
+  public void deleteTagsByObjectId(String companyId, Collection<String> objectIds) {
+    List<FileTagEntry> deleted = new ArrayList<FileTagEntry>();
+    
+    for(String objectId : objectIds) {
+      PagedResult<FileTagEntry> result = datastoreService.list(FileTagEntry.class, null, null, null, "companyId", companyId, "objectId", objectId);
+      
+      for(FileTagEntry entry : result.getList()) {
+        deleted.add(entry);
+      }
+    }
+    
+    datastoreService.delete((List<?>) deleted);
   }
 
   public PagedResult<FileTagEntry> list(String companyId, String search, Integer limit, String sort, String cursor) throws Exception {

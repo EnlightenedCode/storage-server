@@ -1,13 +1,15 @@
 package com.risevision.storage.entities;
 
+import java.util.List;
+
+import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Index;
 import com.googlecode.objectify.annotation.Subclass;
-
-import java.util.List;
 
 /**
  * Created by rodrigopavezi on 12/9/14.
  */
+@Entity
 @Subclass(index=true)
 public class TagDefinition extends DatastoreEntity {
   @Index
@@ -16,8 +18,8 @@ public class TagDefinition extends DatastoreEntity {
   public String name;
   public String type;
   public List<String> values;
-
-  public TagDefinition(){
+  
+  public TagDefinition() {
     super();
   }
 
@@ -25,11 +27,12 @@ public class TagDefinition extends DatastoreEntity {
     super(id);
   }
 
-  public TagDefinition(String companyId, String name, String type, List<String> values, String email) {
-    super();
+  public TagDefinition(String companyId, String type, String name, List<String> values, String email) {
+    super(companyId + type + name);
+    
     this.companyId = companyId;
-    this.name = name;
     this.type = type;
+    this.name = name;
     this.values = values;
     this.setChangedBy(email);
   }

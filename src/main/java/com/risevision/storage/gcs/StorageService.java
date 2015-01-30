@@ -11,9 +11,6 @@ import java.util.logging.Logger;
 
 import org.mortbay.log.Log;
 
-import com.google.api.client.googleapis.batch.BatchRequest;
-import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
-import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.GenericUrl;
@@ -36,9 +33,9 @@ import com.risevision.storage.amazonImpl.ListAllMyBucketsResponse;
 import com.risevision.storage.info.ServiceFailedException;
 
 public final class StorageService {
-  static Storage storage;
-  private Map<String, Boolean> existingBuckets;
   protected static final Logger log = Logger.getAnonymousLogger();
+  protected Storage storage;
+  private Map<String, Boolean> existingBuckets;
 
   public StorageService(Storage storage) {
     this.storage = storage;
@@ -250,32 +247,8 @@ public final class StorageService {
   }
 
   public List<String> deleteMediaItems(String bucketName, List<String> items)
-  throws ServiceFailedException {
-    List<String> errorItems = new ArrayList<String>();
-    if (items.size() == 0) {return errorItems;}
-    String plurality = items.size() > 1 ? "s" : "";
-    log.info("Deleting " + Integer.toString(items.size()) +
-             " object" + plurality + " from " + bucketName +
-             " using gcs client library");
-
-    if (items.size() == 1 && items.get(0).endsWith("/") == false) {
-      try {
-        storage.objects().delete(bucketName, items.get(0)).execute();
-      } catch (GoogleJsonResponseException e) {
-        if (e.getDetails().getCode() != ServiceFailedException.NOT_FOUND) {
-          log.warning(e.getDetails().getMessage());
-          errorItems.add(items.get(0));
-        }
-      } catch (IOException e) {
-        log.warning(e.getMessage());
-        errorItems.add(items.get(0));
-      }
-      return errorItems;
-    }
-
-    BatchDelete batchDelete = new BatchDelete();
-    errorItems = batchDelete.deleteFiles(bucketName, items);
-    return errorItems;
+  throws ServiceFailedException {    
+    return new BatchDelete(storage).deleteFiles(bucketName, items);
   }
   
   /**
@@ -383,78 +356,6 @@ public final class StorageService {
     log.info("Signed URL for " + fileName + ": " + signedURI);
     
     return signedURI;
-  }
-  
-  class BatchDelete {
-    List<String> errorList;
-
-    public BatchDelete() {
-      errorList = new ArrayList<String>();
-    }
-
-    @SuppressWarnings("rawtypes")
-    class DeleteBatchCallback extends JsonBatchCallback {
-      String fileName;
-
-      public DeleteBatchCallback(String deleteFileName) {
-        fileName = deleteFileName;
-      }
-
-      public void onSuccess(Object n, HttpHeaders responseHeaders) {
-      }
-
-      public void onFailure(GoogleJsonError e, HttpHeaders responseHeaders) {
-        if (e.getCode() != ServiceFailedException.NOT_FOUND) {
-          log.warning("Could not delete " + fileName);
-          errorList.add(fileName);
-          log.warning(e.getMessage());
-        }
-      }
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<String> deleteFiles(String bucketName, List<String> deleteList)
-    throws ServiceFailedException {
-      BatchRequest batch = storage.batch();
-      errorList = new ArrayList<String>();
-      Storage.Objects.List listRequest;
-      com.google.api.services.storage.model.Objects listResult;
-
-      try {
-        for (String deleteItem : deleteList) {
-          if (deleteItem.endsWith("/")) {
-            listRequest = storage.objects().list(bucketName)
-                                           .setPrefix(null)
-                                           .setDelimiter(null);
-            do {
-                listResult = listRequest.execute();
-                if (listResult.getItems() != null) {
-                  for (StorageObject bucketItem : listResult.getItems()) {
-                    if (bucketItem.getName().startsWith(deleteItem)) {
-                      storage.objects().delete(bucketName,
-                                             bucketItem.getName())
-                         .queue(batch, new DeleteBatchCallback(bucketItem.getName()));
-                    }
-                  }
-                }
-                listRequest.setPageToken(listResult.getNextPageToken());
-            } while (null != listResult.getNextPageToken());
-          } else {
-            storage.objects().delete(bucketName, deleteItem)
-                             .queue(batch, new DeleteBatchCallback(deleteItem));
-          }
-        }
-        
-        if(batch.size() > 0) {
-          batch.execute();
-        }
-      } catch (IOException e) {
-        log.warning(e.getMessage());
-        throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
-      }
-
-      return errorList;
-    }
   }
   
   public boolean objectExists(String bucketName, String objectName) {

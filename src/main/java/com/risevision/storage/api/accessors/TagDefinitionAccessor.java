@@ -1,6 +1,7 @@
 package com.risevision.storage.api.accessors;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.google.appengine.api.users.User;
@@ -17,7 +18,7 @@ public class TagDefinitionAccessor extends AbstractAccessor {
     datastoreService = DatastoreService.getInstance();
   }
 
-  public TagDefinition put(String companyId, String name, String type, List<String> values, User user) throws Exception {
+  public TagDefinition put(String companyId, String type, String name, List<String> values, User user) throws Exception {
     // Validate required fields
     if(Utils.isEmpty(companyId)) {
       throw new ValidationException("Company id is required");
@@ -49,9 +50,14 @@ public class TagDefinitionAccessor extends AbstractAccessor {
       throw new ValidationException("Lookup tags must have predefined values");
     }
 
+    // Convert to lower case an remove duplicates
     Utils.changeValuesToLowerCase(values);
-
-    TagDefinition tagDefinition = new TagDefinition(companyId,name,type,values, user.getEmail());
+    
+    if(values != null) {
+      values = new ArrayList<String>(new LinkedHashSet<String>(values));
+    }
+    
+    TagDefinition tagDefinition = new TagDefinition(companyId, type, name, values, user.getEmail());
     datastoreService.put(tagDefinition);
 
     return tagDefinition;
@@ -61,7 +67,7 @@ public class TagDefinitionAccessor extends AbstractAccessor {
     return (TagDefinition) datastoreService.get(new TagDefinition(id));
   }
   
-  public TagDefinition get(String companyId, String name, String type) throws Exception {
+  public TagDefinition get(String companyId, String type, String name) throws Exception {
     PagedResult<TagDefinition> result = datastoreService.list(TagDefinition.class, null, null, null, mergeFilters(new ArrayList<Condition>(), "companyId", companyId, "name", name));
     
     for(TagDefinition tagDefinition : result.getList()) {

@@ -48,16 +48,32 @@ public class DatastoreService {
     return instance;
    }
 
-  public void put(Object entity) {
-      ofy().save().entity(entity).now();
+  public Object put(Object entity) {
+    ofy().save().entity(entity).now();
+    
+    return entity;
+  }
+  
+  public List<?> put(List<?> entities) {
+    ofy().save().entities(entities).now();
+    
+    return entities;
   }
 
   public Object get(Object entity) {
-      return ofy().load().entity(entity).now();
+    return ofy().load().entity(entity).now();
   }
 
-  public void delete(Object entity) {
+  public Object delete(Object entity) {
     ofy().delete().entity(entity).now();
+    
+    return entity;
+  }
+
+  public List<?> delete(List<?> entities) {
+    ofy().delete().entities(entities).now();
+    
+    return entities;
   }
 
   public <T> PagedResult<T> list(Class<T> clazz, Integer limit, String sort, String cursor, Object... conditions) {

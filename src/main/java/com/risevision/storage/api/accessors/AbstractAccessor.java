@@ -8,9 +8,9 @@ import com.risevision.storage.Utils;
 public abstract class AbstractAccessor {
   public static class Condition {
     private String field;
-    private String value;
+    private Object value;
     
-    public Condition(String field, String value) {
+    public Condition(String field, Object value) {
       this.field = field;
       this.value = value;
     }
@@ -19,7 +19,7 @@ public abstract class AbstractAccessor {
       return field;
     }
 
-    public String getValue() {
+    public Object getValue() {
       return value;
     }
   }
