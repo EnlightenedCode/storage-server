@@ -233,13 +233,6 @@ public class StorageAPI extends AbstractAPI {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
     
-//    try {
-//      verifyActiveSubscription(companyId);
-//    }
-//    catch (ServiceFailedException e) {
-//      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "delete-inactive-subscription", user.getEmail());
-//    }
-    
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
 
@@ -532,13 +525,6 @@ public class StorageAPI extends AbstractAPI {
     } catch (IllegalArgumentException e) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
-    
-//    try {
-//      verifyActiveSubscription(companyId);
-//    }
-//    catch (ServiceFailedException e) {
-//      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "trash-inactive-subscription", user.getEmail());
-//    }
 
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
