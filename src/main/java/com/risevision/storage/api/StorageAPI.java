@@ -137,9 +137,9 @@ public class StorageAPI extends AbstractAPI {
     
     status = subscriptionStatusFetcher.getSubscriptionStatus(companyId);
     
-    if(!status.isActive() && !status.isTrialAvailable()) {
-      throw new ServiceFailedException(ServiceFailedException.FORBIDDEN, errorPrefix + "-inactive-subscription");
-    }
+//    if(!status.isActive() && !status.isTrialAvailable()) {
+//      throw new ServiceFailedException(ServiceFailedException.FORBIDDEN, errorPrefix + "-inactive-subscription");
+//    }
     
     if(status.isTrialAvailable()) {
       initiateTrial(companyId);
