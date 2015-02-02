@@ -46,7 +46,10 @@ abstract class BatchServerTask extends ServerTask {
   }
 
   void submitNextTask() throws IOException {
-    if ((String) listResult.get("nextPageToken") == null) {
+    String nextPageToken = (String) listResult.get("nextPageToken");
+    if (nextPageToken == null) {nextPageToken = (String) listResult.get("pageToken");}
+
+    if (nextPageToken == null) {
       log.info("Finished processing batches for " + getClass().getSimpleName());
       return;
     }
@@ -63,7 +66,7 @@ abstract class BatchServerTask extends ServerTask {
       options.param("jobId", (String)bqJobReference.get("jobId"));
     }
 
-    options.param("pageToken", (String)listResult.get("nextPageToken"));
+    options.param("pageToken", nextPageToken);
 
     if (requestParams.get("task") == null) {
       String className = this.getClass().getSimpleName();
