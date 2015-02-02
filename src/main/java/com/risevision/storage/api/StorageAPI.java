@@ -137,9 +137,9 @@ public class StorageAPI extends AbstractAPI {
     
     status = subscriptionStatusFetcher.getSubscriptionStatus(companyId);
     
-//    if(!status.isActive() && !status.isTrialAvailable()) {
-//      throw new ServiceFailedException(ServiceFailedException.FORBIDDEN, errorPrefix + "-inactive-subscription");
-//    }
+    if(!status.isActive() && !status.isTrialAvailable()) {
+      throw new ServiceFailedException(ServiceFailedException.FORBIDDEN, errorPrefix + "-inactive-subscription");
+    }
     
     if(status.isTrialAvailable()) {
       initiateTrial(companyId);
@@ -231,13 +231,6 @@ public class StorageAPI extends AbstractAPI {
       result = new GCSFilesResponse(user);
     } catch (IllegalArgumentException e) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
-    }
-    
-    try {
-      verifyActiveSubscription(companyId);
-    }
-    catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "delete-inactive-subscription", user.getEmail());
     }
     
     try {
@@ -531,13 +524,6 @@ public class StorageAPI extends AbstractAPI {
       result = new GCSFilesResponse(user);
     } catch (IllegalArgumentException e) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
-    }
-    
-    try {
-      verifyActiveSubscription(companyId);
-    }
-    catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "trash-inactive-subscription", user.getEmail());
     }
 
     try {
