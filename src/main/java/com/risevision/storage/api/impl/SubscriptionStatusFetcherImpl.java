@@ -2,6 +2,7 @@ package com.risevision.storage.api.impl;
 
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
+import java.util.logging.Logger;
 
 import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.http.GenericUrl;
@@ -14,6 +15,7 @@ import com.risevision.storage.entities.SubscriptionStatus;
 import com.risevision.storage.info.ServiceFailedException;
 
 public class SubscriptionStatusFetcherImpl implements SubscriptionStatusFetcher {
+  private static final Logger log = Logger.getAnonymousLogger();
   private static final String HTTP_CHARSET = "UTF-8";
   private static HttpRequestFactory httprequestFactory = new UrlFetchTransport().createRequestFactory();
   
@@ -26,10 +28,12 @@ public class SubscriptionStatusFetcherImpl implements SubscriptionStatusFetcher 
       return new Gson().fromJson(request.execute().parseAsString(), SubscriptionStatus[].class)[0];
     }
     catch (MalformedURLException e) {
+      log.warning("Error determining subscription for " + companyId);
       e.printStackTrace();
       throw new ServiceFailedException(ServiceFailedException.BAD_REQUEST);
     }
     catch (Exception e) {
+      log.warning("Error determining subscription for " + companyId);
       e.printStackTrace();
       throw new ServiceFailedException(ServiceFailedException.SERVER_ERROR);
     }
