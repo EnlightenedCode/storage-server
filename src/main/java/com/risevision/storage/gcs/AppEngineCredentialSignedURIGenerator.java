@@ -7,11 +7,11 @@ import org.apache.commons.codec.binary.Base64;
 
 import com.google.appengine.api.appidentity.*;
 
-public class SignedURIGenerator {
+public class AppEngineCredentialSignedURIGenerator {
   private static final AppIdentityService identityService = 
   AppIdentityServiceFactory.getAppIdentityService();
   
-  private SignedURIGenerator() {}
+  private AppEngineCredentialSignedURIGenerator() {}
   
   public static String getSignedURI
   (String verb, String bucketName, String objectName)

@@ -10,12 +10,12 @@ import org.apache.commons.codec.binary.Base64;
 
 import com.risevision.storage.Globals;
 
-public class LocalSignedURIGenerator {
+public class P12SignedURIGenerator {
   private static PrivateKey key;
   
   static {
     try {
-      key = loadKeyFromPkcs12(Globals.RVCORE_P12_PATH, "notasecret".toCharArray());
+      key = loadKeyFromPkcs12(Globals.RVMEDIA_P12_PATH, "notasecret".toCharArray());
     }
     catch (Exception e) {
       e.printStackTrace();
@@ -24,7 +24,7 @@ public class LocalSignedURIGenerator {
     
   }
   
-  private LocalSignedURIGenerator() {}
+  private P12SignedURIGenerator() {}
   
   public static String getSignedURI(String verb, String bucketName, String objectName) throws Exception {
     return generateSigningURL(verb, bucketName, objectName);
@@ -34,7 +34,7 @@ public class LocalSignedURIGenerator {
     long expiration = getExpiration();
     String url_signature = signString(verb + "\n\n\n" + expiration + "\n" + "/" + bucketName + "/" + objectName);
     String signed_url = "https://storage.googleapis.com/" + bucketName + "/"
-        + objectName + "?GoogleAccessId=" + Globals.RVCORE_ID
+        + objectName + "?GoogleAccessId=" + Globals.RVMEDIA_ID
         + "&Expires=" + expiration + "&Signature="
         + URLEncoder.encode(url_signature, "UTF-8");
     return signed_url;
