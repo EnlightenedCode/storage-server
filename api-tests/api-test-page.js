@@ -189,6 +189,16 @@ function listFileTagEntry() {
   storageApiCall("filetag.list", { "companyId": jenkinsCompany });
 }
 
+function listFileTagEntry() {
+  storageApiCall("filetag.list", { "companyId": jenkinsCompany });
+}
+
+function listFilesByTag(tags, returnTags) {
+  storageApiCall("files.listbytags", { "companyId": jenkinsCompany, 
+                                       "tags": tags,
+                                       "returnTags": returnTags !== null ? returnTags : false });
+}
+
 function storageApiCall(commandString, paramObj, callback, doNotUpdateResponse) {
   var commandObject, commandArray;
   responseId.style.display="none";

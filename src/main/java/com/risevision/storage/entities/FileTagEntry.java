@@ -13,6 +13,7 @@ public class FileTagEntry extends DatastoreEntity {
   public String companyId;
   @Index
   public String objectId;
+  @Index
   public String name;
   public String type;
   public List<String> values;

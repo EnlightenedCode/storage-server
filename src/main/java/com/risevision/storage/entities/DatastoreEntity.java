@@ -1,11 +1,11 @@
 package com.risevision.storage.entities;
 
+import java.util.Date;
+
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.OnSave;
 import com.risevision.storage.Utils;
-
-import java.util.Date;
 
 /**
  * Created by rodrigopavezi on 12/10/14.

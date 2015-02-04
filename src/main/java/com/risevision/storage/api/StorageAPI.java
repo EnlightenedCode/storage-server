@@ -36,6 +36,7 @@ import com.risevision.storage.api.responses.ListResponse;
 import com.risevision.storage.api.responses.SimpleResponse;
 import com.risevision.storage.datastore.DatastoreService.PagedResult;
 import com.risevision.storage.entities.FileTagEntry;
+import com.risevision.storage.entities.StorageEntity;
 import com.risevision.storage.entities.SubscriptionStatus;
 import com.risevision.storage.entities.TagDefinition;
 import com.risevision.storage.gcs.GCSClient;
@@ -56,6 +57,8 @@ public class StorageAPI extends AbstractAPI {
           ".BucketBandwidthMonthly where bucket = '";
   
   private SubscriptionStatusFetcher subscriptionStatusFetcher;
+  private TagDefinitionAccessor tagDefinitionAccessor;
+  private FileTagEntryAccessor fileTagEntryAccessor;
 
   private static final MemcacheService syncCache = 
        MemcacheServiceFactory.getMemcacheService("month-bucket-bandwidth");
@@ -70,6 +73,8 @@ public class StorageAPI extends AbstractAPI {
   
   public StorageAPI() {
     this.subscriptionStatusFetcher = new SubscriptionStatusFetcherImpl();
+    this.fileTagEntryAccessor = new FileTagEntryAccessor();
+    this.tagDefinitionAccessor = new TagDefinitionAccessor();
   }
 
   private boolean hasNull(List<?> parameters) {
@@ -282,6 +287,7 @@ public class StorageAPI extends AbstractAPI {
       verifyAndCreateBucket(companyId, user, "folder");
     }
     catch (ServiceFailedException e) {
+      log.log(Level.WARNING, "Verify and create bucket failed", e);
       return new SimpleResponse(false, e.getReason(), e.getMessage(), user.getEmail());
     }
     
@@ -445,6 +451,7 @@ public class StorageAPI extends AbstractAPI {
       verifyAndCreateBucket(companyId, user, "upload");
     }
     catch (ServiceFailedException e) {
+      log.log(Level.WARNING, "Verify and create bucket failed", e);
       return new SimpleResponse(false, e.getReason(), e.getMessage(), user.getEmail());
     }
 
@@ -604,7 +611,7 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      TagDefinition tagDefinition = new TagDefinitionAccessor().put(companyId, type, name, values, user);
+      TagDefinition tagDefinition = tagDefinitionAccessor.put(companyId, type, name, values, user);
       
       return new ItemResponse<TagDefinition>(user.getEmail(), tagDefinition);
     } catch (ValidationException e) {
@@ -626,7 +633,7 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      TagDefinition tagDefinition = new TagDefinitionAccessor().get(id);
+      TagDefinition tagDefinition = tagDefinitionAccessor.get(id);
       
       if(tagDefinition == null) {
         throw new ValidationException("Tag definition does not exist");
@@ -659,7 +666,7 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      TagDefinition tagDefinition = new TagDefinitionAccessor().get(id);
+      TagDefinition tagDefinition = tagDefinitionAccessor.get(id);
       
       if(tagDefinition == null) {
         throw new ValidationException("Tag definition does not exist");
@@ -672,7 +679,7 @@ public class StorageAPI extends AbstractAPI {
         return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
       }
       
-      new TagDefinitionAccessor().delete(id);
+      tagDefinitionAccessor.delete(id);
       
       return new ItemResponse<TagDefinition>(user.getEmail(), tagDefinition);
     } catch (ValidationException e) {
@@ -705,7 +712,7 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      PagedResult<TagDefinition> pagedResult = new TagDefinitionAccessor().list(companyId, search, limit, sort, cursor);
+      PagedResult<TagDefinition> pagedResult = tagDefinitionAccessor.list(companyId, search, limit, sort, cursor);
       
       return new ListResponse<TagDefinition>(user.getEmail(), pagedResult.getList(), pagedResult.getCursor());
     } catch (ValidationException e) {
@@ -738,7 +745,7 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      FileTagEntry fileTagEntry = new FileTagEntryAccessor().put(companyId, objectId, type, name, values, user);
+      FileTagEntry fileTagEntry = fileTagEntryAccessor.put(companyId, objectId, type, name, values, user);
       
       return new ItemResponse<FileTagEntry>(user.getEmail(), fileTagEntry);
     } catch (ValidationException e) {
@@ -760,7 +767,7 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      FileTagEntry fileTagEntry = new FileTagEntryAccessor().get(id);
+      FileTagEntry fileTagEntry = fileTagEntryAccessor.get(id);
       
       if(fileTagEntry == null) {
         throw new ValidationException("File tag entry does not exist");
@@ -793,7 +800,7 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      FileTagEntry fileTagEntry = new FileTagEntryAccessor().get(id);
+      FileTagEntry fileTagEntry = fileTagEntryAccessor.get(id);
       
       if(fileTagEntry == null) {
         throw new ValidationException("File tag entry does not exist");
@@ -806,7 +813,7 @@ public class StorageAPI extends AbstractAPI {
         return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
       }
       
-      new FileTagEntryAccessor().delete(id);
+      fileTagEntryAccessor.delete(id);
       
       return new ItemResponse<FileTagEntry>(user.getEmail(), fileTagEntry);
     } catch (ValidationException e) {
@@ -839,9 +846,40 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      PagedResult<FileTagEntry> pagedResult = new FileTagEntryAccessor().list(companyId, search, limit, sort, cursor);
+      PagedResult<FileTagEntry> pagedResult = fileTagEntryAccessor.list(companyId, search, limit, sort, cursor);
       
       return new ListResponse<FileTagEntry>(user.getEmail(), pagedResult.getList(), pagedResult.getCursor());
+    } catch (ValidationException e) {
+      return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
+    } catch (Exception e) {
+      log.log(Level.SEVERE, "Failed deleteTagDefinition", e);
+      return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
+    }
+  }
+
+  @ApiMethod(
+  name = "files.listbytags",
+  path = "filesbytag",
+  httpMethod = HttpMethod.GET)
+  public SimpleResponse listFilesByTags(@Named("companyId") String companyId,
+                                        @Named("tags") List<String> tags,
+                                        @Nullable @Named("returnTags") Boolean returnTags,
+                                        User user) throws ServiceException {
+    if(user == null) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+    
+    try {
+      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
+    }
+    
+    try {
+      List<StorageEntity> files = fileTagEntryAccessor.listFilesByTags(companyId, tags, returnTags != null ? returnTags : false);
+      
+      return new GCSFilesResponse(user, true, ServiceFailedException.OK, files);
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
     } catch (Exception e) {

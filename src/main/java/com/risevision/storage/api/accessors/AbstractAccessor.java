@@ -24,6 +24,10 @@ public abstract class AbstractAccessor {
     }
   }
   
+  public Object[] mergeFilters(Object... filters) {
+    return mergeFilters(new ArrayList<Condition>(), filters);
+  }
+  
   public Object[] mergeFilters(List<Condition> conditions, Object... filters) {
     List<Object> values = new ArrayList<Object>();
     
@@ -55,5 +59,27 @@ public abstract class AbstractAccessor {
     }
     
     return conditions;
+  }
+  
+  protected String getFilterName(String filter) {
+    int idx = filter.indexOf(":");
+    
+    if(idx == -1) {
+      return filter;
+    }
+    else {
+      return filter.substring(0, idx);
+    }
+  }
+  
+  protected String getFilterValue(String filter) {
+    int idx = filter.indexOf(":");
+    
+    if(idx == -1) {
+      return "";
+    }
+    else {
+      return filter.substring(idx + 1);
+    }
   }
 }

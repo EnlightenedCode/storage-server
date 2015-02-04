@@ -43,6 +43,9 @@
 <button id="notExistingDeleteFileTagEntry" type="button">notExistingDeleteFileTagEntry</button>
 <button id="deleteFileTagEntry" type="button">deleteFileTagEntry</button>
 <button id="listFileTagEntry" type="button">listFileTagEntry</button>
+<button id="listFilesByTag" type="button">listFilesByTag</button>
+<button id="listEmptyFilesByTag" type="button">listEmptyFilesByTag</button>
+<button id="listFilesByTagReturningTags" type="button">listFilesByTagReturningTags</button>
 
 <h3>Expect Failure</h3>
 <button id="createFolderMissingCompany" type="button" >
@@ -133,7 +136,12 @@ document.getElementById("notExistingDeleteFileTagEntry")
         .addEventListener("click", notExistingDeleteFileTagEntry);
 document.getElementById("listFileTagEntry")
         .addEventListener("click", listFileTagEntry);
-
+document.getElementById("listFilesByTag")
+        .addEventListener("click", function() { listFilesByTag(["tagname:value2"]); });
+document.getElementById("listEmptyFilesByTag")
+        .addEventListener("click", function() { listFilesByTag(["tagname:value5"]); });
+document.getElementById("listFilesByTagReturningTags")
+        .addEventListener("click", function() { listFilesByTag(["tagname:value2"], true); });
 </script>
 </body>
 </html>
