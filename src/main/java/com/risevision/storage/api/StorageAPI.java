@@ -772,7 +772,7 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+      new UserRoleVerifier().verifyPrivilegedRole(user.getEmail());
     }
     catch (ServiceFailedException e) {
       return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
@@ -927,7 +927,7 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      new UserRoleVerifier().verifyContentProducer(user.getEmail());
+      new UserRoleVerifier().verifyPrivilegedRole(user.getEmail());
     }
     catch (ServiceFailedException e) {
       return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
