@@ -83,7 +83,9 @@ public class UpdateThrottleBaselineTest {
     UpdateThrottleBaselineServerTask task = new UpdateThrottleBaselineServerTask
     (null, null, bqRequestor);
 
-    task.handleRequest();
+    task.getDataFromBQ();
+    task.calculateMeanAndSD();
+    task.saveMeanAndSD();
 
     assertThat("it saved the mean", 
     OfyService.ofy().load().type(ThrottleBaseline.class).order("-date").limit(1).first().now().getMean(),

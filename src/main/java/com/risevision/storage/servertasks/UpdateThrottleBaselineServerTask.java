@@ -10,11 +10,15 @@ import com.risevision.storage.BigqueryResponseRequestor;
 import com.risevision.storage.GoogleBigqueryResponseRequestor;
 import com.risevision.storage.entities.ThrottleBaseline;
 
+import com.risevision.storage.datastore.DatastoreService;
+
 import com.google.api.services.storage.*;
 import com.google.api.services.storage.model.*;
 import com.google.api.services.bigquery.Bigquery;
 import com.google.api.services.bigquery.model.*;
-import com.risevision.storage.datastore.DatastoreService;
+
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 
 import org.apache.commons.math3.stat.StatUtils;
 
@@ -34,6 +38,29 @@ class UpdateThrottleBaselineServerTask extends ServerTask {
   UpdateThrottleBaselineServerTask(Storage client, Map<String, String[]> params, BigqueryResponseRequestor bqRequestor) throws IOException {
     super(client, params);
     this.bqRequestor = bqRequestor;
+  }
+
+  void handleRequest() throws IOException {
+    if (forceQueue()) {
+      callFromTaskQueue();
+      return;
+    }
+
+    getDataFromBQ();
+    calculateMeanAndSD();
+    saveMeanAndSD();
+    return;
+  }
+
+  boolean forceQueue() {
+    return requestParams.containsKey("forceQueue");
+  }
+
+  void callFromTaskQueue() {
+    TaskOptions options = TaskOptions.Builder.withUrl("/servertask");
+    options.param("task", requestParams.get("task")[0]);
+    options.method(TaskOptions.Method.valueOf("GET"));
+    QueueFactory.getQueue("storageBulkOperations").add(options);
   }
 
   void getDataFromBQ() throws IOException {
@@ -83,13 +110,6 @@ class UpdateThrottleBaselineServerTask extends ServerTask {
 
   void saveMeanAndSD() {
     DatastoreService.getInstance().put(new ThrottleBaseline(countsMean, countsSD));
-  }
-
-  void handleRequest() throws IOException {
-    getDataFromBQ();
-    calculateMeanAndSD();
-    saveMeanAndSD();
-    return;
   }
 }
 
