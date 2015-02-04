@@ -11,9 +11,6 @@ import org.junit.Before;
 import java.io.Closeable;
 import java.io.IOException;
 
-/**
- * Created by rodrigopavezi on 12/10/14.
- */
 public class ObjectifyTest {
 
     private final LocalServiceTestHelper helper =

@@ -9,6 +9,8 @@
 target/
 lib/com/
 src/private-keys/
+WEB-INF/classes
+*.p12
 .settings/
 .classpath
 .project
