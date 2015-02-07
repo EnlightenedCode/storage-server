@@ -45,6 +45,7 @@ public final class Globals {
     "America/Toronto";
 
   public static final String TRASH = "--TRASH--/";
+  public static final String TAG_DELIMITER = "|";
   
   public static final String LOGS_BUCKET_NAME;
   public static final String DATASET_ID;
