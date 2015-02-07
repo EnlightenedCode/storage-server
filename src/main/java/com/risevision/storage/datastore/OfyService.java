@@ -8,6 +8,7 @@ import com.risevision.storage.entities.AutoTrashTag;
 import com.risevision.storage.entities.DatastoreEntity;
 import com.risevision.storage.entities.FileTagEntry;
 import com.risevision.storage.entities.TagDefinition;
+import com.risevision.storage.entities.TaggedStorageObject;
 
 public class OfyService {
     static {
@@ -15,6 +16,7 @@ public class OfyService {
         factory().register(TagDefinition.class);
         factory().register(FileTagEntry.class);
         factory().register(AutoTrashTag.class);
+        factory().register(TaggedStorageObject.class);
     }
 
     public static Objectify ofy() {
