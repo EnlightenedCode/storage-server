@@ -292,10 +292,9 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
   }
   
   protected String getTimeline(boolean trash) {
-    return "{\"type\":\"TIMELINE\","
-        + "\"timeDefined\":true,\"duration\":60,\"pud\":\"false\","
-        + "\"trash\":\"" + trash + "\",\"carryon\":\"false\","
-        + "\"startDate\":\"02/02/15 12:00 AM\",\"endDate\":\"02/03/15 12:00 AM\","
-        + "\"startTime\":null,\"endTime\":null,\"recurrenceOptions\":null}";
+    return "{\"timeDefined\":true,\"duration\":60,\"pud\":\"false\","
+          + "\"trash\":\"" + trash + "\",\"carryon\":\"false\","
+          + "\"startDate\":\"02/02/15 12:00 AM\",\"endDate\":\"02/03/15 12:00 AM\","
+          + "\"startTime\":null,\"endTime\":null,\"recurrenceOptions\":null}";
   }
 }
