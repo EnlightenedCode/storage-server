@@ -26,7 +26,7 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.users.User;
 import com.google.common.base.Strings;
 import com.risevision.storage.Globals;
-import com.risevision.storage.api.accessors.FileTagEntryAccessor;
+import com.risevision.storage.api.accessors.RvStorageObjectAccessor;
 import com.risevision.storage.api.accessors.TagDefinitionAccessor;
 import com.risevision.storage.api.exception.ValidationException;
 import com.risevision.storage.api.impl.SubscriptionStatusFetcherImpl;
@@ -34,9 +34,10 @@ import com.risevision.storage.api.responses.GCSFilesResponse;
 import com.risevision.storage.api.responses.ItemResponse;
 import com.risevision.storage.api.responses.ListResponse;
 import com.risevision.storage.api.responses.SimpleResponse;
+import com.risevision.storage.api.wrapper.ListByTagsWrapper;
+import com.risevision.storage.api.wrapper.RvStoragePutWrapper;
 import com.risevision.storage.datastore.DatastoreService.PagedResult;
-import com.risevision.storage.entities.FileTagEntry;
-import com.risevision.storage.entities.StorageEntity;
+import com.risevision.storage.entities.RvStorageObject;
 import com.risevision.storage.entities.SubscriptionStatus;
 import com.risevision.storage.entities.TagDefinition;
 import com.risevision.storage.gcs.GCSClient;
@@ -58,7 +59,7 @@ public class StorageAPI extends AbstractAPI {
   
   private SubscriptionStatusFetcher subscriptionStatusFetcher;
   private TagDefinitionAccessor tagDefinitionAccessor;
-  private FileTagEntryAccessor fileTagEntryAccessor;
+  private RvStorageObjectAccessor rvStorageObjectAccessor;
 
   private static final MemcacheService syncCache = 
        MemcacheServiceFactory.getMemcacheService("month-bucket-bandwidth");
@@ -73,8 +74,8 @@ public class StorageAPI extends AbstractAPI {
   
   public StorageAPI() {
     this.subscriptionStatusFetcher = new SubscriptionStatusFetcherImpl();
-    this.fileTagEntryAccessor = new FileTagEntryAccessor();
     this.tagDefinitionAccessor = new TagDefinitionAccessor();
+    this.rvStorageObjectAccessor = new RvStorageObjectAccessor();
   }
 
   private boolean hasNull(List<?> parameters) {
@@ -720,122 +721,118 @@ public class StorageAPI extends AbstractAPI {
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
     } catch (Exception e) {
-      log.log(Level.SEVERE, "Failed deleteTagDefinition", e);
+      log.log(Level.SEVERE, "Failed listTagDefinitions", e);
       return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
     }
   }
 
   @ApiMethod(
-  name = "filetag.put",
-  path = "filetag",
+  name = "storageobject.put",
+  path = "storageobject",
   httpMethod = HttpMethod.PUT)
-  public SimpleResponse putFileTagEntry(@Named("companyId") String companyId,
-                                        @Named("objectId") String objectId,
-                                        @Named("type") String type,
-                                        @Named("name") String name,
-                                        @Nullable @Named("values") List<String> values,
-                                        User user) throws ServiceException {
-    if(user == null) {
-      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
-    }
-    
-    try {
-      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
-    }
-    catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
-    }
-    
-    try {
-      FileTagEntry fileTagEntry = fileTagEntryAccessor.put(companyId, objectId, type, name, values, user);
-      
-      return new ItemResponse<FileTagEntry>(user.getEmail(), fileTagEntry);
-    } catch (ValidationException e) {
-      return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
-    } catch (Exception e) {
-      log.log(Level.SEVERE, "Failed deleteTagDefinition", e);
-      return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
-    }
-  }
-
-  @ApiMethod(
-  name = "filetag.get",
-  path = "filetag",
-  httpMethod = HttpMethod.GET)
-  public SimpleResponse getFileTagEntry(@Named("id") String id,
-                                        User user) throws ServiceException {
-    if(user == null) {
-      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
-    }
-    
-    try {
-      FileTagEntry fileTagEntry = fileTagEntryAccessor.get(id);
-      
-      if(fileTagEntry == null) {
-        throw new ValidationException("File tag entry does not exist");
-      }
-      
-      try {
-        new UserCompanyVerifier().verifyUserCompany(fileTagEntry.getCompanyId(), user.getEmail());
-      }
-      catch (ServiceFailedException e) {
-        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
-      }
-      
-      return new ItemResponse<FileTagEntry>(user.getEmail(), fileTagEntry);
-    } catch (ValidationException e) {
-      return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
-    } catch (Exception e) {
-      log.log(Level.SEVERE, "Failed getTagDefinition", e);
-      return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
-    }
-  }
-
-  @ApiMethod(
-  name = "filetag.delete",
-  path = "filetag",
-  httpMethod = HttpMethod.DELETE)
-  public SimpleResponse deleteFileTagEntry(@Named("id") String id,
+  public SimpleResponse putRvStorageObject(RvStoragePutWrapper rvso,
                                            User user) throws ServiceException {
     if(user == null) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
     
     try {
-      FileTagEntry fileTagEntry = fileTagEntryAccessor.get(id);
+      new UserCompanyVerifier().verifyUserCompany(rvso.getCompanyId(), user.getEmail());
+    }
+    catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
+    }
+    
+    try {
+      RvStorageObject rvStorageObject = rvStorageObjectAccessor.put(rvso.getCompanyId(), rvso.getObjectId(), rvso.getTags(), rvso.getTimeline(), user);
       
-      if(fileTagEntry == null) {
-        throw new ValidationException("File tag entry does not exist");
-      }
-     
-      try {
-        new UserCompanyVerifier().verifyUserCompany(fileTagEntry.getCompanyId(), user.getEmail());
-      }
-      catch (ServiceFailedException e) {
-        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
-      }
-      
-      fileTagEntryAccessor.delete(id);
-      
-      return new ItemResponse<FileTagEntry>(user.getEmail(), fileTagEntry);
+      return new ItemResponse<RvStorageObject>(user.getEmail(), rvStorageObject);
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
     } catch (Exception e) {
-      log.log(Level.SEVERE, "Failed deleteTagDefinition", e);
+      log.log(Level.SEVERE, "Failed putRvStorageObject", e);
       return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
     }
   }
 
   @ApiMethod(
-  name = "filetag.list",
-  path = "filetaglist",
+  name = "storageobject.get",
+  path = "storageobject",
   httpMethod = HttpMethod.GET)
-  public SimpleResponse listFileTagEntry(@Named("companyId") String companyId,
-                                         @Nullable @Named("search") String search,
-                                         @Nullable @Named("limit") Integer limit,
-                                         @Nullable @Named("sort") String sort,
-                                         @Nullable @Named("cursor") String cursor,
-                                         User user) throws ServiceException {
+  public SimpleResponse getRvStorageObject(@Named("id") String id,
+                                           User user) throws ServiceException {
+    if(user == null) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+    
+    try {
+      RvStorageObject rvStorageObject = rvStorageObjectAccessor.get(id);
+      
+      if(rvStorageObject == null) {
+        throw new ValidationException("Storage object does not exist");
+      }
+      
+      try {
+        new UserCompanyVerifier().verifyUserCompany(rvStorageObject.getCompanyId(), user.getEmail());
+      }
+      catch (ServiceFailedException e) {
+        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
+      }
+      
+      return new ItemResponse<RvStorageObject>(user.getEmail(), rvStorageObject);
+    } catch (ValidationException e) {
+      return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
+    } catch (Exception e) {
+      log.log(Level.SEVERE, "Failed getRvStorageObject", e);
+      return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
+    }
+  }
+
+  @ApiMethod(
+  name = "storageobject.delete",
+  path = "storageobject",
+  httpMethod = HttpMethod.DELETE)
+  public SimpleResponse deleteRvStorageObject(@Named("id") String id,
+                                              User user) throws ServiceException {
+    if(user == null) {
+      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
+    }
+    
+    try {
+      RvStorageObject rvStorageObject = rvStorageObjectAccessor.get(id);
+      
+      if(rvStorageObject == null) {
+        throw new ValidationException("Storage object does not exist");
+      }
+      
+      try {
+        new UserCompanyVerifier().verifyUserCompany(rvStorageObject.getCompanyId(), user.getEmail());
+      }
+      catch (ServiceFailedException e) {
+        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
+      }
+      
+      rvStorageObjectAccessor.delete(id);
+      
+      return new ItemResponse<RvStorageObject>(user.getEmail(), rvStorageObject);
+    } catch (ValidationException e) {
+      return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
+    } catch (Exception e) {
+      log.log(Level.SEVERE, "Failed deleteRvStorageObject", e);
+      return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
+    }
+  }
+
+  @ApiMethod(
+  name = "storageobject.list",
+  path = "storageobjectlist",
+  httpMethod = HttpMethod.GET)
+  public SimpleResponse listRvStorageObject(@Named("companyId") String companyId,
+                                            @Nullable @Named("search") String search,
+                                            @Nullable @Named("limit") Integer limit,
+                                            @Nullable @Named("sort") String sort,
+                                            @Nullable @Named("cursor") String cursor,
+                                            User user) throws ServiceException {
     if(user == null) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
@@ -848,23 +845,22 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      PagedResult<FileTagEntry> pagedResult = fileTagEntryAccessor.list(companyId, search, limit, sort, cursor);
+      PagedResult<RvStorageObject> pagedResult = rvStorageObjectAccessor.list(companyId, search, limit, sort, cursor);
       
-      return new ListResponse<FileTagEntry>(user.getEmail(), pagedResult.getList(), pagedResult.getCursor());
+      return new ListResponse<RvStorageObject>(user.getEmail(), pagedResult.getList(), pagedResult.getCursor());
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
     } catch (Exception e) {
-      log.log(Level.SEVERE, "Failed deleteTagDefinition", e);
+      log.log(Level.SEVERE, "Failed listRvStorageObject", e);
       return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
     }
   }
 
   @ApiMethod(
   name = "files.listbytags",
-  path = "filesbytag",
+  path = "storageobjectbytag",
   httpMethod = HttpMethod.GET)
-  public SimpleResponse listFilesByTags(@Named("companyId") String companyId,
-                                        @Named("tags") List<String> tags,
+  public SimpleResponse listFilesByTags(ListByTagsWrapper lbt,
                                         @Nullable @Named("returnTags") Boolean returnTags,
                                         User user) throws ServiceException {
     if(user == null) {
@@ -872,20 +868,20 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
+      new UserCompanyVerifier().verifyUserCompany(lbt.getCompanyId(), user.getEmail());
     }
     catch (ServiceFailedException e) {
       return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
     }
     
     try {
-      List<StorageEntity> files = fileTagEntryAccessor.listFilesByTags(companyId, tags, returnTags != null ? returnTags : false);
+      List<RvStorageObject> files = rvStorageObjectAccessor.listFilesByTags(lbt.getCompanyId(), lbt.getTags());
       
       return new GCSFilesResponse(user, true, ServiceFailedException.OK, files);
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
     } catch (Exception e) {
-      log.log(Level.SEVERE, "Failed deleteTagDefinition", e);
+      log.log(Level.SEVERE, "Failed listFilesByTags", e);
       return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
     }
   }
