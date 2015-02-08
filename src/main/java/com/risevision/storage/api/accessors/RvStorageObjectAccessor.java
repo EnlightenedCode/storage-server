@@ -53,6 +53,10 @@ public class RvStorageObjectAccessor extends AbstractAccessor {
     if(Utils.isEmpty(objectId)) {
       throw new ValidationException("Object id is required");
     }
+
+    if(tags == null) {
+      throw new ValidationException("Tags is required");
+    }
     
     // Get the tag definitions to validate lookup and freeform tags
     Map<String, TagDefinition> tagDefs = getTagDefinitions(companyId);
