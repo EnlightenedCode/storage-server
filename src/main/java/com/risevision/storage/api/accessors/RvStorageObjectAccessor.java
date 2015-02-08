@@ -22,21 +22,21 @@ import com.risevision.storage.datastore.DatastoreService;
 import com.risevision.storage.datastore.DatastoreService.PagedResult;
 import com.risevision.storage.entities.Tag;
 import com.risevision.storage.entities.TagDefinition;
-import com.risevision.storage.entities.TaggedStorageObject;
+import com.risevision.storage.entities.RvStorageObject;
 import com.risevision.storage.entities.Timeline;
 
-public class TaggedStorageObjectAccessor extends AbstractAccessor {
+public class RvStorageObjectAccessor extends AbstractAccessor {
   private DatastoreService datastoreService;
   private Gson gson;
   private DateFormat dateFormat;
 
-  public TaggedStorageObjectAccessor() {
+  public RvStorageObjectAccessor() {
     this.datastoreService = DatastoreService.getInstance();
     this.gson = new Gson();
     this.dateFormat = new SimpleDateFormat("MM/dd/yy hh:mm a");
   }
 
-  public TaggedStorageObject put(String companyId, String objectId, List<Tag> tags, String timeline, User user) throws Exception {
+  public RvStorageObject put(String companyId, String objectId, List<Tag> tags, String timeline, User user) throws Exception {
     // Use sets to avoid duplicates
     Set<String> lookupNames = new HashSet<String>();
     Set<String> lookupTags = new HashSet<String>();
@@ -120,27 +120,27 @@ public class TaggedStorageObjectAccessor extends AbstractAccessor {
       }
     }
     
-    TaggedStorageObject tso = new TaggedStorageObject(companyId, objectId, 
+    RvStorageObject rvso = new RvStorageObject(companyId, objectId, 
         new ArrayList<String>(lookupNames), new ArrayList<String>(lookupTags), 
         new ArrayList<String>(freeformNames), new ArrayList<String>(freeformTags), 
         timeline, autoTrashDate, user.getEmail());
-    TaggedStorageObject existing = get(companyId, objectId);
+    RvStorageObject existing = get(companyId, objectId);
     
     if(existing != null) {
-      tso.setId(existing.getId());
+      rvso.setId(existing.getId());
     }
     
-    datastoreService.put(tso);
+    datastoreService.put(rvso);
     
-    return tso;
+    return rvso;
   }
 
-  public TaggedStorageObject get(String id) throws Exception {
-    return (TaggedStorageObject) datastoreService.get(new TaggedStorageObject(id));
+  public RvStorageObject get(String id) throws Exception {
+    return (RvStorageObject) datastoreService.get(new RvStorageObject(id));
   }
 
-  public TaggedStorageObject get(String companyId, String objectId) throws Exception {
-    List<TaggedStorageObject> list = datastoreService.list(TaggedStorageObject.class, "companyId", companyId, "objectId", objectId);
+  public RvStorageObject get(String companyId, String objectId) throws Exception {
+    List<RvStorageObject> list = datastoreService.list(RvStorageObject.class, "companyId", companyId, "objectId", objectId);
     
     if(list.size() > 0) {
       return list.get(0);
@@ -151,14 +151,14 @@ public class TaggedStorageObjectAccessor extends AbstractAccessor {
   }
   
   public void delete(String id) throws Exception {
-    datastoreService.delete(new TaggedStorageObject(id));
+    datastoreService.delete(new RvStorageObject(id));
   }
 
-  public PagedResult<TaggedStorageObject> list(String companyId, String search, Integer limit, String sort, String cursor) throws Exception {
-    return datastoreService.list(TaggedStorageObject.class, limit, sort, cursor, mergeFilters(parseQuery(search), "companyId", companyId));
+  public PagedResult<RvStorageObject> list(String companyId, String search, Integer limit, String sort, String cursor) throws Exception {
+    return datastoreService.list(RvStorageObject.class, limit, sort, cursor, mergeFilters(parseQuery(search), "companyId", companyId));
   }
   
-  public List<TaggedStorageObject> listFilesByTags(String companyId, List<Tag> tags) throws Exception {
+  public List<RvStorageObject> listFilesByTags(String companyId, List<Tag> tags) throws Exception {
     // Finds all TagEntries with any of the given tag names (values are processed in the next stage)
     List<Object> params = new ArrayList<Object>();
     List<String> lookupNames = new ArrayList<String>();
@@ -193,8 +193,8 @@ public class TaggedStorageObjectAccessor extends AbstractAccessor {
     addCollectionCondition(params, "freeformNames", freeformNames);
     addCollectionCondition(params, "freeformTags", freeformTags);
     
-    PagedResult<TaggedStorageObject> entries = 
-        datastoreService.list(TaggedStorageObject.class, null, null, null, params.toArray());
+    PagedResult<RvStorageObject> entries = 
+        datastoreService.list(RvStorageObject.class, null, null, null, params.toArray());
     
     return entries.getList();
   }

@@ -9,7 +9,7 @@ import com.googlecode.objectify.annotation.Subclass;
 
 @Entity
 @Subclass(index = true)
-public class TaggedStorageObject extends DatastoreEntity {
+public class RvStorageObject extends DatastoreEntity {
   @Index
   private String companyId;
   @Index
@@ -26,15 +26,15 @@ public class TaggedStorageObject extends DatastoreEntity {
   @Index
   private Date autoTrashDate;
   
-  public TaggedStorageObject() {
+  public RvStorageObject() {
     
   }
   
-  public TaggedStorageObject(String id) {
+  public RvStorageObject(String id) {
     setId(id);
   }
   
-  public TaggedStorageObject(String companyId, String objectId, 
+  public RvStorageObject(String companyId, String objectId, 
       List<String> lookupNames, List<String> lookupTags, List<String> freeformNames, List<String> freeformTags, 
       String timeline, Date autoTrashDate, String email) {
     super();
