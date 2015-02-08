@@ -183,7 +183,6 @@ public class TaggedStorageObjectAccessorTest extends ObjectifyTest {
     String id = responseFromAdd.getId();
     
     assertThat(responseFromAdd, is(notNullValue()));
-    assertThat(id, is(companyId + filename));
     
     TaggedStorageObject responseFromGet = tsoAccessor.get(id);
     
