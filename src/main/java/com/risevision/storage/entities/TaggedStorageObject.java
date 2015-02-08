@@ -37,7 +37,7 @@ public class TaggedStorageObject extends DatastoreEntity {
   public TaggedStorageObject(String companyId, String objectId, 
       List<String> lookupNames, List<String> lookupTags, List<String> freeformNames, List<String> freeformTags, 
       String timeline, Date autoTrashDate, String email) {
-    setId(companyId + objectId);
+    super();
     setCompanyId(companyId);
     setObjectId(objectId);
     setLookupNames(lookupNames);
