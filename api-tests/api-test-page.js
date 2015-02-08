@@ -6,7 +6,7 @@ var storageAPIFilesCountId;
 var storageAPIFoldersCountId;
 var googleAPIFilesCountId;
 var googleAPIFoldersCountId;
-var tagDefinitionId = "", fileTagEntryId = "";
+var tagDefinitionId = "", storageObjectId = "";
 
 function init() {
   var ROOT = "http://localhost:8888/_ah/api",
@@ -148,56 +148,56 @@ function listTagDefinition() {
   storageApiCall("tagdef.list", { "companyId": jenkinsCompany });
 }
 
-function createFileTagEntry(name, type, values) {
-    storageApiCall("filetag.put", 
-      { "companyId": jenkinsCompany,
-        "name": "TagName",
-        "objectId": "filename",
-        "type": "Lookup",
-        "values": ["value1", "value2", "value3"] },
-      createFileTagEntryCallback);
+function createRvStorageObject(name, type, values) {
+  var tag1 = { name: "TagName", type: "Lookup", value: "value1" };
+  var tag2 = { name: "TagName", type: "Lookup", value: "value2" };
+  var tag3 = { name: "TagName", type: "Lookup", value: "value3" };
+  var timeline = {
+    timeDefined: "true", duration: "60", pud: "false", trash: "true", carryon: "false",
+    startDate: "02/02/15 12:00 AM", endDate:"02/03/15 12:00 AM",
+    startTime: null, endTime: null, recurrenceOptions: null };
+
+  storageApiCall("storageobject.put", {
+      "companyId": jenkinsCompany,
+      "objectId": "filename",
+      "tags": [ tag1, tag2, tag3 ],
+      "timeline": JSON.stringify(timeline)
+    },
+    createStorageObjectCallback);
 }
 
-function createFileTagEntryCallback(response) {
-    var result = response.result;
-    if(result !== undefined){
-        fileTagEntryId = result.item.id;
-    }
+function createStorageObjectCallback(response) {
+  var result = response.result;
+  if(result !== undefined) {
+    storageObjectId = result.item.id;
+  }
 }
 
-//function updateFileTagEntry(id, name, type, values){
-//  storageApiCall("filetag.patch",{"id": id,"name": name, "type": type, "values": values});
+function deleteRvStorageObject() {
+  storageApiCall("storageobject.delete", { "id": storageObjectId });
+}
+
+function notExistingDeleteRvStorageObject() {
+  storageApiCall("storageobject.delete", { "id": "doesNotExist" });
+}
+
+function getRvStorageObject() {
+  storageApiCall("storageobject.get", { "id": storageObjectId });
+}
+
+function notExistingGetRvStorageObject() {
+  storageApiCall("storageobject.get", { "id": "doesNotExist" });
+}
+
+function listRvStorageObject() {
+  storageApiCall("storageobject.list", { "companyId": jenkinsCompany });
+}
+
+//function listFilesByTag(tags, returnTags) {
+//  storageApiCall("files.listbytags", { "companyId": jenkinsCompany, 
+//                                       "tags": tags,
+//                                       "returnTags": returnTags !== null ? returnTags : false });
 //}
-
-function deleteFileTagEntry() {
-  storageApiCall("filetag.delete", { "id": fileTagEntryId });
-}
-
-function notExistingDeleteFileTagEntry() {
-  storageApiCall("filetag.delete", { "id": "doesNotExist" });
-}
-
-function getFileTagEntry() {
-  storageApiCall("filetag.get", { "id": fileTagEntryId });
-}
-
-function notExistingGetFileTagEntry() {
-  storageApiCall("filetag.get", { "id": "doesNotExist" });
-}
-
-function listFileTagEntry() {
-  storageApiCall("filetag.list", { "companyId": jenkinsCompany });
-}
-
-function listFileTagEntry() {
-  storageApiCall("filetag.list", { "companyId": jenkinsCompany });
-}
-
-function listFilesByTag(tags, returnTags) {
-  storageApiCall("files.listbytags", { "companyId": jenkinsCompany, 
-                                       "tags": tags,
-                                       "returnTags": returnTags !== null ? returnTags : false });
-}
 
 function storageApiCall(commandString, paramObj, callback, doNotUpdateResponse) {
   var commandObject, commandArray;

@@ -439,8 +439,8 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    casper.echo("Create File Tag Entry.");
-    casper.click("#createFileTagEntry");
+    casper.echo("Create RV Storage Object.");
+    casper.click("#createRvStorageObject");
   });
 
   casper.then(function() {
@@ -452,8 +452,8 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    casper.echo("Get File Tag Entry.");
-    casper.click("#getFileTagEntry");
+    casper.echo("Get RV Storage Object.");
+    casper.click("#getRvStorageObject");
   });
 
   casper.then(function() {
@@ -465,8 +465,8 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    casper.echo("Not Existing Get File Tag Entry.");
-    casper.click("#notExistingGetFileTagEntry");
+    casper.echo("Not Existing Get RV Storage Object.");
+    casper.click("#notExistingGetRvStorageObject");
   });
 
   casper.then(function() {
@@ -478,8 +478,8 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    casper.echo("List File Tag Entry.");
-    casper.click("#listFileTagEntry");
+    casper.echo("List RV Storage Object.");
+    casper.click("#listRvStorageObject");
   });
 
   casper.then(function() {
@@ -490,51 +490,51 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
     this.test.assertSelectorHasText("#response", '"result":true');
   });
 
-  casper.then(function() {
-    casper.echo("Find files by tag.");
-    casper.click("#listFilesByTag");
-  });
+//  casper.then(function() {
+//    casper.echo("Find files by tag.");
+//    casper.click("#listFilesByTag");
+//  });
+//
+//  casper.then(function() {
+//    casper.waitUntilVisible("#response");
+//  });
+//
+//  casper.then(function() {
+//    // Checks if the endpoint returned one file
+//    this.test.assertSelectorHasText("#storageAPIFilesCount", "1");
+//  });
+//
+//  casper.then(function() {
+//    casper.echo("Find empty files by tag.");
+//    casper.click("#listEmptyFilesByTag");
+//  });
+//
+//  casper.then(function() {
+//    casper.waitUntilVisible("#response");
+//  });
+//
+//  casper.then(function() {
+//    // Checks if the endpoint returned one file
+//    this.test.assertSelectorHasText("#storageAPIFilesCount", "0");
+//  });
+//
+//  casper.then(function() {
+//    casper.echo("Find files by tag returning tags.");
+//    casper.click("#listFilesByTagReturningTags");
+//  });
+//
+//  casper.then(function() {
+//    casper.waitUntilVisible("#response");
+//  });
+//
+//  casper.then(function() {
+//    // Checks if the endpoint returned the tags
+//    this.test.assertSelectorHasText("#response", '"values":["value1","value2","value3"]');
+//  });
 
   casper.then(function() {
-    casper.waitUntilVisible("#response");
-  });
-
-  casper.then(function() {
-    // Checks if the endpoint returned one file
-    this.test.assertSelectorHasText("#storageAPIFilesCount", "1");
-  });
-
-  casper.then(function() {
-    casper.echo("Find empty files by tag.");
-    casper.click("#listEmptyFilesByTag");
-  });
-
-  casper.then(function() {
-    casper.waitUntilVisible("#response");
-  });
-
-  casper.then(function() {
-    // Checks if the endpoint returned one file
-    this.test.assertSelectorHasText("#storageAPIFilesCount", "0");
-  });
-
-  casper.then(function() {
-    casper.echo("Find files by tag returning tags.");
-    casper.click("#listFilesByTagReturningTags");
-  });
-
-  casper.then(function() {
-    casper.waitUntilVisible("#response");
-  });
-
-  casper.then(function() {
-    // Checks if the endpoint returned the tags
-    this.test.assertSelectorHasText("#response", '"values":["value1","value2","value3"]');
-  });
-
-  casper.then(function() {
-    casper.echo("Delete File Tag Entry.");
-    casper.click("#deleteFileTagEntry");
+    casper.echo("Delete RV Storage Object.");
+    casper.click("#deleteRvStorageObject");
   });
 
   casper.then(function() {
@@ -547,8 +547,8 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    casper.echo("Not Existing Delete File Tag Entry.");
-    casper.click("#notExistingDeleteFileTagEntry");
+    casper.echo("Not Existing Delete RV Storage Object.");
+    casper.click("#notExistingDeleteRvStorageObject");
   });
 
   casper.then(function() {
