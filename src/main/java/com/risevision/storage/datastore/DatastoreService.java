@@ -76,7 +76,11 @@ public class DatastoreService {
     
     return entities;
   }
-
+  
+  public <T> List<T> list(Class<T> clazz, Object... conditions) {
+    return list(clazz, null, null, null, conditions).getList();
+  }
+  
   public <T> PagedResult<T> list(Class<T> clazz, Integer limit, String sort, String cursor, Object... conditions) {
     Query<T> query = ofy().load().type(clazz);
     List<T> result = new ArrayList<T>();
