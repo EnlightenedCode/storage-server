@@ -124,6 +124,11 @@ public class TaggedStorageObjectAccessor extends AbstractAccessor {
         new ArrayList<String>(lookupNames), new ArrayList<String>(lookupTags), 
         new ArrayList<String>(freeformNames), new ArrayList<String>(freeformTags), 
         timeline, autoTrashDate, user.getEmail());
+    TaggedStorageObject existing = get(companyId, objectId);
+    
+    if(existing != null) {
+      tso.setId(existing.getId());
+    }
     
     datastoreService.put(tso);
     
@@ -132,6 +137,17 @@ public class TaggedStorageObjectAccessor extends AbstractAccessor {
 
   public TaggedStorageObject get(String id) throws Exception {
     return (TaggedStorageObject) datastoreService.get(new TaggedStorageObject(id));
+  }
+
+  public TaggedStorageObject get(String companyId, String objectId) throws Exception {
+    List<TaggedStorageObject> list = datastoreService.list(TaggedStorageObject.class, "companyId", companyId, "objectId", objectId);
+    
+    if(list.size() > 0) {
+      return list.get(0);
+    }
+    else {
+      return null;
+    }
   }
   
   public void delete(String id) throws Exception {
