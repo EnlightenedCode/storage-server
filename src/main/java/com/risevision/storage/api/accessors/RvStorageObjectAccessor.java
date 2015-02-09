@@ -171,29 +171,31 @@ public class RvStorageObjectAccessor extends AbstractAccessor {
     List<String> freeformTags = new ArrayList<String>();
     
     // Create lists of strings matching the stored format
-    for(Tag tag : tags) {
-      TagType tagType = null;
-      
-      try {
-        tagType = TagType.valueOf(tag.getType().toUpperCase());
-      } catch (IllegalArgumentException e) {
-        throw new ValidationException("Tag type is invalid " + tag.getType());
-      }
-      
-      if(tagType == TagType.LOOKUP) {
-        if(Utils.isEmpty(tag.getValue())) {
-          lookupNames.add(tag.getName());
+    if(tags != null) {
+      for(Tag tag : tags) {
+        TagType tagType = null;
+        
+        try {
+          tagType = TagType.valueOf(tag.getType().toUpperCase());
+        } catch (IllegalArgumentException e) {
+          throw new ValidationException("Tag type is invalid " + tag.getType());
         }
-        else {
-          lookupTags.add(tag.getName() + Globals.TAG_DELIMITER + tag.getValue());
+        
+        if(tagType == TagType.LOOKUP) {
+          if(Utils.isEmpty(tag.getValue())) {
+            lookupNames.add(tag.getName());
+          }
+          else {
+            lookupTags.add(tag.getName() + Globals.TAG_DELIMITER + tag.getValue());
+          }
         }
-      }
-      else if(tagType == TagType.FREEFORM) {
-        if(Utils.isEmpty(tag.getValue())) {
-          freeformNames.add(tag.getName());
-        }
-        else {
-          freeformTags.add(tag.getName() + Globals.TAG_DELIMITER + tag.getValue());
+        else if(tagType == TagType.FREEFORM) {
+          if(Utils.isEmpty(tag.getValue())) {
+            freeformNames.add(tag.getName());
+          }
+          else {
+            freeformTags.add(tag.getName() + Globals.TAG_DELIMITER + tag.getValue());
+          }
         }
       }
     }
