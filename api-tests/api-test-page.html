@@ -140,12 +140,18 @@ document.getElementById("notExistingDeleteRvStorageObject")
         .addEventListener("click", notExistingDeleteRvStorageObject);
 document.getElementById("listRvStorageObject")
         .addEventListener("click", listRvStorageObject);
-//document.getElementById("listFilesByTag")
-//        .addEventListener("click", function() { listFilesByTag(["tagname:value2"]); });
-//document.getElementById("listEmptyFilesByTag")
-//        .addEventListener("click", function() { listFilesByTag(["tagname:value5"]); });
-//document.getElementById("listFilesByTagReturningTags")
-//        .addEventListener("click", function() { listFilesByTag(["tagname:value2"], true); });
+document.getElementById("listFilesByTag")
+        .addEventListener("click", function() { 
+            listFilesByTag([{ type: "Lookup", name: "tagname", value: "value1" }]); 
+        });
+document.getElementById("listEmptyFilesByTag")
+        .addEventListener("click", function() { 
+            listFilesByTag([{ type: "Lookup", name: "tagname", value: "value5" }]); 
+        });
+document.getElementById("listFilesByTagReturningTags")
+        .addEventListener("click", function() { 
+            listFilesByTag([{ type: "Lookup", name: "tagname", value: "value2" }]);
+        });
 
 </script>
 </body>

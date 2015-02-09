@@ -193,11 +193,10 @@ function listRvStorageObject() {
   storageApiCall("storageobject.list", { "companyId": jenkinsCompany });
 }
 
-//function listFilesByTag(tags, returnTags) {
-//  storageApiCall("files.listbytags", { "companyId": jenkinsCompany, 
-//                                       "tags": tags,
-//                                       "returnTags": returnTags !== null ? returnTags : false });
-//}
+function listFilesByTag(tags) {
+  storageApiCall("files.listbytags", { "companyId": jenkinsCompany, 
+                                       "tags": tags });
+}
 
 function storageApiCall(commandString, paramObj, callback, doNotUpdateResponse) {
   var commandObject, commandArray;
@@ -216,9 +215,11 @@ function storageApiCall(commandString, paramObj, callback, doNotUpdateResponse) 
     responseId.innerHTML=JSON.stringify(resp);
     var lengthOfFiles = 0;
     var lengthOfFolders = 0;
-    if(resp.files){
-      for(var i=0; i < resp.files.length; i++) {
-        (resp.files[i].kind === "folder") ? lengthOfFolders++ : lengthOfFiles++;
+    var items = resp.files || resp.items;
+    
+    if(items){
+      for(var i=0; i < items.length; i++) {
+        (items[i].kind === "folder") ? lengthOfFolders++ : lengthOfFiles++;
       }
     }
     storageAPIFilesCountId.innerHTML= lengthOfFiles;
