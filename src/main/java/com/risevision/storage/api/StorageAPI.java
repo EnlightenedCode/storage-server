@@ -827,39 +827,6 @@ public class StorageAPI extends AbstractAPI {
   }
 
   @ApiMethod(
-  name = "storageobject.list",
-  path = "storageobjectlist",
-  httpMethod = HttpMethod.GET)
-  public SimpleResponse listRvStorageObject(@Named("companyId") String companyId,
-                                            @Nullable @Named("search") String search,
-                                            @Nullable @Named("limit") Integer limit,
-                                            @Nullable @Named("sort") String sort,
-                                            @Nullable @Named("cursor") String cursor,
-                                            User user) throws ServiceException {
-    if(user == null) {
-      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
-    }
-    
-    try {
-      new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
-    }
-    catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
-    }
-    
-    try {
-      PagedResult<RvStorageObject> pagedResult = rvStorageObjectAccessor.list(companyId, search, limit, sort, cursor);
-      
-      return new ListResponse<RvClientStorageObject>(user.getEmail(), serverToClientStorageObjects(pagedResult.getList()), pagedResult.getCursor());
-    } catch (ValidationException e) {
-      return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
-    } catch (Exception e) {
-      log.log(Level.SEVERE, "Failed listRvStorageObject", e);
-      return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
-    }
-  }
-
-  @ApiMethod(
   name = "files.listbytags",
   path = "storageobjectbytag",
   httpMethod = HttpMethod.PUT)

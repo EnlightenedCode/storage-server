@@ -190,7 +190,7 @@ function notExistingGetRvStorageObject() {
 }
 
 function listRvStorageObject() {
-  storageApiCall("storageobject.list", { "companyId": jenkinsCompany });
+  listFilesByTag(null);
 }
 
 function listFilesByTag(tags) {

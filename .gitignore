@@ -18,3 +18,4 @@ api-tests/jenkins-company*
 .idea
 *.iml
 api-tests/node_modules
+api-tests/*.png
