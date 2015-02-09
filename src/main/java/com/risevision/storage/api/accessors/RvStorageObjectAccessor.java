@@ -172,7 +172,15 @@ public class RvStorageObjectAccessor extends AbstractAccessor {
     
     // Create lists of strings matching the stored format
     for(Tag tag : tags) {
-      if(TagType.valueOf(tag.getType()) == TagType.LOOKUP) {
+      TagType tagType = null;
+      
+      try {
+        tagType = TagType.valueOf(tag.getType().toUpperCase());
+      } catch (IllegalArgumentException e) {
+        throw new ValidationException("Tag type is invalid " + tag.getType());
+      }
+      
+      if(tagType == TagType.LOOKUP) {
         if(Utils.isEmpty(tag.getValue())) {
           lookupNames.add(tag.getName());
         }
@@ -180,7 +188,7 @@ public class RvStorageObjectAccessor extends AbstractAccessor {
           lookupTags.add(tag.getName() + Globals.TAG_DELIMITER + tag.getValue());
         }
       }
-      else if(TagType.valueOf(tag.getType()) == TagType.FREEFORM) {
+      else if(tagType == TagType.FREEFORM) {
         if(Utils.isEmpty(tag.getValue())) {
           freeformNames.add(tag.getName());
         }
