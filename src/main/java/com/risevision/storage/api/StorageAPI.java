@@ -28,6 +28,7 @@ import com.google.common.base.Strings;
 import com.risevision.storage.Globals;
 import com.risevision.storage.api.accessors.RvStorageObjectAccessor;
 import com.risevision.storage.api.accessors.TagDefinitionAccessor;
+import com.risevision.storage.api.accessors.TagType;
 import com.risevision.storage.api.exception.ValidationException;
 import com.risevision.storage.api.impl.SubscriptionStatusFetcherImpl;
 import com.risevision.storage.api.responses.GCSFilesResponse;
@@ -37,8 +38,10 @@ import com.risevision.storage.api.responses.SimpleResponse;
 import com.risevision.storage.api.wrapper.ListByTagsWrapper;
 import com.risevision.storage.api.wrapper.RvStoragePutWrapper;
 import com.risevision.storage.datastore.DatastoreService.PagedResult;
+import com.risevision.storage.entities.RvClientStorageObject;
 import com.risevision.storage.entities.RvStorageObject;
 import com.risevision.storage.entities.SubscriptionStatus;
+import com.risevision.storage.entities.Tag;
 import com.risevision.storage.entities.TagDefinition;
 import com.risevision.storage.gcs.GCSClient;
 import com.risevision.storage.gcs.StorageService;
@@ -746,7 +749,7 @@ public class StorageAPI extends AbstractAPI {
     try {
       RvStorageObject rvStorageObject = rvStorageObjectAccessor.put(rvso.getCompanyId(), rvso.getObjectId(), rvso.getTags(), rvso.getTimeline(), user);
       
-      return new ItemResponse<RvStorageObject>(user.getEmail(), rvStorageObject);
+      return new ItemResponse<RvClientStorageObject>(user.getEmail(), serverToClientStorageObject(rvStorageObject));
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
     } catch (Exception e) {
@@ -779,7 +782,7 @@ public class StorageAPI extends AbstractAPI {
         return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
       }
       
-      return new ItemResponse<RvStorageObject>(user.getEmail(), rvStorageObject);
+      return new ItemResponse<RvClientStorageObject>(user.getEmail(), serverToClientStorageObject(rvStorageObject));
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
     } catch (Exception e) {
@@ -814,7 +817,7 @@ public class StorageAPI extends AbstractAPI {
       
       rvStorageObjectAccessor.delete(id);
       
-      return new ItemResponse<RvStorageObject>(user.getEmail(), rvStorageObject);
+      return new ItemResponse<RvClientStorageObject>(user.getEmail(), serverToClientStorageObject(rvStorageObject));
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
     } catch (Exception e) {
@@ -847,7 +850,7 @@ public class StorageAPI extends AbstractAPI {
     try {
       PagedResult<RvStorageObject> pagedResult = rvStorageObjectAccessor.list(companyId, search, limit, sort, cursor);
       
-      return new ListResponse<RvStorageObject>(user.getEmail(), pagedResult.getList(), pagedResult.getCursor());
+      return new ListResponse<RvClientStorageObject>(user.getEmail(), serverToClientStorageObjects(pagedResult.getList()), pagedResult.getCursor());
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
     } catch (Exception e) {
@@ -859,9 +862,8 @@ public class StorageAPI extends AbstractAPI {
   @ApiMethod(
   name = "files.listbytags",
   path = "storageobjectbytag",
-  httpMethod = HttpMethod.GET)
+  httpMethod = HttpMethod.PUT)
   public SimpleResponse listFilesByTags(ListByTagsWrapper lbt,
-                                        @Nullable @Named("returnTags") Boolean returnTags,
                                         User user) throws ServiceException {
     if(user == null) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
@@ -877,12 +879,45 @@ public class StorageAPI extends AbstractAPI {
     try {
       List<RvStorageObject> files = rvStorageObjectAccessor.listFilesByTags(lbt.getCompanyId(), lbt.getTags());
       
-      return new GCSFilesResponse(user, true, ServiceFailedException.OK, files);
+      return new GCSFilesResponse(user, true, ServiceFailedException.OK, serverToClientStorageObjects(files));
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
     } catch (Exception e) {
       log.log(Level.SEVERE, "Failed listFilesByTags", e);
       return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
     }
+  }
+  
+  protected RvClientStorageObject serverToClientStorageObject(RvStorageObject rvServerObject) {
+    RvClientStorageObject rvClientObject = new RvClientStorageObject();
+    
+    rvClientObject.setId(rvServerObject.getId());
+    rvClientObject.setCompanyId(rvServerObject.getCompanyId());
+    rvClientObject.setObjectId(rvServerObject.getObjectId());
+    rvClientObject.setTimeline(rvServerObject.getTimeline());
+    
+    if(rvServerObject.getLookupTags() != null) {
+      for(String nameValue : rvServerObject.getLookupTags()) {
+        rvClientObject.getTags().add(new Tag(TagType.LOOKUP.toString(), nameValue));
+      }
+    }
+    
+    if(rvServerObject.getFreeformTags() != null) {
+      for(String nameValue : rvServerObject.getFreeformTags()) {
+        rvClientObject.getTags().add(new Tag(TagType.FREEFORM.toString(), nameValue));
+      }
+    }
+    
+    return rvClientObject;    
+  }
+  
+  protected List<RvClientStorageObject> serverToClientStorageObjects(List<RvStorageObject> serverObjects) {
+    List<RvClientStorageObject> clientObjects = new ArrayList<RvClientStorageObject>();
+    
+    for(RvStorageObject serverObject : serverObjects) {
+      clientObjects.add(serverToClientStorageObject(serverObject));
+    }
+    
+    return clientObjects;
   }
 }
