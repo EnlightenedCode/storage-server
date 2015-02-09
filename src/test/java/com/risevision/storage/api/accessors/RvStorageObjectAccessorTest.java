@@ -20,8 +20,8 @@ import com.google.appengine.api.users.User;
 import com.risevision.storage.api.exception.ValidationException;
 import com.risevision.storage.datastore.DatastoreService.PagedResult;
 import com.risevision.storage.datastore.ObjectifyTest;
-import com.risevision.storage.entities.Tag;
 import com.risevision.storage.entities.RvStorageObject;
+import com.risevision.storage.entities.Tag;
 
 public class RvStorageObjectAccessorTest extends ObjectifyTest {
   private TagDefinitionAccessor tagDefinitionAccessor;
@@ -43,16 +43,16 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
     companyId2 = "4598acdf-e2e5-72da-b2d1-20bd28b7fbf5";
     
     filename = "unnamed.png";
-    levis = new Tag("brand", TagType.LOOKUP.toString(), "levis");
-    gap = new Tag("brand", TagType.LOOKUP.toString(), "gap");
-    armani = new Tag("brand", TagType.LOOKUP.toString(), "armani");
-    hugo = new Tag("brand", TagType.LOOKUP.toString(), "hugo");
-    urban = new Tag("style", TagType.LOOKUP.toString(), "urban");
-    business = new Tag("style", TagType.LOOKUP.toString(), "business");
-    casual = new Tag("style", TagType.LOOKUP.toString(), "casual");
-    value1 = new Tag("test", TagType.LOOKUP.toString(), "value1");
-    address = new Tag("address", TagType.FREEFORM.toString(), "test address");
-    comment = new Tag("comment", TagType.FREEFORM.toString(), "test comment");
+    levis = new Tag(TagType.LOOKUP.toString(), "brand", "levis");
+    gap = new Tag(TagType.LOOKUP.toString(), "brand", "gap");
+    armani = new Tag(TagType.LOOKUP.toString(), "brand", "armani");
+    hugo = new Tag(TagType.LOOKUP.toString(), "brand", "hugo");
+    urban = new Tag(TagType.LOOKUP.toString(), "style", "urban");
+    business = new Tag(TagType.LOOKUP.toString(), "style", "business");
+    casual = new Tag(TagType.LOOKUP.toString(), "style", "casual");
+    value1 = new Tag(TagType.LOOKUP.toString(), "test", "value1");
+    address = new Tag(TagType.FREEFORM.toString(), "address", "test address");
+    comment = new Tag(TagType.FREEFORM.toString(), "comment", "test comment");
     values = getList(levis, gap, armani, address, comment);
     timeline = null;
     
@@ -106,7 +106,7 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
 
   @Test
   public void itShouldAddATaggedStorageObjectWithLowerCaseNameAndValues() throws Exception {
-    levis = new Tag("BRAND", TagType.LOOKUP.toString(), "LEVIS");
+    levis = new Tag(TagType.LOOKUP.toString(), "BRAND", "LEVIS");
     values = getList(levis);
     
     RvStorageObject response = rvsoAccessor.put(companyId, filename, values, timeline, user);
@@ -130,7 +130,7 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
 
   @Test(expected = ValidationException.class)
   public void itShouldNotAddATaggedStorageObjectWithoutName() throws Exception {
-    levis = new Tag("", TagType.LOOKUP.toString(), "levis");
+    levis = new Tag(TagType.LOOKUP.toString(), "", "levis");
     values = getList(levis);
     
     rvsoAccessor.put(companyId, filename, values, timeline, user);
@@ -138,7 +138,7 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
 
   @Test(expected = ValidationException.class)
   public void itShouldNotAddATaggedStorageObjectWithoutType() throws Exception {
-    levis = new Tag("brand", "", "levis");
+    levis = new Tag("", "brand", "levis");
     values = getList(levis);
     
     rvsoAccessor.put(companyId, filename, values, timeline, user);
@@ -146,7 +146,7 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
 
   @Test(expected = ValidationException.class)
   public void itShouldNotAddATaggedStorageObjectWithInvalidType() throws Exception {
-    levis = new Tag("brand", "invalidType", "levis");
+    levis = new Tag("invalidType", "brand", "levis");
     values = getList(levis);
     
     rvsoAccessor.put(companyId, filename, values, timeline, user);
@@ -154,7 +154,7 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
 
   @Test(expected = ValidationException.class)
   public void itShouldNotAddATaggedStorageObjectWithTimelineType() throws Exception {
-    levis = new Tag("brand", TagType.TIMELINE.toString(), "levis");
+    levis = new Tag(TagType.TIMELINE.toString(), "brand", "levis");
     values = getList(levis);
     
     rvsoAccessor.put(companyId, filename, values, timeline, user);
@@ -162,7 +162,7 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
 
   @Test(expected = ValidationException.class)
   public void itShouldNotAddATaggedStorageObjectIfValueDoesNotExistInParent() throws Exception {
-    levis = new Tag("color", TagType.LOOKUP.toString(), "red");
+    levis = new Tag(TagType.LOOKUP.toString(), "color", "red");
     values = getList(levis);
     
     rvsoAccessor.put(companyId, filename, values, timeline, user);
@@ -170,7 +170,7 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
 
   @Test(expected = ValidationException.class)
   public void itShouldNotAddAFreeformTaggedStorageObjectWithNoValue() throws Exception {
-    levis = new Tag("brand", TagType.LOOKUP.toString(), "");
+    levis = new Tag(TagType.LOOKUP.toString(), "brand", "");
     values = getList(levis);
     
     rvsoAccessor.put(companyId, filename, values, timeline, user);
@@ -207,7 +207,7 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
   public void itShouldFindTwoElementsByCompanyId() throws Exception {
     rvsoAccessor.put(companyId, "file1", values, timeline, user);
     rvsoAccessor.put(companyId, "file2", values, timeline, user);
-    rvsoAccessor.put(companyId2, "file3", getList(new Tag("test", TagType.LOOKUP.toString(), "value1")), timeline, user);
+    rvsoAccessor.put(companyId2, "file3", getList(new Tag(TagType.LOOKUP.toString(), "test", "value1")), timeline, user);
     
     PagedResult<RvStorageObject> responseFromList = rvsoAccessor.list(companyId, null, 100, null, null);
     
@@ -218,7 +218,7 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
   public void itShouldFindTwoElementsBySearchFilter() throws Exception {
     rvsoAccessor.put(companyId, "file1", values, timeline, user);
     rvsoAccessor.put(companyId, "file2", values, timeline, user);
-    rvsoAccessor.put(companyId2, "file3", getList(new Tag("test", TagType.LOOKUP.toString(), "value1")), timeline, user);
+    rvsoAccessor.put(companyId2, "file3", getList(new Tag(TagType.LOOKUP.toString(), "test", "value1")), timeline, user);
     
     PagedResult<RvStorageObject> responseFromList = rvsoAccessor.list(companyId, "objectId: file2", 100, null, null);
     
@@ -245,26 +245,26 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
   @Test
   public void itShouldFindFilesByTagSearch() throws Exception {
     List<RvStorageObject> responseFromList;
-    Tag address2 = new Tag("address", TagType.FREEFORM.toString(), "random");
+    Tag address2 = new Tag(TagType.FREEFORM.toString(), "address", "random");
     
     rvsoAccessor.put(companyId, "file1", getList(armani, business), timeline, user);
     rvsoAccessor.put(companyId, "file2", getList(gap, hugo, urban, address), timeline, user);
     rvsoAccessor.put(companyId, "file3", getList(hugo, levis, casual, value1, address2), timeline, user);
     
     // Should return file1, file2 and file3
-    responseFromList = rvsoAccessor.listFilesByTags(companyId, getList(new Tag("brand", TagType.LOOKUP.toString(), null)));
+    responseFromList = rvsoAccessor.listFilesByTags(companyId, getList(new Tag(TagType.LOOKUP.toString(), "brand", null)));
     
     assertThat(responseFromList.size(), is(3));
     
     // Should return file2 and file3
-    responseFromList = rvsoAccessor.listFilesByTags(companyId, getList(new Tag("address", TagType.FREEFORM.toString(), null)));
+    responseFromList = rvsoAccessor.listFilesByTags(companyId, getList(new Tag(TagType.FREEFORM.toString(), "address", null)));
     
     assertThat(responseFromList.size(), is(2));
     assertThat(responseFromList.get(0).getObjectId(), anyOf(is("file2"), is("file3")));
     assertThat(responseFromList.get(1).getObjectId(), anyOf(is("file2"), is("file3")));
     
     // Should return file3
-    responseFromList = rvsoAccessor.listFilesByTags(companyId, getList(new Tag("test", TagType.LOOKUP.toString(), null)));
+    responseFromList = rvsoAccessor.listFilesByTags(companyId, getList(new Tag(TagType.LOOKUP.toString(), "test", null)));
     
     assertThat(responseFromList.size(), is(1));
     assertThat(responseFromList.get(0).getObjectId(), is("file3"));
