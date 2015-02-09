@@ -240,7 +240,11 @@ public class StorageAPI extends AbstractAPI {
     
     try {
       new UserCompanyVerifier().verifyUserCompany(companyId, user.getEmail());
+    } catch (ServiceFailedException e) {
+      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "delete-verify-company", user.getEmail());
+    }
 
+    try {
       gcsService.deleteMediaItems(Globals.COMPANY_BUCKET_PREFIX + companyId,
                                   files);
 
@@ -287,7 +291,6 @@ public class StorageAPI extends AbstractAPI {
       verifyAndCreateBucket(companyId, user, "folder");
     }
     catch (ServiceFailedException e) {
-      log.log(Level.WARNING, "Verify and create bucket failed", e);
       return new SimpleResponse(false, e.getReason(), e.getMessage(), user.getEmail());
     }
     
@@ -451,7 +454,6 @@ public class StorageAPI extends AbstractAPI {
       verifyAndCreateBucket(companyId, user, "upload");
     }
     catch (ServiceFailedException e) {
-      log.log(Level.WARNING, "Verify and create bucket failed", e);
       return new SimpleResponse(false, e.getReason(), e.getMessage(), user.getEmail());
     }
 
