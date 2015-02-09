@@ -250,6 +250,12 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
     rvsoAccessor.put(companyId, "file1", getList(armani, business), timeline, user);
     rvsoAccessor.put(companyId, "file2", getList(gap, hugo, urban, address), timeline, user);
     rvsoAccessor.put(companyId, "file3", getList(hugo, levis, casual, value1, address2), timeline, user);
+    rvsoAccessor.put(companyId, "file4", getList(business), timeline, user);
+    
+    // Should return all files
+    responseFromList = rvsoAccessor.listFilesByTags(companyId, null);
+    
+    assertThat(responseFromList.size(), is(4));
     
     // Should return file1, file2 and file3
     responseFromList = rvsoAccessor.listFilesByTags(companyId, getList(new Tag(TagType.LOOKUP.toString(), "brand", null)));
