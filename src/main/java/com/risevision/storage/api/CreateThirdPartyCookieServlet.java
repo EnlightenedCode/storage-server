@@ -6,8 +6,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class CreateThirdPartyCookieServlet extends HttpServlet {
+    private static final Logger log = Logger.getAnonymousLogger();
     //List of allowed origins
     private final List<String> incomingUrls;
     private final Cookie cookie;
@@ -27,6 +29,8 @@ public class CreateThirdPartyCookieServlet extends HttpServlet {
       response.setContentType("application/json");
       // Get client's origin
       String clientOrigin = request.getHeader("origin");
+      log.info("Origin: " + clientOrigin);
+      log.info("Addr: " + request.getRemoteAddr());
       int myIndex = incomingUrls.indexOf(clientOrigin);
       if(myIndex != -1) {
         response.addCookie(cookie);
