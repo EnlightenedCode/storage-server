@@ -48,7 +48,7 @@ class UpdateThrottleBaselineServerTask extends ServerTask {
 
     getDataFromBQ();
     calculateMeanAndSD();
-    saveMeanAndSD();
+    saveData();
     return;
   }
 
@@ -108,8 +108,12 @@ class UpdateThrottleBaselineServerTask extends ServerTask {
     return true;
   }
 
-  void saveMeanAndSD() {
-    DatastoreService.getInstance().put(new ThrottleBaseline(countsMean, countsSD));
+  void saveData() {
+    DatastoreService.getInstance().put
+    (new ThrottleBaseline(countsMean,
+                          countsSD,
+                          countsFromQuery[countsFromQuery.length - 1],
+                          countsFromQuery[0]));
   }
 }
 
