@@ -1,6 +1,7 @@
 package com.risevision.storage.entities;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class RvClientStorageObject {
@@ -9,6 +10,10 @@ public class RvClientStorageObject {
   private String objectId;
   private List<Tag> tags;
   private String timeline;
+  private Date creationDate;
+  private Date changedDate;
+  private String changedBy;
+  private String createdBy;
   
   public RvClientStorageObject() {
     setTags(new ArrayList<Tag>());
@@ -60,5 +65,37 @@ public class RvClientStorageObject {
 
   public void setTimeline(String timeline) {
     this.timeline = timeline;
+  }
+
+  public Date getCreationDate() {
+    return creationDate;
+  }
+
+  public void setCreationDate(Date creationDate) {
+    this.creationDate = creationDate;
+  }
+
+  public Date getChangedDate() {
+    return changedDate;
+  }
+
+  public void setChangedDate(Date changedDate) {
+    this.changedDate = changedDate;
+  }
+
+  public String getChangedBy() {
+    return changedBy;
+  }
+
+  public void setChangedBy(String changedBy) {
+    this.changedBy = changedBy;
+  }
+
+  public String getCreatedBy() {
+    return createdBy;
+  }
+
+  public void setCreatedBy(String createdBy) {
+    this.createdBy = createdBy;
   }
 }

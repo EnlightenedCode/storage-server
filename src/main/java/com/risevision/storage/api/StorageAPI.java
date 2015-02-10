@@ -862,6 +862,10 @@ public class StorageAPI extends AbstractAPI {
     rvClientObject.setCompanyId(rvServerObject.getCompanyId());
     rvClientObject.setObjectId(rvServerObject.getObjectId());
     rvClientObject.setTimeline(rvServerObject.getTimeline());
+    rvClientObject.setCreationDate(rvServerObject.getCreationDate());
+    rvClientObject.setChangedDate(rvServerObject.getChangedDate());
+    rvClientObject.setChangedBy(rvServerObject.getChangedBy());
+    rvClientObject.setCreatedBy(rvServerObject.getCreatedBy());
     
     if(rvServerObject.getLookupTags() != null) {
       for(String nameValue : rvServerObject.getLookupTags()) {
