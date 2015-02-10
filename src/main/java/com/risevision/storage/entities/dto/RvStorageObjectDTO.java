@@ -1,8 +1,10 @@
-package com.risevision.storage.entities;
+package com.risevision.storage.entities.dto;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import com.risevision.storage.entities.Tag;
 
 public class RvStorageObjectDTO {
   private String id;
