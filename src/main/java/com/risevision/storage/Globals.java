@@ -57,6 +57,7 @@ public final class Globals {
   public static final String RVMEDIA_P12_PATH;
   public static final String RVMEDIA_ID;
   public static final String THROTTLE_BASELINE_QUERY;
+  public static final String THROTTLE_CHECK_QUERY;
   public static final String BIGQUERY_MAX_RESULTS_PER_PAGE;
 
   private static String bucketParameter;
@@ -70,6 +71,7 @@ public final class Globals {
   private static String rvmedia_p12_path;
   private static String rvmedia_id;
   private static String throttle_baseline_query;
+  private static String throttle_check_query;
   private static String bigquery_max_results_per_page;
 
   static {
@@ -91,6 +93,7 @@ public final class Globals {
       rvmedia_p12_path = buildProperties.getProperty("RVMEDIA_P12_PATH");
       rvmedia_id = buildProperties.getProperty("RVMEDIA_ID");
       throttle_baseline_query = buildProperties.getProperty("THROTTLE_BASELINE_QUERY");
+      throttle_check_query = buildProperties.getProperty("THROTTLE_CHECK_QUERY");
       bigquery_max_results_per_page = buildProperties.getProperty("BIGQUERY_MAX_RESULTS_PER_PAGE");
     } catch (IOException e) {
       e.printStackTrace();
@@ -107,6 +110,7 @@ public final class Globals {
       RVMEDIA_ID = rvmedia_id;
       RVMEDIA_P12_PATH = rvmedia_p12_path;
       THROTTLE_BASELINE_QUERY = throttle_baseline_query;
+      THROTTLE_CHECK_QUERY = throttle_check_query;
       BIGQUERY_MAX_RESULTS_PER_PAGE = bigquery_max_results_per_page;
 
       if (fileData != null) {
