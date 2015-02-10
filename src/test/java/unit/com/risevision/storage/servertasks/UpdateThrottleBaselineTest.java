@@ -69,7 +69,7 @@ public class UpdateThrottleBaselineTest {
     equalTo(3.0));
   }
 
-  @Test public void itPersistsMeanAndSD() throws IOException {
+  @Test public void itPersistsData() throws IOException {
     LocalServiceTestHelper helper =
     new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
@@ -85,7 +85,7 @@ public class UpdateThrottleBaselineTest {
 
     task.getDataFromBQ();
     task.calculateMeanAndSD();
-    task.saveMeanAndSD();
+    task.saveData();
 
     assertThat("it saved the mean", 
     OfyService.ofy().load().type(ThrottleBaseline.class).order("-date").limit(1).first().now().getMean(),
@@ -94,6 +94,14 @@ public class UpdateThrottleBaselineTest {
     assertThat("it saved the standard deviation", 
     OfyService.ofy().load().type(ThrottleBaseline.class).order("-date").limit(1).first().now().getSD(),
     equalTo(task.countsSD));
+
+    assertThat("it saved the minimum value", 
+    OfyService.ofy().load().type(ThrottleBaseline.class).order("-date").limit(1).first().now().getMin(),
+    equalTo(4d));
+
+    assertThat("it saved the maximum value", 
+    OfyService.ofy().load().type(ThrottleBaseline.class).order("-date").limit(1).first().now().getMax(),
+    equalTo(10d));
 
     session.close();
     helper.tearDown();

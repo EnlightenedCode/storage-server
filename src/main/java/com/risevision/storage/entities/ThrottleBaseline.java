@@ -11,12 +11,16 @@ public class ThrottleBaseline {
   @Id Long id;
   double mean;
   double sd;
+  double min;
+  double max;
   @Index Date date = new Date();
 
   ThrottleBaseline() {}
-  public ThrottleBaseline(double mean, double sd) {
+  public ThrottleBaseline(double mean, double sd, double min, double max) {
     this.mean = mean;
     this.sd = sd;
+    this.min = min;
+    this.max = max;
   }
 
   public double getMean() {
@@ -25,5 +29,13 @@ public class ThrottleBaseline {
 
   public double getSD() {
     return sd;
+  }
+
+  public double getMin() {
+    return min;
+  }
+
+  public double getMax() {
+    return max;
   }
 }
