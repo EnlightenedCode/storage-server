@@ -35,8 +35,8 @@ import com.risevision.storage.api.responses.GCSFilesResponse;
 import com.risevision.storage.api.responses.ItemResponse;
 import com.risevision.storage.api.responses.ListResponse;
 import com.risevision.storage.api.responses.SimpleResponse;
-import com.risevision.storage.api.wrapper.ListByTagsWrapper;
-import com.risevision.storage.api.wrapper.RvStoragePutWrapper;
+import com.risevision.storage.api.wrapper.ListByTagsApiInputWrapper;
+import com.risevision.storage.api.wrapper.RvStoragePutApiInputWrapper;
 import com.risevision.storage.datastore.DatastoreService.PagedResult;
 import com.risevision.storage.entities.RvStorageObject;
 import com.risevision.storage.entities.SubscriptionStatus;
@@ -733,7 +733,7 @@ public class StorageAPI extends AbstractAPI {
   name = "storageobject.put",
   path = "storageobject",
   httpMethod = HttpMethod.PUT)
-  public SimpleResponse putRvStorageObject(RvStoragePutWrapper rvso,
+  public SimpleResponse putRvStorageObject(RvStoragePutApiInputWrapper rvso,
                                            User user) throws ServiceException {
     if(user == null) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
@@ -830,7 +830,7 @@ public class StorageAPI extends AbstractAPI {
   name = "files.listbytags",
   path = "storageobjectbytag",
   httpMethod = HttpMethod.PUT)
-  public SimpleResponse listFilesByTags(ListByTagsWrapper lbt,
+  public SimpleResponse listFilesByTags(ListByTagsApiInputWrapper lbt,
                                         User user) throws ServiceException {
     if(user == null) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
