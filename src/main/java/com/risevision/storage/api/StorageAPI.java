@@ -38,7 +38,7 @@ import com.risevision.storage.api.responses.SimpleResponse;
 import com.risevision.storage.api.wrapper.ListByTagsWrapper;
 import com.risevision.storage.api.wrapper.RvStoragePutWrapper;
 import com.risevision.storage.datastore.DatastoreService.PagedResult;
-import com.risevision.storage.entities.RvClientStorageObject;
+import com.risevision.storage.entities.RvStorageObjectDTO;
 import com.risevision.storage.entities.RvStorageObject;
 import com.risevision.storage.entities.SubscriptionStatus;
 import com.risevision.storage.entities.Tag;
@@ -749,7 +749,7 @@ public class StorageAPI extends AbstractAPI {
     try {
       RvStorageObject rvStorageObject = rvStorageObjectAccessor.put(rvso.getCompanyId(), rvso.getObjectId(), rvso.getTags(), rvso.getTimeline(), user);
       
-      return new ItemResponse<RvClientStorageObject>(user.getEmail(), serverToClientStorageObject(rvStorageObject));
+      return new ItemResponse<RvStorageObjectDTO>(user.getEmail(), serverToClientStorageObject(rvStorageObject));
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
     } catch (Exception e) {
@@ -782,7 +782,7 @@ public class StorageAPI extends AbstractAPI {
         return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
       }
       
-      return new ItemResponse<RvClientStorageObject>(user.getEmail(), serverToClientStorageObject(rvStorageObject));
+      return new ItemResponse<RvStorageObjectDTO>(user.getEmail(), serverToClientStorageObject(rvStorageObject));
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
     } catch (Exception e) {
@@ -817,7 +817,7 @@ public class StorageAPI extends AbstractAPI {
       
       rvStorageObjectAccessor.delete(id);
       
-      return new ItemResponse<RvClientStorageObject>(user.getEmail(), serverToClientStorageObject(rvStorageObject));
+      return new ItemResponse<RvStorageObjectDTO>(user.getEmail(), serverToClientStorageObject(rvStorageObject));
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
     } catch (Exception e) {
@@ -855,8 +855,8 @@ public class StorageAPI extends AbstractAPI {
     }
   }
   
-  protected RvClientStorageObject serverToClientStorageObject(RvStorageObject rvServerObject) {
-    RvClientStorageObject rvClientObject = new RvClientStorageObject();
+  protected RvStorageObjectDTO serverToClientStorageObject(RvStorageObject rvServerObject) {
+    RvStorageObjectDTO rvClientObject = new RvStorageObjectDTO();
     
     rvClientObject.setId(rvServerObject.getId());
     rvClientObject.setCompanyId(rvServerObject.getCompanyId());
@@ -882,8 +882,8 @@ public class StorageAPI extends AbstractAPI {
     return rvClientObject;    
   }
   
-  protected List<RvClientStorageObject> serverToClientStorageObjects(List<RvStorageObject> serverObjects) {
-    List<RvClientStorageObject> clientObjects = new ArrayList<RvClientStorageObject>();
+  protected List<RvStorageObjectDTO> serverToClientStorageObjects(List<RvStorageObject> serverObjects) {
+    List<RvStorageObjectDTO> clientObjects = new ArrayList<RvStorageObjectDTO>();
     
     for(RvStorageObject serverObject : serverObjects) {
       clientObjects.add(serverToClientStorageObject(serverObject));

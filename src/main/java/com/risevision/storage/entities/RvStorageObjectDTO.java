@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class RvClientStorageObject {
+public class RvStorageObjectDTO {
   private String id;
   private String companyId;
   private String objectId;
@@ -15,11 +15,11 @@ public class RvClientStorageObject {
   private String changedBy;
   private String createdBy;
   
-  public RvClientStorageObject() {
+  public RvStorageObjectDTO() {
     setTags(new ArrayList<Tag>());
   }
   
-  public RvClientStorageObject(String id, String companyId, String objectId, List<Tag> tags, String timeline) {
+  public RvStorageObjectDTO(String id, String companyId, String objectId, List<Tag> tags, String timeline) {
     this.id = id;
     this.companyId = companyId;
     this.objectId = objectId;
