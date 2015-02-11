@@ -175,6 +175,26 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
     
     rvsoAccessor.put(companyId, filename, values, timeline, user);
   }
+
+  @Test
+  public void itDeleteElementsByCompanyId() throws Exception {
+    PagedResult<RvStorageObject> responseFromList;
+    
+    rvsoAccessor.put(companyId, "file1", values, timeline, user);
+    rvsoAccessor.put(companyId, "file2", values, timeline, user);
+    rvsoAccessor.put(companyId2, "file3", getList(new Tag(TagType.LOOKUP.toString(), "test", "value1")), timeline, user);
+    
+    responseFromList = rvsoAccessor.list(companyId, null, 100, null, null);
+    assertThat(responseFromList.getList().size(), is(2));
+    
+    rvsoAccessor.deleteTagsByObjectId(companyId, Arrays.asList(new String[] { "file1", "file2" }));
+    
+    responseFromList = rvsoAccessor.list(companyId, null, 100, null, null);
+    assertThat(responseFromList.getList().size(), is(0));
+    
+    responseFromList = rvsoAccessor.list(companyId2, null, 100, null, null);
+    assertThat(responseFromList.getList().size(), is(1));
+  }
   
   @Test
   public void itShouldRetrieveATaggedStorageObjectById() throws Exception {

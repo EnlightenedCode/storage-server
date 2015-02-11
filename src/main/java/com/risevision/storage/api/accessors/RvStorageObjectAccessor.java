@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,9 +21,9 @@ import com.risevision.storage.Utils;
 import com.risevision.storage.api.exception.ValidationException;
 import com.risevision.storage.datastore.DatastoreService;
 import com.risevision.storage.datastore.DatastoreService.PagedResult;
+import com.risevision.storage.entities.RvStorageObject;
 import com.risevision.storage.entities.Tag;
 import com.risevision.storage.entities.TagDefinition;
-import com.risevision.storage.entities.RvStorageObject;
 import com.risevision.storage.entities.Timeline;
 
 public class RvStorageObjectAccessor extends AbstractAccessor {
@@ -160,6 +161,12 @@ public class RvStorageObjectAccessor extends AbstractAccessor {
 
   public PagedResult<RvStorageObject> list(String companyId, String search, Integer limit, String sort, String cursor) throws Exception {
     return datastoreService.list(RvStorageObject.class, limit, sort, cursor, mergeFilters(parseQuery(search), "companyId", companyId));
+  }
+  
+  public void deleteTagsByObjectId(String companyId, Collection<String> objectIds) {
+    PagedResult<RvStorageObject> result = datastoreService.list(RvStorageObject.class, null, null, null, "companyId", companyId, "objectId", objectIds);
+    
+    datastoreService.delete((List<?>) result.getList());
   }
   
   public List<RvStorageObject> listFilesByTags(String companyId, List<Tag> tags) throws Exception {
