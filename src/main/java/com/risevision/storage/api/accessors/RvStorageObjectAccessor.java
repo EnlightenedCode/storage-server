@@ -36,12 +36,8 @@ public class RvStorageObjectAccessor extends AbstractAccessor {
     this.gson = new Gson();
     this.dateFormat = new SimpleDateFormat("MM/dd/yy hh:mm a");
   }
-  
-  public RvStorageObject put(String companyId, String objectId, List<Tag> tags, String timeline, User user) throws Exception {
-    return put(companyId, objectId, tags, timeline, null, user);
-  }
 
-  public RvStorageObject put(String companyId, String objectId, List<Tag> tags, String timeline, String updateOnly, User user) throws Exception {
+  public RvStorageObject put(String companyId, String objectId, List<Tag> tags, String timeline, User user) throws Exception {
     // Use sets to avoid duplicates
     Set<String> lookupNames = new HashSet<String>();
     Set<String> lookupTags = new HashSet<String>();
@@ -135,25 +131,6 @@ public class RvStorageObjectAccessor extends AbstractAccessor {
     
     if(existing != null) {
       rvso.setId(existing.getId());
-      
-      if(updateOnly != null) {
-        if(updateOnly.equals("LOOKUP")) {
-          rvso.setFreeformNames(existing.getFreeformNames());
-          rvso.setFreeformTags(existing.getFreeformTags());
-          rvso.setTimeline(existing.getTimeline());
-        }
-        else if(updateOnly.equals("FREEFORM")) {
-          rvso.setLookupNames(existing.getLookupNames());
-          rvso.setLookupTags(existing.getLookupTags());
-          rvso.setTimeline(existing.getTimeline());
-        }
-        else if(updateOnly.equals("TIMELINE")) {
-          rvso.setLookupNames(existing.getLookupNames());
-          rvso.setLookupTags(existing.getLookupTags());
-          rvso.setFreeformNames(existing.getFreeformNames());
-          rvso.setFreeformTags(existing.getFreeformTags());
-        }
-      }
     }
     
     datastoreService.put(rvso);
