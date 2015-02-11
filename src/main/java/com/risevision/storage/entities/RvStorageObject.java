@@ -37,7 +37,7 @@ public class RvStorageObject extends DatastoreEntity {
   public RvStorageObject(String companyId, String objectId, 
       List<String> lookupNames, List<String> lookupTags, List<String> freeformNames, List<String> freeformTags, 
       String timeline, Date autoTrashDate, String email) {
-    super();
+    setId(companyId + objectId);
     setCompanyId(companyId);
     setObjectId(objectId);
     setLookupNames(lookupNames);
