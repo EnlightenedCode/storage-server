@@ -9,7 +9,6 @@ public class RvStoragePutInputWrapper {
   private String objectId;
   private List<Tag> tags;
   private String timeline;
-  private String updateOnly;
   
   public RvStoragePutInputWrapper() {
     
@@ -45,13 +44,5 @@ public class RvStoragePutInputWrapper {
 
   public void setTimeline(String timeline) {
     this.timeline = timeline;
-  }
-
-  public String getUpdateOnly() {
-    return updateOnly;
-  }
-
-  public void setUpdateOnly(String updateOnly) {
-    this.updateOnly = updateOnly;
   }
 }
