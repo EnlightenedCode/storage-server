@@ -24,10 +24,13 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 import org.apache.commons.math3.stat.StatUtils;
 
 class CheckThrottlingServerTask extends ServerTask {
-  final int ACCEPTABLE_DEVIATIONS = 3;
+  int ACCEPTABLE_DEVIATIONS = 3;
   double baselineMean;
   double baselineSD;
   double[] offenders;
+
+  ThrottleOffendersHandler[] handlers =
+  new ThrottleOffendersHandler[]{new JustLogThrottleOffendersHandler()};
 
   private BigqueryResponseRequestor bqRequestor =
   new GoogleBigqueryResponseRequestor();
@@ -45,7 +48,7 @@ class CheckThrottlingServerTask extends ServerTask {
   void handleRequest() throws IOException {
     getBaselineData();
     getDataFromBQ();
-    //saveData();
+    handleOffenders();
     return;
   }
 
@@ -57,7 +60,15 @@ class CheckThrottlingServerTask extends ServerTask {
   }
 
   void getDataFromBQ() throws IOException {
+    String[] acceptableDeviations = requestParams.get("acceptableDeviations");
+
+    if (acceptableDeviations != null) {
+      ACCEPTABLE_DEVIATIONS = Integer.valueOf(acceptableDeviations[0]);
+      if (ACCEPTABLE_DEVIATIONS < 0) { throw new IllegalArgumentException(); }
+    }
+
     String query = Globals.THROTTLE_CHECK_QUERY;
+
     int comparison = (int)(baselineMean + ACCEPTABLE_DEVIATIONS * baselineSD);
     
     query = query.replace("BASELINE_COMPARISON", String.valueOf(comparison));
@@ -72,7 +83,11 @@ class CheckThrottlingServerTask extends ServerTask {
     if (totalRows.compareTo(BigInteger.valueOf((long) Integer.MAX_VALUE)) > 0) {
       throw new RuntimeException("Table result is much too large."); 
     }
+  }
 
-    log.info("Throttle candidate count: " + totalRows.toString());
+  void handleOffenders() {
+    for (ThrottleOffendersHandler handler : handlers) {
+      handler.handle(offenders);
+    }
   }
 }

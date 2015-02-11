@@ -2,6 +2,7 @@ package com.risevision.storage.servertasks;
 
 import java.io.IOException;
 import java.io.Closeable;
+import java.util.HashMap;
 
 import com.risevision.storage.servertasks.UpdateThrottleBaselineServerTask;
 import com.risevision.storage.BigqueryResponseRequestor;
@@ -37,7 +38,7 @@ public class CheckThrottlingTest {
 
   @Test public void itFetchesBaselineData() throws IOException {
     CheckThrottlingServerTask task = new CheckThrottlingServerTask
-    (null, null, null);
+    (null, new HashMap<String, String[]>(), null);
 
     task.getBaselineData();
 
@@ -47,16 +48,17 @@ public class CheckThrottlingTest {
 
   @Test public void itCallsBigquery() throws IOException {
     MockBigqueryResponseRequestor bqRequestor = new MockBigqueryResponseRequestor();
-
+    HashMap<String, String[]> params = new HashMap<>();
+    params.put("acceptableDeviations", new String[]{"4"});
     CheckThrottlingServerTask task = new CheckThrottlingServerTask
-    (null, null, bqRequestor);
+    (null, params, bqRequestor);
 
     task.getBaselineData();
     task.getDataFromBQ();
 
     assertThat ("it made the correct call",
     bqRequestor.getQuery(),
-    equalTo(Globals.THROTTLE_CHECK_QUERY.replace("BASELINE_COMPARISON", "99")));
+    equalTo(Globals.THROTTLE_CHECK_QUERY.replace("BASELINE_COMPARISON", "130")));
 
     assertThat ("it made the correct call",
     bqRequestor.getProjectId(),
