@@ -4,14 +4,14 @@ import java.util.List;
 
 import com.risevision.storage.entities.Tag;
 
-public class RvStoragePutApiInputWrapper {
+public class RvStoragePutInputWrapper {
   private String companyId;
   private String objectId;
   private List<Tag> tags;
   private String timeline;
   private String updateOnly;
   
-  public RvStoragePutApiInputWrapper() {
+  public RvStoragePutInputWrapper() {
     
   }
   

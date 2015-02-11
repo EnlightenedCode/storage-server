@@ -4,11 +4,11 @@ import java.util.List;
 
 import com.risevision.storage.entities.Tag;
 
-public class ListByTagsApiInputWrapper {
+public class ListByTagsInputWrapper {
   private String companyId;
   private List<Tag> tags;
   
-  public ListByTagsApiInputWrapper() {
+  public ListByTagsInputWrapper() {
     
   }
 

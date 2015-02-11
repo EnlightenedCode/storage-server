@@ -35,14 +35,14 @@ import com.risevision.storage.api.responses.GCSFilesResponse;
 import com.risevision.storage.api.responses.ItemResponse;
 import com.risevision.storage.api.responses.ListResponse;
 import com.risevision.storage.api.responses.SimpleResponse;
-import com.risevision.storage.api.wrapper.ListByTagsApiInputWrapper;
-import com.risevision.storage.api.wrapper.RvStoragePutApiInputWrapper;
+import com.risevision.storage.api.wrapper.ListByTagsInputWrapper;
+import com.risevision.storage.api.wrapper.RvStorageOutputWrapper;
+import com.risevision.storage.api.wrapper.RvStoragePutInputWrapper;
 import com.risevision.storage.datastore.DatastoreService.PagedResult;
 import com.risevision.storage.entities.RvStorageObject;
 import com.risevision.storage.entities.SubscriptionStatus;
 import com.risevision.storage.entities.Tag;
 import com.risevision.storage.entities.TagDefinition;
-import com.risevision.storage.entities.dto.RvStorageObjectDTO;
 import com.risevision.storage.gcs.GCSClient;
 import com.risevision.storage.gcs.StorageService;
 import com.risevision.storage.info.ServiceFailedException;
@@ -733,7 +733,7 @@ public class StorageAPI extends AbstractAPI {
   name = "filetags.put",
   path = "filetags",
   httpMethod = HttpMethod.PUT)
-  public SimpleResponse putRvStorageObject(RvStoragePutApiInputWrapper rvso,
+  public SimpleResponse putRvStorageObject(RvStoragePutInputWrapper rvso,
                                            User user) throws ServiceException {
     if(user == null) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
@@ -749,7 +749,7 @@ public class StorageAPI extends AbstractAPI {
     try {
       RvStorageObject rvStorageObject = rvStorageObjectAccessor.put(rvso.getCompanyId(), rvso.getObjectId(), rvso.getTags(), rvso.getTimeline(), rvso.getUpdateOnly(), user);
       
-      return new ItemResponse<RvStorageObjectDTO>(user.getEmail(), serverToClientStorageObject(rvStorageObject));
+      return new ItemResponse<RvStorageOutputWrapper>(user.getEmail(), serverToClientStorageObject(rvStorageObject));
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
     } catch (Exception e) {
@@ -782,7 +782,7 @@ public class StorageAPI extends AbstractAPI {
         return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
       }
       
-      return new ItemResponse<RvStorageObjectDTO>(user.getEmail(), serverToClientStorageObject(rvStorageObject));
+      return new ItemResponse<RvStorageOutputWrapper>(user.getEmail(), serverToClientStorageObject(rvStorageObject));
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
     } catch (Exception e) {
@@ -795,7 +795,7 @@ public class StorageAPI extends AbstractAPI {
   name = "files.listbytags",
   path = "storageobjectbytag",
   httpMethod = HttpMethod.PUT)
-  public SimpleResponse listFilesByTags(ListByTagsApiInputWrapper lbt,
+  public SimpleResponse listFilesByTags(ListByTagsInputWrapper lbt,
                                         User user) throws ServiceException {
     if(user == null) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
@@ -820,8 +820,8 @@ public class StorageAPI extends AbstractAPI {
     }
   }
   
-  protected RvStorageObjectDTO serverToClientStorageObject(RvStorageObject rvServerObject) {
-    RvStorageObjectDTO rvClientObject = new RvStorageObjectDTO();
+  protected RvStorageOutputWrapper serverToClientStorageObject(RvStorageObject rvServerObject) {
+    RvStorageOutputWrapper rvClientObject = new RvStorageOutputWrapper();
     
     rvClientObject.setId(rvServerObject.getId());
     rvClientObject.setCompanyId(rvServerObject.getCompanyId());
@@ -847,8 +847,8 @@ public class StorageAPI extends AbstractAPI {
     return rvClientObject;    
   }
   
-  protected List<RvStorageObjectDTO> serverToClientStorageObjects(List<RvStorageObject> serverObjects) {
-    List<RvStorageObjectDTO> clientObjects = new ArrayList<RvStorageObjectDTO>();
+  protected List<RvStorageOutputWrapper> serverToClientStorageObjects(List<RvStorageObject> serverObjects) {
+    List<RvStorageOutputWrapper> clientObjects = new ArrayList<RvStorageOutputWrapper>();
     
     for(RvStorageObject serverObject : serverObjects) {
       clientObjects.add(serverToClientStorageObject(serverObject));

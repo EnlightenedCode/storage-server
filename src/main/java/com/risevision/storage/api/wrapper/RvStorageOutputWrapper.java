@@ -1,4 +1,4 @@
-package com.risevision.storage.entities.dto;
+package com.risevision.storage.api.wrapper;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.risevision.storage.entities.Tag;
 
-public class RvStorageObjectDTO {
+public class RvStorageOutputWrapper {
   private String id;
   private String companyId;
   private String objectId;
@@ -17,11 +17,11 @@ public class RvStorageObjectDTO {
   private String changedBy;
   private String createdBy;
   
-  public RvStorageObjectDTO() {
+  public RvStorageOutputWrapper() {
     setTags(new ArrayList<Tag>());
   }
   
-  public RvStorageObjectDTO(String id, String companyId, String objectId, List<Tag> tags, String timeline) {
+  public RvStorageOutputWrapper(String id, String companyId, String objectId, List<Tag> tags, String timeline) {
     this.id = id;
     this.companyId = companyId;
     this.objectId = objectId;
