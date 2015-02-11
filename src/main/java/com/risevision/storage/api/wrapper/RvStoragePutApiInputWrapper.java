@@ -9,11 +9,12 @@ public class RvStoragePutApiInputWrapper {
   private String objectId;
   private List<Tag> tags;
   private String timeline;
+  private String updateOnly;
   
   public RvStoragePutApiInputWrapper() {
     
   }
-
+  
   public String getCompanyId() {
     return companyId;
   }
@@ -44,5 +45,13 @@ public class RvStoragePutApiInputWrapper {
 
   public void setTimeline(String timeline) {
     this.timeline = timeline;
+  }
+
+  public String getUpdateOnly() {
+    return updateOnly;
+  }
+
+  public void setUpdateOnly(String updateOnly) {
+    this.updateOnly = updateOnly;
   }
 }

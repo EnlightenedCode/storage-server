@@ -36,8 +36,12 @@ public class RvStorageObjectAccessor extends AbstractAccessor {
     this.gson = new Gson();
     this.dateFormat = new SimpleDateFormat("MM/dd/yy hh:mm a");
   }
-
+  
   public RvStorageObject put(String companyId, String objectId, List<Tag> tags, String timeline, User user) throws Exception {
+    return put(companyId, objectId, tags, timeline, null, user);
+  }
+
+  public RvStorageObject put(String companyId, String objectId, List<Tag> tags, String timeline, String updateOnly, User user) throws Exception {
     // Use sets to avoid duplicates
     Set<String> lookupNames = new HashSet<String>();
     Set<String> lookupTags = new HashSet<String>();
@@ -55,59 +59,61 @@ public class RvStorageObjectAccessor extends AbstractAccessor {
       throw new ValidationException("Object id is required");
     }
 
-    if(tags == null) {
+    if(tags == null && (updateOnly == null || !updateOnly.equals("TIMELINE"))) {
       throw new ValidationException("Tags is required");
     }
     
     // Get the tag definitions to validate lookup and freeform tags
     Map<String, TagDefinition> tagDefs = getTagDefinitions(companyId);
     
-    for(Tag tag : tags) {
-      if(Utils.isEmpty(tag.getName())) {
-        throw new ValidationException("Tag name is required");
-      }
+    if(tags != null) {
+      for(Tag tag : tags) {
+        if(Utils.isEmpty(tag.getName())) {
+          throw new ValidationException("Tag name is required");
+        }
 
-      if(Utils.isEmpty(tag.getType())) {
-        throw new ValidationException("Tag type is required: " + tag.getName());
-      }
+        if(Utils.isEmpty(tag.getType())) {
+          throw new ValidationException("Tag type is required: " + tag.getName());
+        }
 
-      if(Utils.isEmpty(tag.getValue())) {
-        throw new ValidationException("Tag value is required: " + tag.getName() + " " + tag.getType());
-      }
-      
-      // Make sure type, name and value are in the correct case
-      tag.setType(tag.getType().toUpperCase());
-      tag.setName(tag.getName().toLowerCase());
-      tag.setValue(tag.getValue().toLowerCase());
-      
-      try {
-        TagType type = TagType.valueOf(tag.getType());
-        TagDefinition tagDef = tagDefs.get(tag.getType() + tag.getName());
-        
-        if(type == TagType.TIMELINE) {
-          throw new ValidationException("Only Lookup and Freeform tags are accepted in tags: " + tag.getName() + " - " + tag.getType());
+        if(Utils.isEmpty(tag.getValue())) {
+          throw new ValidationException("Tag value is required: " + tag.getName() + " " + tag.getType());
         }
         
-        // Verify if tag values exist in parent tag definition
-        if(tagDef == null) {
-          throw new ValidationException("Parent tag definition does not exist");
-        }
+        // Make sure type, name and value are in the correct case
+        tag.setType(tag.getType().toUpperCase());
+        tag.setName(tag.getName().toLowerCase());
+        tag.setValue(tag.getValue().toLowerCase());
         
-        // If it is a Lookup tag, check the value is defined in the parent tag
-        if(type == TagType.LOOKUP && !tagDef.getValues().contains(tag.getValue())) {
-          throw new ValidationException("Tag value must exist in the parent tag definition: " + tag.getValue());
+        try {
+          TagType type = TagType.valueOf(tag.getType());
+          TagDefinition tagDef = tagDefs.get(tag.getType() + tag.getName());
+          
+          if(type == TagType.TIMELINE) {
+            throw new ValidationException("Only Lookup and Freeform tags are accepted in tags: " + tag.getName() + " - " + tag.getType());
+          }
+          
+          // Verify if tag values exist in parent tag definition
+          if(tagDef == null) {
+            throw new ValidationException("Parent tag definition does not exist");
+          }
+          
+          // If it is a Lookup tag, check the value is defined in the parent tag
+          if(type == TagType.LOOKUP && !tagDef.getValues().contains(tag.getValue())) {
+            throw new ValidationException("Tag value must exist in the parent tag definition: " + tag.getValue());
+          }
+          
+          if(type == TagType.LOOKUP) {
+            lookupNames.add(tag.getName());
+            lookupTags.add(tag.getName() + Globals.TAG_DELIMITER + tag.getValue());
+          }
+          else if(type == TagType.FREEFORM) {
+            freeformNames.add(tag.getName());
+            freeformTags.add(tag.getName() + Globals.TAG_DELIMITER + tag.getValue());
+          }
+        } catch (IllegalArgumentException e) {
+          throw new ValidationException("Tag type is invalid " + tag.getType());
         }
-        
-        if(type == TagType.LOOKUP) {
-          lookupNames.add(tag.getName());
-          lookupTags.add(tag.getName() + Globals.TAG_DELIMITER + tag.getValue());
-        }
-        else if(type == TagType.FREEFORM) {
-          freeformNames.add(tag.getName());
-          freeformTags.add(tag.getName() + Globals.TAG_DELIMITER + tag.getValue());
-        }
-      } catch (IllegalArgumentException e) {
-        throw new ValidationException("Tag type is invalid " + tag.getType());
       }
     }
     
@@ -133,6 +139,25 @@ public class RvStorageObjectAccessor extends AbstractAccessor {
     
     if(existing != null) {
       rvso.setId(existing.getId());
+      
+      if(updateOnly != null) {
+        if(updateOnly.equals("LOOKUP")) {
+          rvso.setFreeformNames(existing.getFreeformNames());
+          rvso.setFreeformTags(existing.getFreeformTags());
+          rvso.setTimeline(existing.getTimeline());
+        }
+        else if(updateOnly.equals("FREEFORM")) {
+          rvso.setLookupNames(existing.getLookupNames());
+          rvso.setLookupTags(existing.getLookupTags());
+          rvso.setTimeline(existing.getTimeline());
+        }
+        else if(updateOnly.equals("TIMELINE")) {
+          rvso.setLookupNames(existing.getLookupNames());
+          rvso.setLookupTags(existing.getLookupTags());
+          rvso.setFreeformNames(existing.getFreeformNames());
+          rvso.setFreeformTags(existing.getFreeformTags());
+        }
+      }
     }
     
     datastoreService.put(rvso);

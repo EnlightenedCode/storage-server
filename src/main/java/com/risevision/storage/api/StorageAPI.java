@@ -747,7 +747,7 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      RvStorageObject rvStorageObject = rvStorageObjectAccessor.put(rvso.getCompanyId(), rvso.getObjectId(), rvso.getTags(), rvso.getTimeline(), user);
+      RvStorageObject rvStorageObject = rvStorageObjectAccessor.put(rvso.getCompanyId(), rvso.getObjectId(), rvso.getTags(), rvso.getTimeline(), rvso.getUpdateOnly(), user);
       
       return new ItemResponse<RvStorageObjectDTO>(user.getEmail(), serverToClientStorageObject(rvStorageObject));
     } catch (ValidationException e) {
