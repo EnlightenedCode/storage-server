@@ -198,9 +198,9 @@ public class RvStorageObjectAccessor extends AbstractAccessor {
     // Finds all TagEntries with any of the given tag names (values are processed in the next stage)
     List<Object> params = new ArrayList<Object>();
     List<String> lookupNames = new ArrayList<String>();
-    List<String> lookupTags = new ArrayList<String>();
     List<String> freeformNames = new ArrayList<String>();
-    List<String> freeformTags = new ArrayList<String>();
+    Map<String, List<String>> lookupTagsMap = new HashMap<String, List<String>>();
+    Map<String, List<String>> freeformTagsMap = new HashMap<String, List<String>>();
     
     // Create lists of strings matching the stored format
     if(tags != null) {
@@ -214,6 +214,12 @@ public class RvStorageObjectAccessor extends AbstractAccessor {
         }
         
         if(tagType == TagType.LOOKUP) {
+          if(!lookupTagsMap.containsKey(tag.getName())) {
+            lookupTagsMap.put(tag.getName(), new ArrayList<String>());
+          }
+          
+          List<String> lookupTags = lookupTagsMap.get(tag.getName());
+          
           if(Utils.isEmpty(tag.getValue())) {
             lookupNames.add(tag.getName());
           }
@@ -222,6 +228,12 @@ public class RvStorageObjectAccessor extends AbstractAccessor {
           }
         }
         else if(tagType == TagType.FREEFORM) {
+          if(!freeformTagsMap.containsKey(tag.getName())) {
+            freeformTagsMap.put(tag.getName(), new ArrayList<String>());
+          }
+          
+          List<String> freeformTags = freeformTagsMap.get(tag.getName());
+          
           if(Utils.isEmpty(tag.getValue())) {
             freeformNames.add(tag.getName());
           }
@@ -235,9 +247,15 @@ public class RvStorageObjectAccessor extends AbstractAccessor {
     params.add("companyId");
     params.add(companyId);
     addCollectionCondition(params, "lookupNames", lookupNames);
-    addCollectionCondition(params, "lookupTags", lookupTags);
     addCollectionCondition(params, "freeformNames", freeformNames);
-    addCollectionCondition(params, "freeformTags", freeformTags);
+    
+    for(List<String> lookupTags : lookupTagsMap.values()) {
+      addCollectionCondition(params, "lookupTags", lookupTags);
+    }
+    
+    for(List<String> freeformTags : freeformTagsMap.values()) {
+      addCollectionCondition(params, "freeformTags", freeformTags);
+    }
     
     PagedResult<RvStorageObject> entries = 
         datastoreService.list(RvStorageObject.class, null, null, null, params.toArray());

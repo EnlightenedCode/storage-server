@@ -271,16 +271,17 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
     rvsoAccessor.put(companyId, "file2", getList(gap, hugo, urban, address), timeline, user);
     rvsoAccessor.put(companyId, "file3", getList(hugo, levis, casual, value1, address2), timeline, user);
     rvsoAccessor.put(companyId, "file4", getList(business), timeline, user);
+    rvsoAccessor.put(companyId, "file5", getList(armani, business, casual), timeline, user);
     
     // Should return all files
     responseFromList = rvsoAccessor.listFilesByTags(companyId, null);
     
-    assertThat(responseFromList.size(), is(4));
+    assertThat(responseFromList.size(), is(5));
     
-    // Should return file1, file2 and file3
+    // Should return file1, file2, file3 and file5
     responseFromList = rvsoAccessor.listFilesByTags(companyId, getList(new Tag(TagType.LOOKUP.toString(), "brand", null)));
     
-    assertThat(responseFromList.size(), is(3));
+    assertThat(responseFromList.size(), is(4));
     
     // Should return file2 and file3
     responseFromList = rvsoAccessor.listFilesByTags(companyId, getList(new Tag(TagType.FREEFORM.toString(), "address", null)));
@@ -295,11 +296,6 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
     assertThat(responseFromList.size(), is(1));
     assertThat(responseFromList.get(0).getObjectId(), is("file3"));
     
-    // Should return file1 and file3
-    responseFromList = rvsoAccessor.listFilesByTags(companyId, getList(armani, casual));
-    
-    assertThat(responseFromList.size(), is(2));
-    
     // Should return file2
     responseFromList = rvsoAccessor.listFilesByTags(companyId, getList(address));
     
@@ -310,6 +306,18 @@ public class RvStorageObjectAccessorTest extends ObjectifyTest {
     responseFromList = rvsoAccessor.listFilesByTags(companyId, getList(levis, casual));
     
     assertThat(responseFromList.get(0).getObjectId(), is("file3"));
+    
+    // Should no return any files
+    responseFromList = rvsoAccessor.listFilesByTags(companyId, getList(armani, value1));
+    
+    assertThat(responseFromList.size(), is(0));
+    
+    // Should return file1 and file5
+    responseFromList = rvsoAccessor.listFilesByTags(companyId, getList(armani, business));
+    
+    assertThat(responseFromList.size(), is(2));
+    assertThat(responseFromList.get(0).getObjectId(), anyOf(is("file1"), is("file5")));
+    assertThat(responseFromList.get(1).getObjectId(), anyOf(is("file1"), is("file5")));
   }
   
   @SuppressWarnings("unchecked")
