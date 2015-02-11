@@ -27,7 +27,7 @@ class CheckThrottlingServerTask extends ServerTask {
   int ACCEPTABLE_DEVIATIONS = 3;
   double baselineMean;
   double baselineSD;
-  double[] offenders;
+  String[] offenders;
 
   ThrottleOffendersHandler[] handlers =
   new ThrottleOffendersHandler[]{new JustLogThrottleOffendersHandler()};
@@ -83,6 +83,21 @@ class CheckThrottlingServerTask extends ServerTask {
     if (totalRows.compareTo(BigInteger.valueOf((long) Integer.MAX_VALUE)) > 0) {
       throw new RuntimeException("Table result is much too large."); 
     }
+
+    offenders = new String[totalRows.intValue()];
+
+    int i = 0;
+    do {
+      List<TableRow> tableRows = resp.getRows();
+      if (tableRows == null) { return; }
+      for (TableRow row : tableRows) {
+        offenders[i] = row.getF().toString();
+        i += 1;
+      }
+
+      resp = bqRequestor.fromToken
+      (resp.getJobReference().getJobId(), resp.getPageToken());
+    } while (resp != null);
   }
 
   void handleOffenders() {

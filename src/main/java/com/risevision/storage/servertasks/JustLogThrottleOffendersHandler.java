@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 class JustLogThrottleOffendersHandler implements ThrottleOffendersHandler {
   private static final Logger log = Logger.getAnonymousLogger();
 
-  public void handle(double[] offenders) {
+  public void handle(String[] offenders) {
     log.info("Offending files count: " + offenders.length);
   }
 }
