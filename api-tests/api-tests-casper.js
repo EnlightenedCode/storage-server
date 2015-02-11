@@ -533,34 +533,6 @@ casper.test.begin('Connecting to ' + url, function suite(test) {
   });
 
   casper.then(function() {
-    casper.echo("Delete RV Storage Object.");
-    casper.click("#deleteRvStorageObject");
-  });
-
-  casper.then(function() {
-    casper.waitUntilVisible("#response");
-  });
-
-  casper.then(function() {
-    // Checks if delete returns the deleted object
-    this.test.assertSelectorHasText("#response", '"result":true');
-  });
-
-  casper.then(function() {
-    casper.echo("Not Existing Delete RV Storage Object.");
-    casper.click("#notExistingDeleteRvStorageObject");
-  });
-
-  casper.then(function() {
-    casper.waitUntilVisible("#response");
-  });
-
-  casper.then(function() {
-    // Checks if delete returns the deleted object
-    this.test.assertSelectorHasText("#response", '"result":false');
-  });
-
-  casper.then(function() {
     casper.echo("Delete Tag Definition.");
     casper.click("#deleteTagDefinition");
   });

@@ -157,7 +157,7 @@ function createRvStorageObject(name, type, values) {
     startDate: "02/02/15 12:00 AM", endDate:"02/03/15 12:00 AM",
     startTime: null, endTime: null, recurrenceOptions: null };
 
-  storageApiCall("storageobject.put", {
+  storageApiCall("filetags.put", {
       "companyId": jenkinsCompany,
       "objectId": "filename",
       "tags": [ tag1, tag2, tag3 ],
@@ -173,20 +173,12 @@ function createStorageObjectCallback(response) {
   }
 }
 
-function deleteRvStorageObject() {
-  storageApiCall("storageobject.delete", { "id": storageObjectId });
-}
-
-function notExistingDeleteRvStorageObject() {
-  storageApiCall("storageobject.delete", { "id": "doesNotExist" });
-}
-
 function getRvStorageObject() {
-  storageApiCall("storageobject.get", { "id": storageObjectId });
+  storageApiCall("filetags.get", { "id": storageObjectId });
 }
 
 function notExistingGetRvStorageObject() {
-  storageApiCall("storageobject.get", { "id": "doesNotExist" });
+  storageApiCall("filetags.get", { "id": "doesNotExist" });
 }
 
 function listRvStorageObject() {
