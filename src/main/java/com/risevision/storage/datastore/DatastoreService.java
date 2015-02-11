@@ -65,6 +65,10 @@ public class DatastoreService {
     return ofy().load().entity(entity).now();
   }
 
+  public <T> T get(Class<T> clazz, String id) {
+    return ofy().load().type(clazz).id(id).now();
+  }
+
   public Object delete(Object entity) {
     ofy().delete().entity(entity).now();
     

@@ -11,6 +11,7 @@ public class OfyService {
         factory().register(FileTagEntry.class);
         factory().register(AutoTrashTag.class);
         factory().register(ThrottleBaseline.class);
+        factory().register(RvStorageObject.class);
     }
 
     public static Objectify ofy() {

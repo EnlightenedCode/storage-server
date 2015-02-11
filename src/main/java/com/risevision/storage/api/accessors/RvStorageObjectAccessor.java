@@ -170,14 +170,7 @@ public class RvStorageObjectAccessor extends AbstractAccessor {
   }
 
   public RvStorageObject get(String companyId, String objectId) throws Exception {
-    List<RvStorageObject> list = datastoreService.list(RvStorageObject.class, "companyId", companyId, "objectId", objectId);
-    
-    if(list.size() > 0) {
-      return list.get(0);
-    }
-    else {
-      return null;
-    }
+    return datastoreService.get(RvStorageObject.class, companyId + objectId);
   }
   
   public void delete(String id) throws Exception {

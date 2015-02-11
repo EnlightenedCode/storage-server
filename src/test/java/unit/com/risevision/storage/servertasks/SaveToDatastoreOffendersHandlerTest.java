@@ -6,6 +6,7 @@ import java.util.*;
 
 import com.risevision.storage.servertasks.SaveToDatastoreOffendersHandler;
 import com.risevision.storage.datastore.OfyService;
+import com.risevision.storage.entities.RvStorageObject;
 
 import com.google.appengine.tools.development.testing.*;
 import com.google.api.services.bigquery.model.*;
@@ -16,17 +17,20 @@ import static org.hamcrest.CoreMatchers.*;
 import com.google.api.services.bigquery.model.*;
 
 public class SaveToDatastoreOffendersHandlerTest {
+  LocalServiceTestHelper helper;
+  Closeable session;
+
   private TableCell makeCell(Object o) { 
     TableCell cell = new TableCell();
     cell.setV(o);
     return cell;
   }
 
-  private TableRow makeRow(Object... o) {
+  private TableRow makeRow(Object... rowElements) {
     TableRow row = new TableRow();
     List<TableCell> cells = new ArrayList<>();
-    for (Object obj in o) {
-      cells.add(makeCell(o));
+    for (Object rowElement : rowElements) {
+      cells.add(makeCell(rowElement));
     }
     row.setF(cells);
     return row;
@@ -49,25 +53,21 @@ public class SaveToDatastoreOffendersHandlerTest {
     SaveToDatastoreOffendersHandler handler = new SaveToDatastoreOffendersHandler();
     List<TableRow> offenders = new ArrayList<>();
     
-    cells.add(makeCell("ip"));
-    cells.add(makeCell("referer"));
-    cells.add(makeCell("bucket"));
-    cells.add(makeCell("file"));
-    cells.add(makeCell(999999999999d));
-
-    offenders.add(makeRow("ip", "referer", "bucket", "file1", 999999999999d));
-    offenders.add(makeRow("ip", "referer", "bucket", "file1", 999999999999d));
-    offenders.add(makeRow("ip", "referer", "bucket", "file2", 777777777777d));
+    offenders.add(makeRow("ip", "referer", "cid", "file1", "99999"));
+    offenders.add(makeRow("ip", "referer", "cid", "file1", "99999"));
+    offenders.add(makeRow("ip", "referer", "cid", "file2", "77777"));
     handler.handle(offenders);
 
-    assertThat("It saved the record.",
+    assertThat("It saved the record without duplicating.",
     OfyService.ofy().load().type(RvStorageObject.class)
-    .filter("ObjectId", "file1").filter("bucket", "bucket").now().list().size()
+    .filter("companyId", "cid").filter("objectId", "file1").list().size(),
     equalTo(1));
 
-    assertThat("It saved the record.",
-    OfyService.ofy().load().type(RvStorageObject.class).filter("ObjectId", "file2")
-    .filter("bucket", "bucket").now().list().get(0).getCount()
-    equalTo(777777777777d));
+    Integer countVal = OfyService.ofy().load().type(RvStorageObject.class)
+    .id("cidfile2").now().getThrottleOffenderCounts().get(0);
+
+    assertThat("It saved with the proper count.",
+    countVal,
+    equalTo(77777));
   }
 }

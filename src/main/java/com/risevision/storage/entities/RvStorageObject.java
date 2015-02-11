@@ -1,7 +1,6 @@
 package com.risevision.storage.entities;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Index;
@@ -23,6 +22,12 @@ public class RvStorageObject extends DatastoreEntity {
   @Index
   private List<String> freeformTags;
   private String timeline;
+  private List<String> throttleOffenderTypes;
+  private List<String> throttleOffenderIPs;
+  private List<String> throttleOffenderReferers;
+  private List<Integer> throttleOffenderCounts;
+  @Index
+  private boolean throttled;
   @Index
   private Date autoTrashDate;
   
@@ -32,12 +37,16 @@ public class RvStorageObject extends DatastoreEntity {
   
   public RvStorageObject(String id) {
     setId(id);
+    throttleOffenderTypes = new ArrayList<String>();
+    throttleOffenderIPs = new ArrayList<String>();
+    throttleOffenderReferers = new ArrayList<String>();
+    throttleOffenderCounts = new ArrayList<Integer>();
   }
   
   public RvStorageObject(String companyId, String objectId, 
       List<String> lookupNames, List<String> lookupTags, List<String> freeformNames, List<String> freeformTags, 
       String timeline, Date autoTrashDate, String email) {
-    super();
+    super(companyId + objectId);
     setCompanyId(companyId);
     setObjectId(objectId);
     setLookupNames(lookupNames);
@@ -111,5 +120,37 @@ public class RvStorageObject extends DatastoreEntity {
 
   public void setAutoTrashDate(Date autoTrashDate) {
     this.autoTrashDate = autoTrashDate;
+  }
+
+  public List<String> getThrottleOffenderTypes() {
+    return throttleOffenderTypes;
+  }
+
+  public List<String> getThrottleOffenderIPs() {
+    return throttleOffenderIPs;
+  }
+
+  public List<String> getThrottleOffenderReferers() {
+    return throttleOffenderReferers;
+  }
+
+  public List<Integer> getThrottleOffenderCounts() {
+    return throttleOffenderCounts;
+  }
+
+  public boolean getThrottled() {
+    return throttled;
+  }
+
+  public void setThrottled(boolean throttled) {
+    this.throttled = throttled;
+  }
+
+  public void addThrottleOffender
+  (String type, String ip, String referer, Integer count) {
+    throttleOffenderTypes.add(type);
+    throttleOffenderIPs.add(ip);
+    throttleOffenderReferers.add(referer);
+    throttleOffenderCounts.add(count);
   }
 }

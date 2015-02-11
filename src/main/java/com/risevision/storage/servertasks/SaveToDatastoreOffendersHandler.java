@@ -3,45 +3,71 @@ package com.risevision.storage.servertasks;
 import java.util.*;
 import com.google.api.services.bigquery.model.*;
 import com.risevision.storage.datastore.DatastoreService;
+import com.risevision.storage.entities.RvStorageObject;
+import com.risevision.storage.datastore.OfyService;
 
 class SaveToDatastoreOffendersHandler implements ThrottleOffendersHandler {
+  private final static int CID_COLUMN = 2;
+  private final static int FILE_COLUMN = 3;
+  private final static int IP_COLUMN = 0;
+  private final static int REFERER_COLUMN = 1;
+  private final static int COUNT_COLUMN = 4;
+  private final static String THROTTLE_TYPE = "hourly-get";
+
   HashMap<String, RvStorageObject> rvStorageObjects = new HashMap<>();
 
-  RvStorageObject rvStorageObject;
   public void handle(List<TableRow> offenders) {
+    createOneRvStorageObjectPerFile(offenders);
+    insertRvStorageObjectsIntoDatastore();
+  }
+
+  private void createOneRvStorageObjectPerFile(List<TableRow> offenders) {
+    RvStorageObject rvStorageObject;
+
     for (TableRow offender : offenders) {
       List<TableCell> cells = offender.getF();
-      String bucket = (String)cells.get(2).getV();
-      String file = (String)cells.get(3).getV();
+      String companyId = (String)cells.get(CID_COLUMN).getV();
+      String file = (String)cells.get(FILE_COLUMN).getV();
 
-      rvStorageObject = rvStorageObjects.get(bucket + "\u00f1" + file);
+      rvStorageObject = rvStorageObjects.get(companyId + file);
       if (rvStorageObject == null) {
-        rvStorageObject = new RvStorageObject(bucket, file);
+        rvStorageObject = new RvStorageObject(companyId + file);
+        rvStorageObject.setCompanyId(companyId);
+        rvStorageObject.setObjectId(file);
       }
 
-      rvStorageObject.addFileThrottleOffender
-      (cells.get(0).getV() + "|" + cells.get(1).getV() + "|" + cells.get(4).getV());
-      rvStorageObjects.put(bucket + "\u00f1" + file, rvStorageObject);
+      rvStorageObject.addThrottleOffender
+      (THROTTLE_TYPE,
+      (String)cells.get(IP_COLUMN).getV(),
+      (String)cells.get(REFERER_COLUMN).getV(),
+      Integer.valueOf((String)cells.get(COUNT_COLUMN).getV()));
+
+      rvStorageObjects.put(rvStorageObject.getId(), rvStorageObject);
     }
+  }
 
-    for (RvStorageObject rvStorageObject : rvStorageObjects) {
-      OfyService.ofy().transact(new VoidWork() {
-        public void vrun() {
-          RvStorageObject datastoreRec = 
-          OfyService.ofy().load().type(RvStorageObject.class)
-          .filter(rvStorageObject.getBucket())
-          .filter(rvStorageObject.getFile()).first().now();
+  private void insertRvStorageObjectsIntoDatastore() {
+    for (RvStorageObject rvStorageObject : rvStorageObjects.values()) {
+      RvStorageObject datastoreRec = OfyService.ofy().load()
+        .type(RvStorageObject.class).id(rvStorageObject.getId()).now();
 
-          if (datastoreRec == null) {
-            datastoreRec = new RvStorageObject(bucket, file);
-          }
+      if (datastoreRec == null) {
+        datastoreRec = new RvStorageObject(rvStorageObject.getId());
+        datastoreRec.setCompanyId(rvStorageObject.getCompanyId());
+        datastoreRec.setObjectId(rvStorageObject.getObjectId());
+      }
 
-          datastoreRec.addFileThrottleOffenders
-          (rvStorageObject.getFileThrottleOffenders());
-          datastoreRec.setFileThrottle(true);
-          OfyService.ofy().save(datastoreRec).now();
-        }
-      });
+      int numberOfOffenders = rvStorageObject.getThrottleOffenderTypes().size();
+      for (int i = 0; i < numberOfOffenders; i += 1) {
+        datastoreRec.addThrottleOffender
+          (rvStorageObject.getThrottleOffenderTypes().get(i),
+           rvStorageObject.getThrottleOffenderIPs().get(i),
+           rvStorageObject.getThrottleOffenderReferers().get(i),
+           rvStorageObject.getThrottleOffenderCounts().get(i));
+      }
+
+      datastoreRec.setThrottled(false);
+      OfyService.ofy().save().entity(datastoreRec).now();
     }
   }
 }

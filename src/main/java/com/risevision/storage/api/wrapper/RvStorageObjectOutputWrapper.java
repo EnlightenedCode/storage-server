@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.risevision.storage.entities.Tag;
 
-public class RvStorageObjectDTO {
+public class RvStorageObjectOutputWrapper {
   private String id;
   private String companyId;
   private String objectId;
