@@ -23,12 +23,12 @@ public class DatastoreServiceTest extends ObjectifyTest {
 
 
     @Entity
-    public class SampleEntity {
+    public static class SampleEntity {
 
         @Id Long id;
         @Index String sampleAttribute;
 
-        private SampleEntity(){
+        public SampleEntity(){
 
         }
 
