@@ -790,6 +790,8 @@ public class StorageAPI extends AbstractAPI {
       return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
     }
   }
+  
+  static int CURRENT_CALL = 0;
 
   @ApiMethod(
   name = "files.listbytags",
@@ -797,6 +799,8 @@ public class StorageAPI extends AbstractAPI {
   httpMethod = HttpMethod.PUT)
   public SimpleResponse listFilesByTags(ListByTagsApiInputWrapper lbt,
                                         User user) throws ServiceException {
+    int currentCall = CURRENT_CALL++;
+    System.out.println("Begin call: " + currentCall);
     if(user == null) {
       return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
     }
@@ -811,6 +815,7 @@ public class StorageAPI extends AbstractAPI {
     try {
       List<RvStorageObject> files = rvStorageObjectAccessor.listFilesByTags(lbt.getCompanyId(), lbt.getTags());
       
+      System.out.println("End call: " + currentCall);
       return new GCSFilesResponse(user, true, ServiceFailedException.OK, serverToClientStorageObjects(files));
     } catch (ValidationException e) {
       return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
@@ -833,12 +838,16 @@ public class StorageAPI extends AbstractAPI {
     rvClientObject.setCreatedBy(rvServerObject.getCreatedBy());
     
     if(rvServerObject.getLookupTags() != null) {
+      System.out.println("********* LOOKUP: " + rvServerObject.getLookupTags().size());
+      
       for(String nameValue : rvServerObject.getLookupTags()) {
         rvClientObject.getTags().add(new Tag(TagType.LOOKUP.toString(), nameValue));
       }
     }
     
     if(rvServerObject.getFreeformTags() != null) {
+      System.out.println("********* FREEFORM: " + rvServerObject.getFreeformTags().size());
+      
       for(String nameValue : rvServerObject.getFreeformTags()) {
         rvClientObject.getTags().add(new Tag(TagType.FREEFORM.toString(), nameValue));
       }

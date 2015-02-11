@@ -5,6 +5,7 @@ package com.risevision.storage.datastore;
  */
 
 import static com.risevision.storage.datastore.OfyService.ofy;
+import static com.risevision.storage.datastore.OfyService.factory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.QueryResultIterator;
+import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.cmd.Query;
 import com.risevision.storage.Utils;
 
@@ -50,7 +52,10 @@ public class DatastoreService {
    }
 
   public Object put(Object entity) {
-    ofy().save().entity(entity).now();
+    Objectify ofy = factory().begin();
+    ofy.save().entity(entity).now();
+    ofy.flush();
+    //ofy().save().entity(entity).now();
     
     return entity;
   }
@@ -82,7 +87,9 @@ public class DatastoreService {
   }
   
   public <T> PagedResult<T> list(Class<T> clazz, Integer limit, String sort, String cursor, Object... conditions) {
-    Query<T> query = ofy().load().type(clazz);
+    Objectify objectify = factory().begin();
+    objectify.clear();
+    Query<T> query = objectify.load().type(clazz);
     List<T> result = new ArrayList<T>();
     
     if(limit != null) {
