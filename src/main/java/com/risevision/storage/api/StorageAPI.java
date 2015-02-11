@@ -792,41 +792,6 @@ public class StorageAPI extends AbstractAPI {
   }
 
   @ApiMethod(
-  name = "storageobject.delete",
-  path = "storageobject",
-  httpMethod = HttpMethod.DELETE)
-  public SimpleResponse deleteRvStorageObject(@Named("id") String id,
-                                              User user) throws ServiceException {
-    if(user == null) {
-      return new SimpleResponse(false, ServiceFailedException.AUTHENTICATION_FAILED, "No user");
-    }
-    
-    try {
-      RvStorageObject rvStorageObject = rvStorageObjectAccessor.get(id);
-      
-      if(rvStorageObject == null) {
-        throw new ValidationException("Storage object does not exist");
-      }
-      
-      try {
-        new UserCompanyVerifier().verifyUserCompany(rvStorageObject.getCompanyId(), user.getEmail());
-      }
-      catch (ServiceFailedException e) {
-        return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
-      }
-      
-      rvStorageObjectAccessor.delete(id);
-      
-      return new ItemResponse<RvStorageObjectDTO>(user.getEmail(), serverToClientStorageObject(rvStorageObject));
-    } catch (ValidationException e) {
-      return new SimpleResponse(false, ServiceFailedException.CONFLICT, e.getMessage());
-    } catch (Exception e) {
-      log.log(Level.SEVERE, "Failed deleteRvStorageObject", e);
-      return new SimpleResponse(false, ServiceFailedException.SERVER_ERROR, e.getMessage());
-    }
-  }
-
-  @ApiMethod(
   name = "files.listbytags",
   path = "storageobjectbytag",
   httpMethod = HttpMethod.PUT)
