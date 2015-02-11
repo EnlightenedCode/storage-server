@@ -730,8 +730,8 @@ public class StorageAPI extends AbstractAPI {
   }
 
   @ApiMethod(
-  name = "storageobject.put",
-  path = "storageobject",
+  name = "filetags.put",
+  path = "filetags",
   httpMethod = HttpMethod.PUT)
   public SimpleResponse putRvStorageObject(RvStoragePutApiInputWrapper rvso,
                                            User user) throws ServiceException {
@@ -759,8 +759,8 @@ public class StorageAPI extends AbstractAPI {
   }
 
   @ApiMethod(
-  name = "storageobject.get",
-  path = "storageobject",
+  name = "filetags.get",
+  path = "filetags",
   httpMethod = HttpMethod.GET)
   public SimpleResponse getRvStorageObject(@Named("id") String id,
                                            User user) throws ServiceException {
