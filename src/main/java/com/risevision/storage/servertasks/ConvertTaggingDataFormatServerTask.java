@@ -62,7 +62,7 @@ public class ConvertTaggingDataFormatServerTask extends BatchServerTask {
         
         for(String value : tag.getValues()) {
           if(tag.getType().equals("LOOKUP") || tag.getType().equals("FREEFORM")) {
-            file.getTags().add(new Tag(tag.getType(), tag.getType(), value));
+            file.getTags().add(new Tag(tag.getType(), tag.getName(), value));
           }
           else if(tag.getType().equals("TIMELINE")) {
             file.setTimeline(value);
@@ -92,10 +92,10 @@ public class ConvertTaggingDataFormatServerTask extends BatchServerTask {
   }
 
   void submitNextTask(String nextPageToken) throws IOException {
-    if ((String) listResult.get("nextPageToken") != null) {
+    if (nextPageToken != null) {
       TaskOptions options = TaskOptions.Builder.withUrl("/servertask")
           .method(TaskOptions.Method.valueOf("GET"))
-          .param("task", "TrashTimelineExpiredFiles")
+          .param("task", "ConvertTaggingDataFormat")
           .param("pageToken", nextPageToken);
         
       QueueFactory.getDefaultQueue().add(options);
