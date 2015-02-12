@@ -1,5 +1,6 @@
 package com.risevision.storage.entities;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -27,7 +28,10 @@ public class RvStorageObject extends DatastoreEntity {
   private Date autoTrashDate;
   
   public RvStorageObject() {
-    
+    this.lookupNames = new ArrayList<String>();
+    this.lookupTags = new ArrayList<String>();
+    this.freeformNames = new ArrayList<String>();
+    this.freeformTags = new ArrayList<String>();
   }
   
   public RvStorageObject(String id) {

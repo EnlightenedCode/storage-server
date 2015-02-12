@@ -190,6 +190,10 @@ public class FileTagEntryAccessor extends AbstractAccessor {
     datastoreService.delete((List<?>) deleted);
   }
 
+  public PagedResult<FileTagEntry> list(String search, Integer limit, String sort, String cursor) throws Exception {
+    return datastoreService.list(FileTagEntry.class, limit, sort, cursor, mergeFilters(parseQuery(search)));
+  }
+
   public PagedResult<FileTagEntry> list(String companyId, String search, Integer limit, String sort, String cursor) throws Exception {
     return datastoreService.list(FileTagEntry.class, limit, sort, cursor, mergeFilters(parseQuery(search), "companyId", companyId));
   }
