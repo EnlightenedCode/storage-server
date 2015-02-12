@@ -37,7 +37,8 @@ public class SaveToDatastoreOffendersHandlerTest {
   }
 
   @Before public void setupDatastore() {
-    helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+    helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
+    .setApplyAllHighRepJobPolicy());
 
     helper.setUp();
     session = OfyService.begin();

@@ -5,6 +5,7 @@ import com.google.api.services.bigquery.model.*;
 import com.risevision.storage.datastore.DatastoreService;
 import com.risevision.storage.entities.RvStorageObject;
 import com.risevision.storage.datastore.OfyService;
+import com.googlecode.objectify.VoidWork;
 
 class SaveToDatastoreOffendersHandler implements ThrottleOffendersHandler {
   private final static int CID_COLUMN = 2;
@@ -13,6 +14,7 @@ class SaveToDatastoreOffendersHandler implements ThrottleOffendersHandler {
   private final static int REFERER_COLUMN = 1;
   private final static int COUNT_COLUMN = 4;
   private final static String THROTTLE_TYPE = "hourly-get";
+  RvStorageObject rvStorageObj;
 
   HashMap<String, RvStorageObject> rvStorageObjects = new HashMap<>();
 
@@ -48,26 +50,29 @@ class SaveToDatastoreOffendersHandler implements ThrottleOffendersHandler {
 
   private void insertRvStorageObjectsIntoDatastore() {
     for (RvStorageObject rvStorageObject : rvStorageObjects.values()) {
-      RvStorageObject datastoreRec = OfyService.ofy().load()
-        .type(RvStorageObject.class).id(rvStorageObject.getId()).now();
+      rvStorageObj = rvStorageObject;
+      OfyService.ofy().transact(new VoidWork() { public void vrun() {
+        RvStorageObject datastoreRec = OfyService.ofy().load()
+        .type(RvStorageObject.class).id(rvStorageObj.getId()).now();
 
-      if (datastoreRec == null) {
-        datastoreRec = new RvStorageObject(rvStorageObject.getId());
-        datastoreRec.setCompanyId(rvStorageObject.getCompanyId());
-        datastoreRec.setObjectId(rvStorageObject.getObjectId());
-      }
+        if (datastoreRec == null) {
+          datastoreRec = new RvStorageObject(rvStorageObj.getId());
+          datastoreRec.setCompanyId(rvStorageObj.getCompanyId());
+          datastoreRec.setObjectId(rvStorageObj.getObjectId());
+        }
 
-      int numberOfOffenders = rvStorageObject.getThrottleOffenderTypes().size();
-      for (int i = 0; i < numberOfOffenders; i += 1) {
-        datastoreRec.addThrottleOffender
-          (rvStorageObject.getThrottleOffenderTypes().get(i),
-           rvStorageObject.getThrottleOffenderIPs().get(i),
-           rvStorageObject.getThrottleOffenderReferers().get(i),
-           rvStorageObject.getThrottleOffenderCounts().get(i));
-      }
+        int numberOfOffenders = rvStorageObj.getThrottleOffenderTypes().size();
+        for (int i = 0; i < numberOfOffenders; i += 1) {
+          datastoreRec.addThrottleOffender
+          (rvStorageObj.getThrottleOffenderTypes().get(i),
+          rvStorageObj.getThrottleOffenderIPs().get(i),
+          rvStorageObj.getThrottleOffenderReferers().get(i),
+          rvStorageObj.getThrottleOffenderCounts().get(i));
+        }
 
-      datastoreRec.setThrottled(false);
-      OfyService.ofy().save().entity(datastoreRec).now();
+        datastoreRec.setThrottled(false);
+        OfyService.ofy().save().entity(datastoreRec).now();
+      }});
     }
   }
 }
