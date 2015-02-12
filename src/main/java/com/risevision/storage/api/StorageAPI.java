@@ -772,13 +772,6 @@ public class StorageAPI extends AbstractAPI {
     }
     
     try {
-      new UserRoleVerifier().verifyPrivilegedRole(user.getEmail());
-    }
-    catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
-    }
-    
-    try {
       PagedResult<TagDefinition> pagedResult = tagDefinitionAccessor.list(companyId, search, limit, sort, cursor);
       
       return new ListResponse<TagDefinition>(user.getEmail(), pagedResult.getList(), pagedResult.getCursor());
@@ -924,13 +917,6 @@ public class StorageAPI extends AbstractAPI {
     }
     catch (ServiceFailedException e) {
       return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-verify-company", user.getEmail());
-    }
-    
-    try {
-      new UserRoleVerifier().verifyPrivilegedRole(user.getEmail());
-    }
-    catch (ServiceFailedException e) {
-      return new SimpleResponse(false, ServiceFailedException.FORBIDDEN, "tagging-content-producer", user.getEmail());
     }
     
     try {
