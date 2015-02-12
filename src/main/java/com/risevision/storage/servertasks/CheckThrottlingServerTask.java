@@ -27,10 +27,10 @@ class CheckThrottlingServerTask extends ServerTask {
   int ACCEPTABLE_DEVIATIONS = 3;
   double baselineMean;
   double baselineSD;
-  List<TableRow> offenders;
+  List<TableRow> offenders = new ArrayList<>();
 
-  ThrottleOffendersHandler[] handlers =
-  new ThrottleOffendersHandler[]{new JustLogThrottleOffendersHandler()};
+  ThrottleOffendersHandler[] handlers = new ThrottleOffendersHandler[]
+  {new JustLogThrottleOffendersHandler(), new SaveToDatastoreOffendersHandler()};
 
   private BigqueryResponseRequestor bqRequestor =
   new GoogleBigqueryResponseRequestor();
