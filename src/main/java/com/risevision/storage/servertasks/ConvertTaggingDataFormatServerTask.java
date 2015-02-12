@@ -70,7 +70,7 @@ public class ConvertTaggingDataFormatServerTask extends BatchServerTask {
         }
       }
       
-      if ((String) listResult.get("nextPageToken") == null) {
+      if (result.getCursor() == null) {
         for(String companyId : companies.keySet())  {
           Map<String, RvStorageOutputWrapper> companyFiles = companies.get(companyId);
           
