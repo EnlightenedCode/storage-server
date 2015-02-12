@@ -127,6 +127,12 @@ public class RvStorageObjectAccessor extends AbstractAccessor {
         new ArrayList<String>(lookupNames), new ArrayList<String>(lookupTags), 
         new ArrayList<String>(freeformNames), new ArrayList<String>(freeformTags), 
         timeline, autoTrashDate, user.getEmail());
+    RvStorageObject existing = get(rvso.getId());
+    
+    if(existing != null) {
+      rvso.setCreatedBy(existing.getCreatedBy());
+      rvso.setCreationDate(existing.getCreationDate());
+    }
     
     datastoreService.put(rvso);
     
