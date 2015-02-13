@@ -3,5 +3,5 @@ import com.google.api.services.bigquery.model.TableRow;
 import java.util.List;
 
 interface ThrottleOffendersHandler {
-  void handle(List<TableRow> offenders);
+  void handle(RvStorageObjectRowProcessor rp);
 }

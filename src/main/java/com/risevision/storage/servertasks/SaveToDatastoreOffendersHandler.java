@@ -8,48 +8,14 @@ import com.risevision.storage.datastore.OfyService;
 import com.googlecode.objectify.VoidWork;
 
 class SaveToDatastoreOffendersHandler implements ThrottleOffendersHandler {
-  private final static int CID_COLUMN = 2;
-  private final static int FILE_COLUMN = 3;
-  private final static int IP_COLUMN = 0;
-  private final static int REFERER_COLUMN = 1;
-  private final static int COUNT_COLUMN = 4;
-  private final static String THROTTLE_TYPE = "hourly-get";
   RvStorageObject rvStorageObj;
 
-  HashMap<String, RvStorageObject> rvStorageObjects = new HashMap<>();
-
-  public void handle(List<TableRow> offenders) {
-    createOneRvStorageObjectPerFile(offenders);
-    insertRvStorageObjectsIntoDatastore();
+  public void handle(RvStorageObjectRowProcessor rp) {
+    insertRvStorageObjectsIntoDatastore(rp);
   }
 
-  private void createOneRvStorageObjectPerFile(List<TableRow> offenders) {
-    RvStorageObject rvStorageObject;
-
-    for (TableRow offender : offenders) {
-      List<TableCell> cells = offender.getF();
-      String companyId = (String)cells.get(CID_COLUMN).getV();
-      String file = (String)cells.get(FILE_COLUMN).getV();
-
-      rvStorageObject = rvStorageObjects.get(companyId + file);
-      if (rvStorageObject == null) {
-        rvStorageObject = new RvStorageObject(companyId + file);
-        rvStorageObject.setCompanyId(companyId);
-        rvStorageObject.setObjectId(file);
-      }
-
-      rvStorageObject.addThrottleOffender
-      (THROTTLE_TYPE,
-      (String)cells.get(IP_COLUMN).getV(),
-      (String)cells.get(REFERER_COLUMN).getV(),
-      Integer.valueOf((String)cells.get(COUNT_COLUMN).getV()));
-
-      rvStorageObjects.put(rvStorageObject.getId(), rvStorageObject);
-    }
-  }
-
-  private void insertRvStorageObjectsIntoDatastore() {
-    for (RvStorageObject rvStorageObject : rvStorageObjects.values()) {
+  private void insertRvStorageObjectsIntoDatastore(RvStorageObjectRowProcessor rp) {
+    for (RvStorageObject rvStorageObject : rp.getRvStorageObjects()) {
       rvStorageObj = rvStorageObject;
       OfyService.ofy().transact(new VoidWork() { public void vrun() {
         RvStorageObject datastoreRec = OfyService.ofy().load()

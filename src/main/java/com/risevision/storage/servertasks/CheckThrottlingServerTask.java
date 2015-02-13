@@ -90,8 +90,11 @@ class CheckThrottlingServerTask extends ServerTask {
   }
 
   void handleOffenders() {
+    RvStorageObjectRowProcessor rp =
+    new RvStorageObjectRowProcessor(offenders, "hourly-get");
+
     for (ThrottleOffendersHandler handler : handlers) {
-      handler.handle(offenders);
+      handler.handle(rp);
     }
   }
 }

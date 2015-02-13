@@ -57,7 +57,7 @@ public class SaveToDatastoreOffendersHandlerTest {
     offenders.add(makeRow("ip", "referer", "cid", "file1", "99999"));
     offenders.add(makeRow("ip", "referer", "cid", "file1", "99999"));
     offenders.add(makeRow("ip", "referer", "cid", "file2", "77777"));
-    handler.handle(offenders);
+    handler.handle(new RvStorageObjectRowProcessor(offenders, "test"));
 
     assertThat("It saved the record without duplicating.",
     OfyService.ofy().load().type(RvStorageObject.class)
