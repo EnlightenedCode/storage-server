@@ -71,7 +71,9 @@ class SaveToDatastoreOffendersHandler implements ThrottleOffendersHandler {
           rvStorageObj.getThrottleOffenderCounts().get(i));
         }
 
-        datastoreRec.setThrottled(false);
+        if (!datastoreRec.isThrottled()) {
+          datastoreRec.setNeedsThrottling();
+        }
         OfyService.ofy().save().entity(datastoreRec).now();
       }});
     }

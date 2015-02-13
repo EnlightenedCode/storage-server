@@ -27,12 +27,19 @@ public class RvStorageObject extends DatastoreEntity {
   private List<String> throttleOffenderReferers;
   private List<Integer> throttleOffenderCounts;
   @Index
-  private boolean throttled;
+  private THROTTLE_STATUS throttleStatus;
   @Index
   private Date autoTrashDate;
   
   public RvStorageObject() {
     
+  }
+
+  enum THROTTLE_STATUS {
+    NOT_THROTTLED,
+    THROTTLED,
+    NEEDS_THROTTLING,
+    NEEDS_UNTHROTTLING
   }
   
   public RvStorageObject(String id) {
@@ -138,12 +145,12 @@ public class RvStorageObject extends DatastoreEntity {
     return throttleOffenderCounts;
   }
 
-  public boolean getThrottled() {
-    return throttled;
+  public void setThrottled() {
+    this.throttleStatus = THROTTLE_STATUS.THROTTLED;
   }
 
-  public void setThrottled(boolean throttled) {
-    this.throttled = throttled;
+  public boolean isThrottled() {
+    return throttleStatus == THROTTLE_STATUS.THROTTLED;
   }
 
   public void addThrottleOffender
@@ -159,5 +166,9 @@ public class RvStorageObject extends DatastoreEntity {
     throttleOffenderIPs.clear();
     throttleOffenderReferers.clear();
     throttleOffenderCounts.clear();
+  }
+
+  public void setNeedsThrottling() {
+    throttleStatus = THROTTLE_STATUS.NEEDS_THROTTLING;
   }
 }
