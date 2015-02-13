@@ -1,4 +1,4 @@
-# Storage Server  [![Build Status](http://devtools1.risevision.com:8080/view/Storage%20Server/job/Storage-Server-BranchPush/badge/icon)](http://devtools1.risevision.com:8080/view/Storage%20Server/job/Storage-Server-BranchPush/)
+# Storage Server 
 
 ## Introduction
 
