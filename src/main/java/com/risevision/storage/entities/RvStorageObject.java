@@ -153,4 +153,11 @@ public class RvStorageObject extends DatastoreEntity {
     throttleOffenderReferers.add(referer);
     throttleOffenderCounts.add(count);
   }
+
+  public void clearThrottleOffenders() {
+    throttleOffenderTypes.clear();
+    throttleOffenderIPs.clear();
+    throttleOffenderReferers.clear();
+    throttleOffenderCounts.clear();
+  }
 }

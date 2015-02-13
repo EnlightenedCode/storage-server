@@ -61,6 +61,7 @@ class SaveToDatastoreOffendersHandler implements ThrottleOffendersHandler {
           datastoreRec.setObjectId(rvStorageObj.getObjectId());
         }
 
+        datastoreRec.clearThrottleOffenders();
         int numberOfOffenders = rvStorageObj.getThrottleOffenderTypes().size();
         for (int i = 0; i < numberOfOffenders; i += 1) {
           datastoreRec.addThrottleOffender
